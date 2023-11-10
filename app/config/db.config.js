@@ -1,5 +1,5 @@
 module.exports = {
-  HOST: "138.197.181.129",
+  HOST: "localhost",
   USER: "jordan",
   PASSWORD: "Gorillaz13!",
   DB: "ams_db",
@@ -9,6 +9,6 @@ module.exports = {
     max: 5,
     min: 0,
     acquire: 30000,
-    idle: 10000
-  }
+    idle: 10000,
+  },
 };
