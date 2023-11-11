@@ -1,3 +1,24 @@
+const db = require("../models");
+const User = db.user;
+const Op = db.Sequelize.Op;
+exports.allCeos = (req, res) => {
+  User.findAll({
+    include: [
+      {
+        model: db.role,
+        where: [{ id: 4, name: "ceo" }], // Where Role is CEO, id 4
+        attributes: ["id", "name"],
+      },
+    ],
+  })
+    .then((users) => {
+      res.status(200).send(users);
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
 exports.allAccess = (req, res) => {
   res.status(200).send("Public Content.");
 };

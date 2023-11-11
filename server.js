@@ -4,7 +4,7 @@ const cors = require("cors");
 const app = express();
 
 var corsOptions = {
-  origin: "*", // use your actual domain name (or localhost), using * is not recommended
+  origin: "http://localhost:4200", // use your actual domain name (or localhost), using * is not recommended
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
   allowedHeaders: [
     "Content-Type",
@@ -47,6 +47,7 @@ app.get("/api", (req, res) => {
 // routes
 require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
+require("./app/routes/company.routes")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3000;
