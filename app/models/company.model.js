@@ -7,13 +7,19 @@ module.exports = (sequelize, Sequelize) => {
     name: {
       type: Sequelize.STRING,
     },
+    reaNumber: {
+      type: Sequelize.STRING,
+    },
     vat: {
       type: Sequelize.STRING,
     },
-    registered_office: {
+    legalForm: {
       type: Sequelize.STRING,
     },
-    head_office: {
+    registeredOffice: {
+      type: Sequelize.STRING,
+    },
+    headOffice: {
       type: Sequelize.STRING,
     },
     phone: {
@@ -22,22 +28,25 @@ module.exports = (sequelize, Sequelize) => {
     email: {
       type: Sequelize.STRING,
     },
+    pec: {
+      type: Sequelize.STRING,
+    },
     website: {
       type: Sequelize.STRING,
     },
     description: {
       type: Sequelize.STRING,
     },
+    status: {
+      type: Sequelize.BOOLEAN,
+    },
     userId: {
-      field: "id_user",
       type: Sequelize.INTEGER,
     },
     createdAt: {
-      field: "created_at",
       type: Sequelize.DATE,
     },
     updatedAt: {
-      field: "updated_at",
       type: Sequelize.DATE,
     },
   });

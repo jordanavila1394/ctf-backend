@@ -2,6 +2,7 @@ const { verifySignUp } = require("../middleware");
 const { authJwt } = require("../middleware");
 
 const controller = require("../controllers/company.controller");
+const verifyCompany = require("../middleware/verifyCompany");
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -16,5 +17,11 @@ module.exports = function (app) {
     "/api/company/allCompanies",
     [authJwt.verifyToken],
     controller.allCompanies
+  );
+
+  app.post(
+    "/api/company/createCompany",
+    [authJwt.verifyToken, verifyCompany.checkDuplicateCompany],
+    controller.createCompany
   );
 };

@@ -30,7 +30,7 @@ db.user.belongsToMany(db.role, {
 });
 
 db.company.belongsTo(db.user, {
-  through: "id_user",
+  through: "userId",
 });
 
 db.ROLES = ["user", "admin", "moderator"];

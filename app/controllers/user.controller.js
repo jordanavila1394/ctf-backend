@@ -6,10 +6,11 @@ exports.allCeos = (req, res) => {
     include: [
       {
         model: db.role,
-        where: [{ id: 4, name: "ceo" }], // Where Role is CEO, id 4
+        where: [{ id: 4 }], // Where Role is CEO, id 4
         attributes: ["id", "name"],
       },
     ],
+    attributes: ["id", "name", "surname"],
   })
     .then((users) => {
       res.status(200).send(users);
