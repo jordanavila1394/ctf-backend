@@ -33,6 +33,6 @@ db.company.belongsTo(db.user, {
   through: "userId",
 });
 
-db.ROLES = ["user", "admin", "moderator"];
+db.ROLES = ["worker", "admin", "moderator", "ceo"];
 
 module.exports = db;

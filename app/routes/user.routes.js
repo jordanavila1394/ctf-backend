@@ -1,4 +1,4 @@
-const { authJwt } = require("../middleware");
+const { authJwt, verifySignUp } = require("../middleware");
 const controller = require("../controllers/user.controller");
 
 module.exports = function (app) {
@@ -10,21 +10,29 @@ module.exports = function (app) {
     next();
   });
 
-  app.get("/api/test/all", [authJwt.verifyToken], controller.allAccess);
+  // app.get("/api/test/all", [authJwt.verifyToken], controller.allAccess);
 
   app.get("/api/user/allCeos", [authJwt.verifyToken], controller.allCeos);
 
-  app.get("/api/test/user", [authJwt.verifyToken], controller.userBoard);
+  app.get("/api/user/allUsers", [authJwt.verifyToken], controller.allUsers);
 
-  app.get(
-    "/api/test/mod",
-    [authJwt.verifyToken, authJwt.isModerator],
-    controller.moderatorBoard
+  app.get("/api/user/getUser/:id", [authJwt.verifyToken], controller.getUser);
+
+  app.post(
+    "/api/user/createUser",
+    [authJwt.verifyToken, verifySignUp.checkDuplicateUsernameOrEmail],
+    controller.createUser
   );
 
-  app.get(
-    "/api/test/admin",
-    [authJwt.verifyToken, authJwt.isAdmin],
-    controller.adminBoard
+  app.patch(
+    "/api/user/patchUser/:id",
+    [authJwt.verifyToken],
+    controller.patchUser
+  );
+
+  app.delete(
+    "/api/user/deleteUser/:id",
+    [authJwt.verifyToken],
+    controller.deleteUser
   );
 };

@@ -19,9 +19,27 @@ module.exports = function (app) {
     controller.allCompanies
   );
 
+  app.get(
+    "/api/company/getCompany/:id",
+    [authJwt.verifyToken],
+    controller.getCompany
+  );
+
   app.post(
     "/api/company/createCompany",
     [authJwt.verifyToken, verifyCompany.checkDuplicateCompany],
     controller.createCompany
+  );
+
+  app.patch(
+    "/api/company/patchCompany/:id",
+    [authJwt.verifyToken],
+    controller.patchCompany
+  );
+
+  app.delete(
+    "/api/company/deleteCompany/:id",
+    [authJwt.verifyToken],
+    controller.deleteCompany
   );
 };

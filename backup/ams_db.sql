@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Creato il: Nov 13, 2023 alle 12:38
+-- Creato il: Nov 15, 2023 alle 00:23
 -- Versione del server: 10.4.28-MariaDB
 -- Versione PHP: 8.2.4
 
@@ -51,19 +51,11 @@ CREATE TABLE `companies` (
 --
 
 INSERT INTO `companies` (`id`, `name`, `reaNumber`, `vat`, `legalForm`, `registeredOffice`, `headOffice`, `phone`, `email`, `pec`, `website`, `description`, `status`, `userId`, `createdAt`, `updatedAt`) VALUES
-(1, 'BATERY TRASPORTI SRL', 'MI - 2630747', '842340340234', 'società a responsabilità limitata', 'via delle bombe, 12', 'piazza la bomba, 33', '3891323232', 'mail@gmail.com', 'pec1@pec.it', 'www.google.com', 'aomsdaosdmaodmsaosdoamdaomsdoasdm', 1, 5, '2023-11-10 22:46:45', '2023-11-12 13:39:12'),
-(2, 'Anthony SRL', 'MI - 2630750', '96723403402', 'società a responsabilità limitata', 'via da li, 12', 'piazza il box, 33', '3891323232', 'mail2@gmail.com', 'pec2@pec.it', 'www.google2.com', 'aomsdaosdmaodmsaosdoamdaomsdoasdm', 1, 6, '2023-11-10 22:46:45', '2023-11-12 13:41:18'),
-(5, 'azienda di test', 'MI-123123', '12312323', NULL, '30016 Jesolo VE, Italia', 'Venezia VE, Italia', '023123', 'EMAI@GME.COM', 'PEC@PEC.IT', 'www.site.it', 'descrizione', 1, 6, '2023-11-12 18:47:21', '2023-11-12 18:47:21'),
-(6, 'Azie', 'MI-123123', '923423942934', NULL, '20018 Sedriano MI, Italia', '55049 Viareggio LU, Italia', '123123', 'AZIENDA@GMAIL.COM', 'EPEC@PEC.IT', 'WWW.SITE.COM', 'EVENTUALI', 1, 5, '2023-11-12 18:51:09', '2023-11-12 18:51:09'),
-(7, 'bianca', 'MI-12324', '41231231', 'Società a responsabilità limitata', 'Via Sdrucciola, 06122 Perugia PG, Italia', '46019 Viadana MN, Italia', '02312323', 'pec@cgm.com', 'asde@pec.it', '', '', 1, 5, '2023-11-12 18:54:17', '2023-11-12 18:54:17'),
-(8, 'MyPlayBuddy', 'MI-12323', 'request', 'Società a responsabilità limitata', 'ASD Passirana, 20017 Rho MI, Italia', 'ASD Passirana, 20017 Rho MI, Italia', '3891733185', 'georgeavila94@gmail.com', 'ASDAS@PEC.IT', '', '', 1, 5, '2023-11-12 19:44:06', '2023-11-12 19:44:06'),
-(9, 'MyPlayBuddy', 'MI-12323', '84234034023', 'Società a responsabilità limitata', 'ASD Passirana, 20017 Rho MI, Italia', 'ASD Passirana, 20017 Rho MI, Italia', '3891733185', 'georgeavila94@gmail.com', 'ASDAS@PEC.IT', '', '', 1, 5, '2023-11-12 19:52:34', '2023-11-12 19:52:34'),
-(10, 'MyPlayBuddy', 'MI-12323', '84234034022', 'Società a responsabilità limitata', 'ASD Passirana, 20017 Rho MI, Italia', 'ASD Passirana, 20017 Rho MI, Italia', '3891733185', 'georgeavila94@gmail.com', 'ASDAS@PEC.IT', '', '', 1, 5, '2023-11-12 19:55:11', '2023-11-12 19:55:11'),
-(11, 'MyPlayBuddy', 'MI-12323', '842340340233', 'Società a responsabilità limitata', 'ASD Passirana, 20017 Rho MI, Italia', 'ASD Passirana, 20017 Rho MI, Italia', '3891733185', 'georgeavila94@gmail.com', 'ASDAS@PEC.IT', '', '', 1, 5, '2023-11-12 19:57:34', '2023-11-12 19:57:34'),
-(12, 'MyPlayBuddy', 'MI-12323', '842340340212', 'Società a responsabilità limitata', 'ASD Passirana, 20017 Rho MI, Italia', 'ASD Passirana, 20017 Rho MI, Italia', '3891733185', 'georgeavila94@gmail.com', 'ASDAS@PEC.IT', 'sdasd', '', 1, 5, '2023-11-12 19:58:47', '2023-11-12 19:58:47'),
-(13, 'MyPlayBuddy', 'MI-12323', '842340340123', 'Società a responsabilità limitata', 'ASD Passirana, 20017 Rho MI, Italia', 'ASD Passirana, 20017 Rho MI, Italia', '3891733185', 'georgeavila94@gmail.com', 'ASDAS@PEC.IT', 'sdasd', '', 1, 5, '2023-11-12 19:59:54', '2023-11-12 19:59:54'),
-(14, 'MyPlayBuddy', 'MI-12323', '8423403412', 'Società a responsabilità limitata', 'ASD Passirana, 20017 Rho MI, Italia', 'ASD Passirana, 20017 Rho MI, Italia', '3891733185', 'georgeavila94@gmail.com', 'ASDAS@PEC.IT', '', '', 1, 6, '2023-11-12 20:00:54', '2023-11-12 20:00:54'),
-(15, 'MyPlayBuddy', 'MI-12323', '8423403401222', 'Società a responsabilità limitata', 'ASD Passirana, 20017 Rho MI, Italia', 'ASD Passirana, 20017 Rho MI, Italia', '3891733185', 'georgeavila94@gmail.com', 'ASDAS@PEC.IT', 'sdasd', '', 1, 5, '2023-11-12 20:05:23', '2023-11-12 20:05:23');
+(9, 'Societa 1', 'MI-12323', '842340340231', 'Società a responsabilità limitata', 'ASD Passirana, 20017 Rho MI, Italia', 'ASD Passirana, 20017 Rho MI, Italia', '3891733182', 'georgeavila94@gmail.com', 'ASDAS@PEC.IT', '', '', 1, 5, '2023-11-12 19:52:34', '2023-11-14 19:41:00'),
+(11, 'Unoms SRL', 'MI-12323', '842340340232', 'Società per azioni', 'ASD Passirana, 20017 Rho MI, Italia', 'ASD Passirana, 20017 Rho MI, Italia', '3891733185', 'georgeavila94@gmail.com', 'ASDAS@PEC.IT', 'www.google.it', 'descrizione', 1, 5, '2023-11-12 19:57:34', '2023-11-14 19:29:30'),
+(12, 'Societa2', 'MI-12323', '842340340212', 'Società per azioni', 'ASD Passirana, 20017 Rho MI, Italia', 'ASD Passirana, 20017 Rho MI, Italia', '3891733185', 'georgeavila94@gmail.com', 'ASDAS@PEC.IT', 'sdasd', '', 1, 6, '2023-11-12 19:58:47', '2023-11-13 22:04:13'),
+(13, 'Azienda fatturona', 'MI-12323', '842340340123', 'Società a responsabilità limitata', 'ASD Passirana, 20017 Rho MI, Italia', 'ASD Passirana, 20017 Rho MI, Italia', '3891733185', 'georgeavila94@gmail.com', 'ASDAS@PEC.IT', 'sdasd', '', 1, 5, '2023-11-12 19:59:54', '2023-11-14 19:28:59'),
+(14, 'Trasporti SRL', 'MI-12323', '8423403412', 'Società per azioni', 'ASD Passirana, 20017 Rho MI, Italia', 'ASD Passirana, 20017 Rho MI, Italia', '3891733185', 'georgeavila94@gmail.com', 'ASDAS@PEC.IT', '', '', 1, 6, '2023-11-12 20:00:54', '2023-11-14 19:29:11');
 
 -- --------------------------------------------------------
 
@@ -74,6 +66,7 @@ INSERT INTO `companies` (`id`, `name`, `reaNumber`, `vat`, `legalForm`, `registe
 CREATE TABLE `roles` (
   `id` int(11) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
+  `label` varchar(100) DEFAULT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -82,24 +75,11 @@ CREATE TABLE `roles` (
 -- Dump dei dati per la tabella `roles`
 --
 
-INSERT INTO `roles` (`id`, `name`, `createdAt`, `updatedAt`) VALUES
-(1, 'worker', '2023-11-04 18:30:05', '2023-11-04 18:30:05'),
-(2, 'moderator', '2023-11-04 18:30:26', '2023-11-04 18:30:26'),
-(3, 'admin', '2023-11-04 18:30:36', '2023-11-04 18:30:36'),
-(4, 'ceo', '2023-11-11 09:03:32', '2023-11-11 09:03:32');
-
--- --------------------------------------------------------
-
---
--- Struttura della tabella `useroles`
---
-
-CREATE TABLE `useroles` (
-  `createdAt` datetime NOT NULL,
-  `updatedAt` datetime NOT NULL,
-  `userId` int(11) NOT NULL,
-  `roleId` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+INSERT INTO `roles` (`id`, `name`, `label`, `createdAt`, `updatedAt`) VALUES
+(1, 'worker', 'Autista', '2023-11-04 18:30:05', '2023-11-04 18:30:05'),
+(2, 'moderator', 'CTF', '2023-11-04 18:30:26', '2023-11-04 18:30:26'),
+(3, 'admin', 'Admin', '2023-11-04 18:30:36', '2023-11-04 18:30:36'),
+(4, 'ceo', 'CEO Azienda', '2023-11-11 09:03:32', '2023-11-11 09:03:32');
 
 -- --------------------------------------------------------
 
@@ -114,6 +94,7 @@ CREATE TABLE `users` (
   `surname` varchar(255) DEFAULT 'Cognome',
   `email` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
+  `status` tinyint(1) DEFAULT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -122,12 +103,13 @@ CREATE TABLE `users` (
 -- Dump dei dati per la tabella `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `name`, `surname`, `email`, `password`, `createdAt`, `updatedAt`) VALUES
-(1, 'jordanavila', 'Jordan', 'Avila', 'jordanavila1394@gmail.com', '$2a$08$DlamsgRXrcukFgjxZm8LFeFLOdGW2IDTqYSnx5LLXvoxY2DEB.ps6', '2023-11-04 17:34:44', '2023-11-04 17:34:44'),
-(2, 'mariagutierrez', 'Maria', 'Gutierrez', 'mariagutierrez@gmail.com', '$2a$12$CIDOlpha.7vdTPlOclS5EeyVRH8oiMcWsy5YyhnW2WfU13vDOb40y', '2023-11-04 19:50:02', '2023-11-04 19:50:02'),
-(3, 'luisalfonso', 'Luis Alfonso', 'Rodriguez Ramirez', 'autista@gmail.com', '$2a$12$CIDOlpha.7vdTPlOclS5EeyVRH8oiMcWsy5YyhnW2WfU13vDOb40y', '2023-11-04 19:50:02', '2023-11-04 19:50:02'),
-(5, 'marcocarta94', 'Marco', 'Carta', 'marcocarta@gmail.com', '$2a$12$CIDOlpha.7vdTPlOclS5EeyVRH8oiMcWsy5YyhnW2WfU13vDOb40y', '2023-11-04 19:50:02', '2023-11-04 19:50:02'),
-(6, 'lucaRossi94', 'Luca', 'Rossi', 'lucarossi@gmail.com', '$2a$12$CIDOlpha.7vdTPlOclS5EeyVRH8oiMcWsy5YyhnW2WfU13vDOb40y', '2023-11-04 19:50:02', '2023-11-04 19:50:02');
+INSERT INTO `users` (`id`, `username`, `name`, `surname`, `email`, `password`, `status`, `createdAt`, `updatedAt`) VALUES
+(1, 'jordanavila94', 'Jordan', 'Avilas', 'jordanavila1394@gmail.com', '$2a$08$DlamsgRXrcukFgjxZm8LFeFLOdGW2IDTqYSnx5LLXvoxY2DEB.ps6', 1, '2023-11-04 17:34:44', '2023-11-14 22:22:57'),
+(2, 'mariagutierrez', 'Maria', 'Gutierrez', 'mariagutierrez@gmail.com', '$2a$12$CIDOlpha.7vdTPlOclS5EeyVRH8oiMcWsy5YyhnW2WfU13vDOb40y', 1, '2023-11-04 19:50:02', '2023-11-04 19:50:02'),
+(3, 'luisalfonso', 'Luis Alfonso', 'Rodriguez Ramirez', 'autista@gmail.com', '$2a$12$CIDOlpha.7vdTPlOclS5EeyVRH8oiMcWsy5YyhnW2WfU13vDOb40y', 1, '2023-11-04 19:50:02', '2023-11-04 19:50:02'),
+(5, 'marcocarta94', 'Marco', 'Carta', 'marcocarta@gmail.com', '$2a$12$CIDOlpha.7vdTPlOclS5EeyVRH8oiMcWsy5YyhnW2WfU13vDOb40y', 1, '2023-11-04 19:50:02', '2023-11-04 19:50:02'),
+(6, 'lucaRossi94', 'Luca', 'Rossi', 'lucarossi@gmail.com', '$2a$12$CIDOlpha.7vdTPlOclS5EeyVRH8oiMcWsy5YyhnW2WfU13vDOb40y', 1, '2023-11-04 19:50:02', '2023-11-04 19:50:02'),
+(9, 'asd123', 'nome', 'cognome', 'email@gmail.com', NULL, 1, '2023-11-14 22:15:16', '2023-11-14 22:16:30');
 
 -- --------------------------------------------------------
 
@@ -170,13 +152,6 @@ ALTER TABLE `roles`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indici per le tabelle `useroles`
---
-ALTER TABLE `useroles`
-  ADD PRIMARY KEY (`userId`,`roleId`),
-  ADD KEY `roleId` (`roleId`);
-
---
 -- Indici per le tabelle `users`
 --
 ALTER TABLE `users`
@@ -203,18 +178,11 @@ ALTER TABLE `companies`
 -- AUTO_INCREMENT per la tabella `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Limiti per le tabelle scaricate
 --
-
---
--- Limiti per la tabella `useroles`
---
-ALTER TABLE `useroles`
-  ADD CONSTRAINT `useroles_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `useroles_ibfk_2` FOREIGN KEY (`roleId`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Limiti per la tabella `user_roles`
