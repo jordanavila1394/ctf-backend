@@ -1,10 +1,28 @@
 const db = require("../models");
 const Company = db.company;
+const User = db.user;
 const Op = db.Sequelize.Op;
 
 exports.allCompanies = (req, res) => {
   Company.findAll({
-    include: [{ model: db.user, attributes: ["name", "surname"] }],
+    include: [
+      {
+        model: db.user,
+        attributes: ["id", "name", "surname"],
+        as: "users",
+        include: [
+          {
+            model: db.role,
+            as: "roles",
+          },
+        ],
+      },
+      {
+        model: db.place,
+        as: "places",
+      },
+    ],
+    order: [["name", "ASC"]],
   })
     .then((companies) => {
       res.status(200).send(companies);
@@ -29,7 +47,7 @@ exports.createCompany = (req, res) => {
     website: req.body.website,
     description: req.body.description,
     status: req.body.status,
-    userId: req.body.userId,
+    ceoId: req.body.ceoId,
   })
     .then((company) => {
       res.status(201).send({ message: "Azienda aggiunta con successo!" });
@@ -85,7 +103,7 @@ exports.patchCompany = (req, res) => {
       website: req.body.website,
       description: req.body.description,
       status: req.body.status,
-      userId: req.body.userId,
+      ceoId: req.body.ceoId,
     },
     { where: { id: req.params.id } }
   )

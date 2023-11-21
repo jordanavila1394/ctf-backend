@@ -20,17 +20,51 @@ db.sequelize = sequelize;
 db.user = require("../models/user.model.js")(sequelize, Sequelize);
 db.role = require("../models/role.model.js")(sequelize, Sequelize);
 db.company = require("../models/company.model.js")(sequelize, Sequelize);
+db.place = require("../models/place.model.js")(sequelize, Sequelize);
 
+UserRoles = sequelize.define("user_roles", {
+  userId: Sequelize.STRING,
+  roleId: Sequelize.STRING,
+});
+
+UserCompanies = sequelize.define("user_companies", {
+  userId: Sequelize.STRING,
+  companyId: Sequelize.STRING,
+});
+
+//UserRoles
 db.role.belongsToMany(db.user, {
-  through: "user_roles",
+  foreignKey: "roleId",
+  otherKey: "userId",
+  through: UserRoles,
+  as: "users",
 });
 
 db.user.belongsToMany(db.role, {
-  through: "user_roles",
+  foreignKey: "userId",
+  otherKey: "roleId",
+  through: UserRoles,
+  as: "roles",
 });
 
-db.company.belongsTo(db.user, {
-  through: "userId",
+//UserCompanies
+db.company.belongsToMany(db.user, {
+  foreignKey: "companyId",
+  otherKey: "userId",
+  through: UserCompanies,
+  as: "users",
+});
+
+db.user.belongsToMany(db.company, {
+  foreignKey: "userId",
+  otherKey: "companyId",
+  through: UserCompanies,
+  as: "companies",
+});
+
+db.company.hasMany(db.place, {
+  foreignKey: "companyId",
+  as: "places",
 });
 
 db.ROLES = ["worker", "admin", "moderator", "ceo"];

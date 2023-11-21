@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const Company = sequelize.define("companies", {
+  const Place = sequelize.define("places", {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
@@ -7,40 +7,25 @@ module.exports = (sequelize, Sequelize) => {
     name: {
       type: Sequelize.STRING,
     },
-    reaNumber: {
+    address: {
       type: Sequelize.STRING,
     },
-    vat: {
+    latitude: {
       type: Sequelize.STRING,
     },
-    legalForm: {
+    longitude: {
       type: Sequelize.STRING,
     },
-    registeredOffice: {
-      type: Sequelize.STRING,
+    googlePlaceId: {
+      type: Sequelize.INTEGER,
     },
-    headOffice: {
-      type: Sequelize.STRING,
-    },
-    phone: {
-      type: Sequelize.STRING,
-    },
-    email: {
-      type: Sequelize.STRING,
-    },
-    pec: {
-      type: Sequelize.STRING,
-    },
-    website: {
+    url: {
       type: Sequelize.STRING,
     },
     description: {
       type: Sequelize.STRING,
     },
-    status: {
-      type: Sequelize.BOOLEAN,
-    },
-    ceoId: {
+    companyId: {
       type: Sequelize.INTEGER,
     },
     createdAt: {
@@ -51,5 +36,5 @@ module.exports = (sequelize, Sequelize) => {
     },
   });
 
-  return Company;
+  return Place;
 };

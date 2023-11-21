@@ -1,6 +1,10 @@
 const db = require("../models");
 const User = db.user;
+const Company = db.company;
+const Role = db.role;
+
 const Op = db.Sequelize.Op;
+var bcrypt = require("bcryptjs");
 
 exports.allCeos = (req, res) => {
   User.findAll({
@@ -9,9 +13,40 @@ exports.allCeos = (req, res) => {
         model: db.role,
         where: [{ id: 4 }],
         attributes: ["id", "name", "label"],
+        as: "roles",
+      },
+      {
+        model: db.company,
+        as: "companies",
       },
     ],
-    attributes: ["id", "name", "surname"],
+    attributes: { include: ["id", "name", "surname"], exclude: ["password"] },
+  })
+    .then((users) => {
+      res.status(200).send(users);
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
+exports.allCeosByCompany = (req, res) => {
+  User.findAll({
+    include: [
+      {
+        model: db.role,
+        where: [{ id: 4 }],
+        attributes: ["id", "name", "label"],
+        as: "roles",
+      },
+      {
+        model: db.company,
+        where: [{ id: req.params.id }],
+
+        as: "companies",
+      },
+    ],
+    attributes: { include: ["id", "name", "surname"], exclude: ["password"] },
   })
     .then((users) => {
       res.status(200).send(users);
@@ -26,9 +61,19 @@ exports.allUsers = (req, res) => {
     include: [
       {
         model: db.role,
-        attributes: ["id", "name", "label"],
+        attributes: {
+          include: ["id", "name", "label"],
+          order: [["label", "ASC"]],
+        },
+        as: "roles",
+      },
+      {
+        model: db.company,
+        as: "companies",
+        order: [["name", "ASC"]],
       },
     ],
+    attributes: { exclude: ["password"] },
   })
     .then((users) => {
       res.status(200).send(users);
@@ -42,12 +87,15 @@ exports.createUser = (req, res) => {
   // Save User to Database
   User.create({
     username: req.body.username,
+    password: bcrypt.hashSync(req.body.password, 8),
     name: req.body.name,
     surname: req.body.surname,
     email: req.body.email,
     status: req.body.status,
   })
     .then((user) => {
+      user.addRole(req.body.roleId);
+      user.addCompany(req.body.companyId);
       res.status(201).send({ message: "Utente aggiunto con successo!" });
     })
     .catch((err) => {
@@ -72,6 +120,17 @@ exports.getUser = (req, res) => {
   // Get User
   User.findOne({
     where: { id: req.params.id },
+    include: [
+      {
+        model: db.role,
+        attributes: ["id", "name", "label"],
+        as: "roles",
+      },
+      {
+        model: db.company,
+        as: "companies",
+      },
+    ],
   })
     .then((user) => {
       if (user) {
@@ -98,9 +157,7 @@ exports.patchUser = (req, res) => {
     { where: { id: req.params.id } }
   )
     .then((user) => {
-      res.status(201).send({
-        message: "Azienda modificata con successo!",
-      });
+      res.send({ message: "User registered successfully!" });
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });

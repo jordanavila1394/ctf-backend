@@ -14,6 +14,12 @@ module.exports = function (app) {
 
   app.get("/api/user/allCeos", [authJwt.verifyToken], controller.allCeos);
 
+  app.get(
+    "/api/user/allCeosByCompany/:id",
+    [authJwt.verifyToken],
+    controller.allCeosByCompany
+  );
+
   app.get("/api/user/allUsers", [authJwt.verifyToken], controller.allUsers);
 
   app.get("/api/user/getUser/:id", [authJwt.verifyToken], controller.getUser);
