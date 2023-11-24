@@ -26,7 +26,7 @@ module.exports = function (app) {
 
   app.post(
     "/api/user/createUser",
-    [authJwt.verifyToken, verifySignUp.checkDuplicateUsernameOrEmail],
+    [authJwt.verifyToken, verifySignUp.checkDuplicateUser],
     controller.createUser
   );
 
