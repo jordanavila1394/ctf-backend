@@ -1,7 +1,6 @@
 const db = require("../models");
 const User = db.user;
 
-
 module.exports = (sequelize, Sequelize) => {
   const Vehicle = sequelize.define("vehicles", {
     licensePlate: {

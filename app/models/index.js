@@ -22,6 +22,7 @@ db.role = require("../models/role.model.js")(sequelize, Sequelize);
 db.company = require("../models/company.model.js")(sequelize, Sequelize);
 db.place = require("../models/place.model.js")(sequelize, Sequelize);
 db.vehicle = require("../models/vehicle.model.js")(sequelize, Sequelize);
+db.attendance = require("../models/attendance.model.js")(sequelize, Sequelize);
 
 UserRoles = sequelize.define("user_roles", {
   userId: Sequelize.STRING,
@@ -77,12 +78,20 @@ db.user.hasMany(db.vehicle, {
   foreignKey: "userId",
   as: "vehicles",
 });
+
 //Vehicles - Company
 
 db.vehicle.belongsTo(db.company, { foreignKey: "companyId", as: "company" });
 db.company.hasMany(db.vehicle, {
   foreignKey: "companyId",
   as: "vehicles",
+});
+
+//Attendances - User
+db.attendance.belongsTo(db.user, { foreignKey: "userId", as: "driver" });
+db.user.hasMany(db.attendance, {
+  foreignKey: "userId",
+  as: "attendances",
 });
 
 db.ROLES = ["worker", "admin", "moderator", "ceo"];

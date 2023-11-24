@@ -51,6 +51,7 @@ require("./app/routes/role.routes")(app);
 require("./app/routes/company.routes")(app);
 require("./app/routes/place.routes")(app);
 require("./app/routes/vehicle.routes")(app);
+require("./app/routes/attendance.routes")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3000;
