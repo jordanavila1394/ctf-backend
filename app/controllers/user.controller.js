@@ -57,6 +57,9 @@ exports.allCeosByCompany = (req, res) => {
 };
 
 exports.allUsers = (req, res) => {
+  const idCompany = req.body.idCompany;
+  if (idCompany > 0) {
+
   User.findAll({
     include: [
       {
@@ -71,6 +74,9 @@ exports.allUsers = (req, res) => {
         model: db.company,
         as: "companies",
         order: [["name", "ASC"]],
+        where: {
+          id: idCompany,
+        },
       },
     ],
     attributes: { exclude: ["password"] },
@@ -81,12 +87,38 @@ exports.allUsers = (req, res) => {
     .catch((err) => {
       res.status(500).send({ message: err.message });
     });
+  }else{
+    User.findAll({
+      include: [
+        {
+          model: db.role,
+          attributes: {
+            include: ["id", "name", "label"],
+            order: [["label", "ASC"]],
+          },
+          as: "roles",
+        },
+        {
+          model: db.company,
+          as: "companies",
+          order: [["name", "ASC"]],
+        },
+      ],
+      attributes: { exclude: ["password"] },
+    })
+      .then((users) => {
+        res.status(200).send(users);
+      })
+      .catch((err) => {
+        res.status(500).send({ message: err.message });
+      });
+  }
 };
 
 exports.createUser = (req, res) => {
   // Save User to Database
   User.create({
-    username: req.body.username,
+    fiscalCode: req.body.fiscalCode,
     password: bcrypt.hashSync(req.body.password, 8),
     name: req.body.name,
     surname: req.body.surname,
@@ -132,6 +164,16 @@ exports.getUser = (req, res) => {
       {
         model: db.company,
         as: "companies",
+        include: [
+          {
+            model: db.place,
+            as: "places",
+          },
+          {
+            model: db.vehicle,
+            as: "vehicles",
+          },
+        ],
       },
     ],
   })
@@ -151,7 +193,7 @@ exports.patchUser = (req, res) => {
   // Save User to Database
   User.update(
     {
-      username: req.body.username,
+      fiscalCode: req.body.fiscalCode,
       name: req.body.name,
       surname: req.body.surname,
       email: req.body.email,

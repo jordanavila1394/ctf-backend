@@ -10,6 +10,6 @@ module.exports = function (app) {
     next();
   });
     
-  app.get("/api/vehicle/allVehicles", [authJwt.verifyToken], controller.allVehicles);
+  app.post("/api/vehicle/allVehicles", [authJwt.verifyToken], controller.allVehicles);
 
 };

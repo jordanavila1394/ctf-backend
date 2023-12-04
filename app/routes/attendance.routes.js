@@ -10,14 +10,42 @@ module.exports = function (app) {
     next();
   });
 
-  app.get(
+  app.post(
     "/api/attendance/allAttendances",
     [authJwt.verifyToken],
     controller.allAttendances
   );
-  app.get(
+
+  app.post(
+    "/api/attendance/getAttendance",
+    [authJwt.verifyToken],
+    controller.getAttendance
+  );
+
+  app.post(
     "/api/attendance/getDataAttendances",
     [authJwt.verifyToken],
     controller.getDataAttendances
   );
+
+  
+  app.post(
+    "/api/attendance/getMyAttendances",
+    [authJwt.verifyToken],
+    controller.getMyAttendances
+  );
+
+  app.post(
+    "/api/attendance/checkInAttendance",
+    [authJwt.verifyToken],
+    controller.checkInAttendance
+  );
+
+  app.post(
+    "/api/attendance/checkOutAttendance",
+    [authJwt.verifyToken],
+    controller.checkOutAttendance
+  );
+  
+  
 };

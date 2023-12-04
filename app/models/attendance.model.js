@@ -8,10 +8,19 @@ module.exports = (sequelize, Sequelize) => {
       references: db.user,
       referencesKey: "id",
     },
-    checkOut: {
-      type: Sequelize.DATE,
+    companyId: {
+      type: Sequelize.INTEGER,
+    },
+    placeId: {
+      type: Sequelize.INTEGER,
+    },
+    vehicleId: {
+      type: Sequelize.INTEGER,
     },
     checkIn: {
+      type: Sequelize.DATE,
+    },
+    checkOut: {
       type: Sequelize.DATE,
     },
     createdAt: {

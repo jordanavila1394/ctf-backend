@@ -8,7 +8,67 @@ const Vehicle = db.vehicle;
 const Op = db.Sequelize.Op;
 
 exports.allAttendances = (req, res) => {
-  Attendance.findAll({
+  const idCompany = req.body.idCompany;
+  if (idCompany > 0) {
+    Attendance.findAll({
+      include: [
+        {
+          model: db.user,
+          as: "driver",
+          include: [
+            {
+              model: db.company,
+              as: "companies",
+            },
+          ],
+        },
+      ],
+      where: {
+        companyId: idCompany,
+      },
+    })
+      .then((attendances) => {
+        res.status(200).send(attendances);
+      })
+      .catch((err) => {
+        res.status(500).send({ message: err.message });
+      });
+  } else {
+    Attendance.findAll({
+      include: [
+        {
+          model: db.user,
+          as: "driver",
+          include: [
+            {
+              model: db.company,
+              as: "companies",
+            },
+          ],
+        },
+      ],
+    })
+      .then((attendances) => {
+        res.status(200).send(attendances);
+      })
+      .catch((err) => {
+        res.status(500).send({ message: err.message });
+      });
+  }
+};
+
+exports.getAttendance = (req, res) => {
+  const idUser = req.body.idUser;
+  const TODAY_START = moment().format("YYYY-MM-DD 00:00");
+  const NOW = moment().format("YYYY-MM-DD 23:59");
+
+  Attendance.findOne({
+    where: {
+      userId: idUser,
+      createdAt: {
+        [Op.between]: [TODAY_START, NOW],
+      },
+    },
     include: [
       {
         model: db.user,
@@ -19,8 +79,44 @@ exports.allAttendances = (req, res) => {
             as: "companies",
           },
         ],
+        where: {
+          id: idUser,
+        },
       },
     ],
+  })
+    .then((attendance) => {
+      if (attendance) {
+        res.status(200).send({ foundCheckIn: true, attendance: attendance });
+      } else {
+        res.status(200).send({ foundCheckIn: false });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
+exports.getMyAttendances = (req, res) => {
+  const idUser = req.body.idUser;
+
+  const startOfMonth = moment()
+    .set({ year: req.body.year, month: req.body.month })
+    .startOf("month")
+    .format("YYYY-MM-DD hh:mm");
+  const endOfMonth = moment()
+    .set({ year: req.body.year, month: req.body.month })
+    .endOf("month")
+    .format("YYYY-MM-DD hh:mm");
+
+  Attendance.findAll({
+    where: {
+      userId: idUser,
+      checkIn: {
+        [Op.between]: [startOfMonth, endOfMonth],
+      },
+    },
+    order: [["checkIn", "DESC"]],
   })
     .then((attendances) => {
       res.status(200).send(attendances);
@@ -32,24 +128,67 @@ exports.allAttendances = (req, res) => {
 
 exports.getDataAttendances = (req, res) => {
   console.log(moment());
-  dateTo = moment().add(1, "d").format("YYYY-MM-DD h:mm:ss");
-  dateFrom = moment().subtract(4, "d").format("YYYY-MM-DD h:mm:ss");
+  let dateTo = moment().add(1, "d").format("YYYY-MM-DD h:mm:ss");
+  let dateFrom = moment().subtract(4, "d").format("YYYY-MM-DD h:mm:ss");
 
-  const vehiclesNumber = Vehicle.count({});
-  const usersNumber = User.count({});
-
-  const checkIns = Attendance.findAll({
-    where: {
-      createdAt: {
-        [Op.between]: [dateFrom, dateTo],
+  let vehiclesNumber = null;
+  let usersNumber = null;
+  let checkIns = null;
+  const idCompany = req.body.idCompany;
+  if (idCompany > 0) {
+    checkIns = Attendance.findAll({
+      where: {
+        createdAt: {
+          [Op.between]: [dateFrom, dateTo],
+        },
+        companyId: idCompany,
       },
-    },
-    attributes: [
-      [db.Sequelize.literal(`DATE(createdAt)`), "date"],
-      [db.Sequelize.literal(`COUNT(*)`), "count"],
-    ],
-    group: ["date"],
-  });
+      attributes: [
+        [db.Sequelize.literal(`DATE(createdAt)`), "date"],
+        [db.Sequelize.literal(`COUNT(*)`), "count"],
+      ],
+      group: ["date"],
+    });
+
+    usersNumber = User.count({
+      include: [
+        {
+          model: db.company,
+          as: "companies",
+          where: {
+            id: req.body.idCompany,
+          },
+        },
+      ],
+    });
+    vehiclesNumber = Vehicle.count({
+      include: [
+        {
+          model: db.company,
+          as: "company",
+          where: {
+            id: req.body.idCompany,
+          },
+        },
+      ],
+    });
+  } else {
+    checkIns = Attendance.findAll({
+      where: {
+        createdAt: {
+          [Op.between]: [dateFrom, dateTo],
+        },
+      },
+      attributes: [
+        [db.Sequelize.literal(`DATE(createdAt)`), "date"],
+        [db.Sequelize.literal(`COUNT(*)`), "count"],
+      ],
+      group: ["date"],
+    });
+
+    usersNumber = User.count({});
+    vehiclesNumber = Vehicle.count({});
+  }
 
   Promise.all([vehiclesNumber, usersNumber, checkIns])
     .then((response) => {
@@ -68,4 +207,45 @@ exports.getDataAttendances = (req, res) => {
   // .catch((err) => {
   //   res.status(500).send({ message: err.message });
   // });
+};
+
+exports.checkInAttendance = (req, res) => {
+  var ItalyZone = "Europe/Rome";
+  const CURRENT_MOMENT = moment()
+    .locale(ItalyZone)
+    .format("YYYY-MM-DD HH:mm:ss");
+
+  Attendance.create({
+    userId: req.body.userId,
+    companyId: req.body.companyId,
+    placeId: req.body.placeId,
+    vehicleId: req.body.vehicleId,
+    checkIn: CURRENT_MOMENT,
+  })
+    .then((attendance) => {
+      res.status(201).send({ message: "CheckIn aggiunto con successo!" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
+exports.checkOutAttendance = (req, res) => {
+  var ItalyZone = "Europe/Rome";
+  const CURRENT_MOMENT = moment()
+    .locale(ItalyZone)
+    .format("YYYY-MM-DD HH:mm:ss");
+
+  Attendance.update(
+    {
+      checkOut: CURRENT_MOMENT,
+    },
+    { where: { id: req.body.id, userId: req.body.userId } }
+  )
+    .then((attendance) => {
+      res.status(201).send({ message: "CheckOut aggiunto con successo!" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
 };

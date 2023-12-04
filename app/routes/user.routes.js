@@ -20,7 +20,7 @@ module.exports = function (app) {
     controller.allCeosByCompany
   );
 
-  app.get("/api/user/allUsers", [authJwt.verifyToken], controller.allUsers);
+  app.post("/api/user/allUsers", [authJwt.verifyToken], controller.allUsers);
 
   app.get("/api/user/getUser/:id", [authJwt.verifyToken], controller.getUser);
 

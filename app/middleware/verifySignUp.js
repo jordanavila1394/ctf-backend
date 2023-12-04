@@ -3,15 +3,15 @@ const ROLES = db.ROLES;
 const User = db.user;
 
 checkDuplicateUser = (req, res, next) => {
-  // Username
+  // fiscalCode
   User.findOne({
     where: {
-      username: req.body.username,
+      fiscalCode: req.body.fiscalCode,
     },
   }).then((user) => {
     if (user) {
       res.status(400).send({
-        message: "Failed! Username is already in use!",
+        message: "Failed! Codice fiscale is already in use!",
       });
       return;
     }

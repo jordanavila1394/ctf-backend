@@ -11,7 +11,7 @@ var bcrypt = require("bcryptjs");
 exports.signup = (req, res) => {
   // Save User to Database
   User.create({
-    username: req.body.username,
+    fiscalCode: req.body.fiscalCode,
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 8),
   })
@@ -43,7 +43,7 @@ exports.signup = (req, res) => {
 exports.signin = (req, res) => {
   User.findOne({
     where: {
-      username: req.body.username,
+      fiscalCode: req.body.fiscalCode,
     },
   })
     .then((user) => {
@@ -74,9 +74,12 @@ exports.signin = (req, res) => {
         for (let i = 0; i < roles.length; i++) {
           authorities.push("ROLE_" + roles[i].name.toUpperCase());
         }
+        console.log(user)
         res.status(201).send({
           id: user.id,
-          username: user.username,
+          fiscalCode: user.fiscalCode,
+          name: user.name,
+          surname: user.surname,
           email: user.email,
           roles: authorities,
           accessToken: token,
