@@ -2,6 +2,7 @@ const db = require("../models");
 const User = db.user;
 const Company = db.company;
 const Role = db.role;
+var moment = require("moment/moment");
 
 const Op = db.Sequelize.Op;
 var bcrypt = require("bcryptjs");
@@ -114,6 +115,111 @@ exports.allUsers = (req, res) => {
       });
   }
 };
+
+exports.allUsersWithAttendances = (req, res) => {
+
+  var ItalyZone = "Europe/Rome";
+  const idCompany = req.body.idCompany;
+
+  const startOfMonth = moment()
+  .set({ year: req.body.year, month: req.body.month })
+  .startOf("month")
+  .format("YYYY-MM-DD 00:00");
+
+const endOfMonth = moment()
+  .set({ year: req.body.year, month: req.body.month })
+  .endOf("month")
+  .format("YYYY-MM-DD 23:59");
+
+  if (idCompany > 0) {
+
+  User.findAll({
+    include: [
+      {
+        model: db.role,
+        attributes: {
+          include: ["id", "name", "label"],
+        },
+        as: "roles",
+      },
+      {
+        model: db.company,
+        as: "companies",
+        
+        where: {
+          id: idCompany,
+        },
+      },
+      {
+        model: db.attendance,
+        as: "attendances",
+        include: [
+          {
+            model: db.image,
+            as: "images",
+          },
+        ],
+        where: {
+          checkIn: {
+            [Op.between]: [startOfMonth, endOfMonth],
+          },
+        },
+      },
+    ],
+    attributes: { exclude: ["password"] },
+    order: [[{ model: db.attendance, as: 'attendances' }, 'checkIn', 'DESC']],
+
+  })
+    .then((users) => {
+      res.status(200).send(users);
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+  }else{
+    User.findAll({
+      include: [
+        {
+          model: db.role,
+          attributes: {
+            include: ["id", "name", "label"],
+          },
+          as: "roles",
+        },
+        {
+          model: db.company,
+          as: "companies",
+        },
+        {
+          model: db.attendance,
+          as: "attendances",
+          include: [
+            {
+              model: db.image,
+              as: "images",
+            },
+          ],
+          where: {
+            checkIn: {
+              [Op.between]: [startOfMonth, endOfMonth],
+            },
+          },
+        },
+      ],
+      attributes: { exclude: ["password"] },
+      order: [[{ model: db.attendance, as: 'attendances' }, 'checkIn', 'DESC']],
+
+    })
+      .then((users) => {
+
+        res.status(200).send(users);
+      })
+      .catch((err) => {
+        res.status(500).send({ message: err.message });
+      });
+  }
+};
+
 
 exports.createUser = (req, res) => {
   // Save User to Database

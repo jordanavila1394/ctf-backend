@@ -23,6 +23,9 @@ module.exports = (sequelize, Sequelize) => {
     checkOut: {
       type: Sequelize.DATE,
     },
+    status: {
+      type: Sequelize.STRING,
+    },
     createdAt: {
       type: Sequelize.DATE,
     },

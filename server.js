@@ -1,4 +1,8 @@
-const express = require("express");
+const aws = require('aws-sdk');
+const express = require('express');
+const multer = require('multer');
+const multerS3 = require('multer-s3');
+
 const cors = require("cors");
 
 const app = express();
@@ -33,11 +37,6 @@ const db = require("./app/models");
 const Role = db.role;
 
 db.sequelize.sync();
-// force: true will drop the table if it already exists
-// db.sequelize.sync({force: true}).then(() => {
-//   console.log('Drop and Resync Database with { force: true }');
-//   initial();
-// });
 
 // simple route
 app.get("/api", (req, res) => {

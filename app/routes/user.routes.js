@@ -22,6 +22,8 @@ module.exports = function (app) {
 
   app.post("/api/user/allUsers", [authJwt.verifyToken], controller.allUsers);
 
+  app.post("/api/user/allUsersWithAttendances", [authJwt.verifyToken], controller.allUsersWithAttendances);
+
   app.get("/api/user/getUser/:id", [authJwt.verifyToken], controller.getUser);
 
   app.post(

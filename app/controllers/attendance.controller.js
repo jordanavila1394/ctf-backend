@@ -5,6 +5,7 @@ var moment = require("moment/moment");
 const Attendance = db.attendance;
 const User = db.user;
 const Vehicle = db.vehicle;
+const ImageStore = db.image;
 const Op = db.Sequelize.Op;
 
 exports.allAttendances = (req, res) => {
@@ -26,6 +27,7 @@ exports.allAttendances = (req, res) => {
       where: {
         companyId: idCompany,
       },
+      order: [["checkIn", "DESC"]],
     })
       .then((attendances) => {
         res.status(200).send(attendances);
@@ -47,6 +49,7 @@ exports.allAttendances = (req, res) => {
           ],
         },
       ],
+      order: [["checkIn", "DESC"]],
     })
       .then((attendances) => {
         res.status(200).send(attendances);
@@ -65,7 +68,7 @@ exports.getAttendance = (req, res) => {
   Attendance.findOne({
     where: {
       userId: idUser,
-      createdAt: {
+      checkIn: {
         [Op.between]: [TODAY_START, NOW],
       },
     },
@@ -103,11 +106,11 @@ exports.getMyAttendances = (req, res) => {
   const startOfMonth = moment()
     .set({ year: req.body.year, month: req.body.month })
     .startOf("month")
-    .format("YYYY-MM-DD hh:mm");
+    .format("YYYY-MM-DD 00:00");
   const endOfMonth = moment()
     .set({ year: req.body.year, month: req.body.month })
     .endOf("month")
-    .format("YYYY-MM-DD hh:mm");
+    .format("YYYY-MM-DD 23:59");
 
   Attendance.findAll({
     where: {
@@ -127,9 +130,8 @@ exports.getMyAttendances = (req, res) => {
 };
 
 exports.getDataAttendances = (req, res) => {
-  console.log(moment());
-  let dateTo = moment().add(1, "d").format("YYYY-MM-DD h:mm:ss");
-  let dateFrom = moment().subtract(4, "d").format("YYYY-MM-DD h:mm:ss");
+  let dateTo = moment().format("YYYY-MM-DD 23:59");
+  let dateFrom = moment().subtract(5, "d").format("YYYY-MM-DD 00:00");
 
   let vehiclesNumber = null;
   let usersNumber = null;
@@ -138,13 +140,13 @@ exports.getDataAttendances = (req, res) => {
   if (idCompany > 0) {
     checkIns = Attendance.findAll({
       where: {
-        createdAt: {
+        checkIn: {
           [Op.between]: [dateFrom, dateTo],
         },
         companyId: idCompany,
       },
       attributes: [
-        [db.Sequelize.literal(`DATE(createdAt)`), "date"],
+        [db.Sequelize.literal(`DATE(checkIn)`), "date"],
         [db.Sequelize.literal(`COUNT(*)`), "count"],
       ],
       group: ["date"],
@@ -175,12 +177,12 @@ exports.getDataAttendances = (req, res) => {
   } else {
     checkIns = Attendance.findAll({
       where: {
-        createdAt: {
+        checkIn: {
           [Op.between]: [dateFrom, dateTo],
         },
       },
       attributes: [
-        [db.Sequelize.literal(`DATE(createdAt)`), "date"],
+        [db.Sequelize.literal(`DATE(checkIn)`), "date"],
         [db.Sequelize.literal(`COUNT(*)`), "count"],
       ],
       group: ["date"],
@@ -215,14 +217,89 @@ exports.checkInAttendance = (req, res) => {
     .locale(ItalyZone)
     .format("YYYY-MM-DD HH:mm:ss");
 
-  Attendance.create({
+  const createAttendance = Attendance.create({
     userId: req.body.userId,
     companyId: req.body.companyId,
     placeId: req.body.placeId,
     vehicleId: req.body.vehicleId,
     checkIn: CURRENT_MOMENT,
+    status: "Presente",
   })
     .then((attendance) => {
+      //Create missing attendance user.
+
+      const idUser = req.body.userId;
+
+      const startOfMonth = moment().startOf("month").format("YYYY-MM-DD 00:00");
+      const endOfMonth = moment().endOf("month").format("YYYY-MM-DD 23:59");
+
+      Attendance.findAll({
+        where: {
+          userId: idUser,
+          checkIn: {
+            [Op.between]: [startOfMonth, endOfMonth],
+          },
+        },
+        order: [["checkIn", "DESC"]],
+      }).then((attendances) => {
+        //Fix missing checkout
+        for (let attendance of attendances) {
+          if (
+            !(
+              moment(attendance?.checkIn).format("DD") == moment().format("DD")
+            ) &&
+            (attendance?.checkOut == null || attendance?.checkOut == undefined)
+          ) {
+            Attendance.update(
+              {
+                checkOut: moment(attendance?.checkIn)
+                  .set({ hour: 18, minute: 0 })
+                  .utc()
+                  .format(),
+                status: "Check Out Mancante",
+              },
+              { where: { id: attendance?.id } }
+            );
+          }
+        }
+        //Fix missing days of month
+        let missingDay = new Array();
+        let checkInInMonth = moment()
+          .startOf("month")
+          .set({ hour: 9, minute: 0 });
+        const currentDate = moment().set({ hour: 23, minute: 59 });
+        while (checkInInMonth.isSameOrBefore(currentDate)) {
+          const found = attendances.find(
+            (day) =>
+              moment(day.checkIn).format("DD") == checkInInMonth.format("DD")
+          );
+
+          if (!found || found == undefined) {
+            missingDay.push({
+              checkIn: moment(checkInInMonth)
+                .set({ hour: 9, minute: 0 })
+                .utc()
+                .format(),
+              checkOut: moment(checkInInMonth)
+                .set({ hour: 18, minute: 0 })
+                .utc()
+                .format(),
+            });
+          }
+          checkInInMonth.add(1, "days");
+        }
+        for (let index = 0; index < missingDay?.length; index++) {
+          Attendance.create({
+            userId: req.body.userId,
+            companyId: req.body.companyId,
+            placeId: req.body.placeId,
+            vehicleId: req.body.vehicleId,
+            checkIn: missingDay[index].checkIn,
+            checkOut: missingDay[index].checkOut,
+            status: "Verificare",
+          });
+        }
+      });
       res.status(201).send({ message: "CheckIn aggiunto con successo!" });
     })
     .catch((err) => {
@@ -243,6 +320,16 @@ exports.checkOutAttendance = (req, res) => {
     { where: { id: req.body.id, userId: req.body.userId } }
   )
     .then((attendance) => {
+      const uploadesFiles = req.body.uploadedFiles;
+      // https://ctf.images.fra1.digitaloceanspaces.com
+      //https://ctf.images.fra1.cdn.digitaloceanspaces.com
+      
+      // ImageStore.create({
+      //   attendanceId: req.body.id,
+      //   name: "test image",
+      // });
+
+
       res.status(201).send({ message: "CheckOut aggiunto con successo!" });
     })
     .catch((err) => {
