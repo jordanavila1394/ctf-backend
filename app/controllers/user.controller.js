@@ -145,7 +145,7 @@ const endOfMonth = moment()
       {
         model: db.company,
         as: "companies",
-        
+
         where: {
           id: idCompany,
         },
@@ -155,8 +155,8 @@ const endOfMonth = moment()
         as: "attendances",
         include: [
           {
-            model: db.image,
-            as: "images",
+            model: db.file,
+            as: "attendanceImages",
           },
         ],
         where: {
@@ -167,8 +167,7 @@ const endOfMonth = moment()
       },
     ],
     attributes: { exclude: ["password"] },
-    order: [[{ model: db.attendance, as: 'attendances' }, 'checkIn', 'DESC']],
-
+    order: [[{ model: db.attendance, as: "attendances" }, "checkIn", "DESC"]],
   })
     .then((users) => {
       res.status(200).send(users);
@@ -195,8 +194,8 @@ const endOfMonth = moment()
           as: "attendances",
           include: [
             {
-              model: db.image,
-              as: "images",
+              model: db.file,
+              as: "attendanceImages",
             },
           ],
           where: {
@@ -207,11 +206,9 @@ const endOfMonth = moment()
         },
       ],
       attributes: { exclude: ["password"] },
-      order: [[{ model: db.attendance, as: 'attendances' }, 'checkIn', 'DESC']],
-
+      order: [[{ model: db.attendance, as: "attendances" }, "checkIn", "DESC"]],
     })
       .then((users) => {
-
         res.status(200).send(users);
       })
       .catch((err) => {

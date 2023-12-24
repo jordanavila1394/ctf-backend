@@ -23,7 +23,8 @@ db.company = require("../models/company.model.js")(sequelize, Sequelize);
 db.place = require("../models/place.model.js")(sequelize, Sequelize);
 db.vehicle = require("../models/vehicle.model.js")(sequelize, Sequelize);
 db.attendance = require("../models/attendance.model.js")(sequelize, Sequelize);
-db.image = require("../models/image.model.js")(sequelize, Sequelize);
+db.permission = require("../models/permission.model.js")(sequelize, Sequelize);
+db.file = require("./file.model.js")(sequelize, Sequelize);
 
 UserRoles = sequelize.define("user_roles", {
   userId: Sequelize.STRING,
@@ -74,7 +75,7 @@ db.company.hasMany(db.place, {
 });
 
 //Vehicles - User
-db.vehicle.belongsTo(db.user, { foreignKey: "userId", as: "driver" });
+db.vehicle.belongsTo(db.user, { foreignKey: "userId", as: "user" });
 db.user.hasMany(db.vehicle, {
   foreignKey: "userId",
   as: "vehicles",
@@ -89,19 +90,27 @@ db.company.hasMany(db.vehicle, {
 });
 
 //Attendances - User
-db.attendance.belongsTo(db.user, { foreignKey: "userId", as: "driver" });
+db.attendance.belongsTo(db.user, { foreignKey: "userId", as: "user" });
 
 db.user.hasMany(db.attendance, {
   foreignKey: "userId",
   as: "attendances",
 });
 
-//Images - User
+//Files - User
 
-db.image.belongsTo(db.attendance, { foreignKey: "attendanceId", as: "attendance" });
-db.attendance.hasMany(db.image, {
+db.file.belongsTo(db.attendance, { foreignKey: "attendanceId", as: "attendance" });
+db.attendance.hasMany(db.file, {
   foreignKey: "attendanceId",
-  as: "images",
+  as: "attendanceImages",
+});
+
+//Attendances - User
+db.permission.belongsTo(db.user, { foreignKey: "userId", as: "user" });
+
+db.user.hasMany(db.permission, {
+  foreignKey: "userId",
+  as: "permissions",
 });
 
 

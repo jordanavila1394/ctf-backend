@@ -5,7 +5,6 @@ var moment = require("moment/moment");
 const Attendance = db.attendance;
 const User = db.user;
 const Vehicle = db.vehicle;
-const ImageStore = db.image;
 const Op = db.Sequelize.Op;
 
 exports.allAttendances = (req, res) => {
@@ -15,7 +14,7 @@ exports.allAttendances = (req, res) => {
       include: [
         {
           model: db.user,
-          as: "driver",
+          as: "user",
           include: [
             {
               model: db.company,
@@ -40,7 +39,7 @@ exports.allAttendances = (req, res) => {
       include: [
         {
           model: db.user,
-          as: "driver",
+          as: "user",
           include: [
             {
               model: db.company,
@@ -75,7 +74,7 @@ exports.getAttendance = (req, res) => {
     include: [
       {
         model: db.user,
-        as: "driver",
+        as: "user",
         include: [
           {
             model: db.company,
@@ -256,7 +255,7 @@ exports.checkInAttendance = (req, res) => {
                   .set({ hour: 18, minute: 0 })
                   .utc()
                   .format(),
-                status: "Check Out Mancante",
+                status: "CheckOut?",
               },
               { where: { id: attendance?.id } }
             );
@@ -320,16 +319,6 @@ exports.checkOutAttendance = (req, res) => {
     { where: { id: req.body.id, userId: req.body.userId } }
   )
     .then((attendance) => {
-      const uploadesFiles = req.body.uploadedFiles;
-      // https://ctf.images.fra1.digitaloceanspaces.com
-      //https://ctf.images.fra1.cdn.digitaloceanspaces.com
-      
-      // ImageStore.create({
-      //   attendanceId: req.body.id,
-      //   name: "test image",
-      // });
-
-
       res.status(201).send({ message: "CheckOut aggiunto con successo!" });
     })
     .catch((err) => {

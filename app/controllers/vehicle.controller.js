@@ -14,7 +14,7 @@ exports.allVehicles = (req, res) => {
     include: [
       {
         model: db.user,
-        as: "driver",
+        as: "user",
       },
       {
         model: db.company,
@@ -36,7 +36,7 @@ exports.allVehicles = (req, res) => {
       include: [
         {
           model: db.user,
-          as: "driver",
+          as: "user",
         },
         {
           model: db.company,

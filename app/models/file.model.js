@@ -1,23 +1,23 @@
 const db = require(".");
 
 module.exports = (sequelize, Sequelize) => {
-  const Image = sequelize.define("images", {
+  const AttendanceImages = sequelize.define("attendanceImages", {
     attendanceId: {
       type: Sequelize.INTEGER,
       references: db.attendance,
       referencesKey: "id",
     },
-    name: {
-        type: Sequelize.STRING,
-      },
-    description: {
-        type: Sequelize.STRING,
+    etag: {
+      type: Sequelize.STRING,
     },
-    imageData: {
-        type: Sequelize.BLOB,
+    location: {
+      type: Sequelize.STRING,
     },
-    typeMIME: {
-        type: Sequelize.STRING,
+    keyFile: {
+      type: Sequelize.STRING,
+    },
+    bucket: {
+      type: Sequelize.STRING,
     },
     createdAt: {
       type: Sequelize.DATE,
@@ -27,5 +27,5 @@ module.exports = (sequelize, Sequelize) => {
     },
   });
 
-  return Image;
+  return AttendanceImages;
 };
