@@ -24,7 +24,10 @@ db.place = require("../models/place.model.js")(sequelize, Sequelize);
 db.vehicle = require("../models/vehicle.model.js")(sequelize, Sequelize);
 db.attendance = require("../models/attendance.model.js")(sequelize, Sequelize);
 db.permission = require("../models/permission.model.js")(sequelize, Sequelize);
-db.file = require("./file.model.js")(sequelize, Sequelize);
+db.attendanceImage = require("../models/attendanceImages.model.js")(
+  sequelize,
+  Sequelize
+);
 
 UserRoles = sequelize.define("user_roles", {
   userId: Sequelize.STRING,
@@ -97,10 +100,13 @@ db.user.hasMany(db.attendance, {
   as: "attendances",
 });
 
-//Files - User
+//attendanceImages - User
 
-db.file.belongsTo(db.attendance, { foreignKey: "attendanceId", as: "attendance" });
-db.attendance.hasMany(db.file, {
+db.attendanceImage.belongsTo(db.attendance, {
+  foreignKey: "attendanceId",
+  as: "attendance",
+});
+db.attendance.hasMany(db.attendanceImage, {
   foreignKey: "attendanceId",
   as: "attendanceImages",
 });
@@ -112,7 +118,6 @@ db.user.hasMany(db.permission, {
   foreignKey: "userId",
   as: "permissions",
 });
-
 
 db.ROLES = ["worker", "admin", "moderator", "ceo"];
 

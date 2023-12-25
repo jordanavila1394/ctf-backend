@@ -155,7 +155,7 @@ const endOfMonth = moment()
         as: "attendances",
         include: [
           {
-            model: db.file,
+            model: db.attendanceImage,
             as: "attendanceImages",
           },
         ],
@@ -194,7 +194,7 @@ const endOfMonth = moment()
           as: "attendances",
           include: [
             {
-              model: db.file,
+              model: db.attendanceImage,
               as: "attendanceImages",
             },
           ],

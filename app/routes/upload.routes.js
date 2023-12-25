@@ -3,7 +3,7 @@ const multer = require("multer");
 const AWS = require("aws-sdk");
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const db = require("../models");
-const AttendanceImages = db.file;
+const AttendanceImages = db.attendanceImage;
 
 module.exports = function (app) {
   const spacesEndpoint = new AWS.Endpoint("fra1.digitaloceanspaces.com");
@@ -27,7 +27,6 @@ module.exports = function (app) {
       const files = req.files;
       const licensePlate = req.body.licensePlate;
       const checkInId = req.body.checkInId;
-      console.log(req.body);
       const date = new Date();
 
       let day = date.getDate();
@@ -65,8 +64,6 @@ module.exports = function (app) {
             message: "Files uploaded successfully",
             files: results,
           };
-          // https://ctf.images.fra1.digitaloceanspaces.com
-          //https://ctf.images.fra1.cdn.digitaloceanspaces.com
           for (let result of results) {
             AttendanceImages.create({
               attendanceId: checkInId,
@@ -95,6 +92,7 @@ module.exports = function (app) {
     async (req, res) => {
       const files = req.files;
       const category = req.body.category;
+      const fiscalCode = req.body.fiscalCode;
 
       if (!files) {
         return res.status(400).send("No files were uploaded.");
