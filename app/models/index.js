@@ -28,6 +28,10 @@ db.attendanceImage = require("../models/attendanceImages.model.js")(
   sequelize,
   Sequelize
 );
+db.userDocument = require("../models/userDocuments.model.js")(
+  sequelize,
+  Sequelize
+);
 
 UserRoles = sequelize.define("user_roles", {
   userId: Sequelize.STRING,
@@ -117,6 +121,15 @@ db.permission.belongsTo(db.user, { foreignKey: "userId", as: "user" });
 db.user.hasMany(db.permission, {
   foreignKey: "userId",
   as: "permissions",
+});
+
+//userDocuments- User
+
+db.userDocument.belongsTo(db.user, { foreignKey: "userId", as: "user" });
+
+db.user.hasMany(db.userDocument, {
+  foreignKey: "userId",
+  as: "userDocuments",
 });
 
 db.ROLES = ["worker", "admin", "moderator", "ceo"];

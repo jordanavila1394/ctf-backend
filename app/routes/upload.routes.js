@@ -4,7 +4,7 @@ const AWS = require("aws-sdk");
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const db = require("../models");
 const AttendanceImages = db.attendanceImage;
-
+const userDocuments = db.userDocument;
 module.exports = function (app) {
   const spacesEndpoint = new AWS.Endpoint("fra1.digitaloceanspaces.com");
 
@@ -73,7 +73,6 @@ module.exports = function (app) {
               bucket: result?.Bucket,
             });
           }
-          res.json(response);
         })
         .catch((error) => {
           const response = {
@@ -91,6 +90,7 @@ module.exports = function (app) {
     upload.array("files"),
     async (req, res) => {
       const files = req.files;
+      const userId = req.body.userId;
       const category = req.body.category;
       const fiscalCode = req.body.fiscalCode;
 
@@ -119,19 +119,22 @@ module.exports = function (app) {
         .then((results) => {
           const response = {
             success: true,
-            message: "Images uploaded successfully",
+            message: "Documents uploaded successfully",
             files: results,
           };
           for (let result of results) {
-            AttendanceImages.create({
-              attendanceId: checkInId,
+            console.log(result);
+            userDocuments.create({
+              userId: userId,
+              fiscalCode: fiscalCode,
+              category: category,
               etag: result?.ETag,
               location: result?.Location,
               keyFile: result?.Key,
               bucket: result?.Bucket,
             });
           }
-          res.json(response);
+          res.status(201).send({ message: "Documento aggiunto con successo!" });
         })
         .catch((error) => {
           const response = {

@@ -1,8 +1,5 @@
-
-const express = require('express');
-const bodyParser = require('body-parser');
-
-
+const express = require("express");
+const bodyParser = require("body-parser");
 const cors = require("cors");
 
 const app = express();
@@ -45,8 +42,6 @@ app.get("/api", (req, res) => {
   res.json({ message: "Welcome to cms application." });
 });
 
-
-
 // routes
 require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
@@ -56,6 +51,7 @@ require("./app/routes/place.routes")(app);
 require("./app/routes/vehicle.routes")(app);
 require("./app/routes/attendance.routes")(app);
 require("./app/routes/upload.routes")(app);
+require("./app/routes/download.routes")(app);
 require("./app/routes/permission.routes")(app);
 require("./app/routes/email.routes")(app);
 

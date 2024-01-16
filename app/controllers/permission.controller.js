@@ -1,7 +1,5 @@
 const db = require("../models");
-
 var moment = require("moment/moment");
-
 const Permission = db.permission;
 const Op = db.Sequelize.Op;
 
@@ -11,16 +9,17 @@ exports.createPermission = (req, res) => {
     .locale(ItalyZone)
     .format("YYYY-MM-DD HH:mm:ss");
 
- Permission.create({
+  Permission.create({
     userId: req.body.userId,
     companyId: req.body.companyId,
     typology: req.body.typology,
     dates: req.body.dates,
-    status: "In Attesa",
+    note: req.body.note,
+    status: req.body.typology === "Malattia" ? "Approvato" : "In Attesa",
     createdAt: CURRENT_MOMENT,
   })
     .then((permission) => {
-        res.status(200).send(permission);
+      res.status(200).send(permission);
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
@@ -42,6 +41,58 @@ exports.getMyPermissions = (req, res) => {
   Permission.findAll({
     where: {
       userId: idUser,
+      typology: { [Op.ne]: "Malattia" },
+      createdAt: {
+        [Op.between]: [startOfMonth, endOfMonth],
+      },
+    },
+    order: [["createdAt", "DESC"]],
+  })
+    .then((permissions) => {
+      res.status(200).send(permissions);
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
+exports.getPermissionById = (req, res) => {
+  const idPermission = req.body.idPermission;
+  Permission.findOne({
+    include: [
+      {
+        model: db.user,
+        as: "user",
+      },
+    ],
+    where: {
+      id: idPermission,
+    },
+  })
+    .then((permission) => {
+      res.status(200).send(permission);
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
+exports.getMyMedicalLeave = (req, res) => {
+  const idUser = req.body.idUser;
+
+  const startOfMonth = moment()
+    .set({ year: req.body.year, month: req.body.month })
+    .startOf("month")
+    .format("YYYY-MM-DD 00:00");
+  const endOfMonth = moment()
+    .set({ year: req.body.year, month: req.body.month })
+    .endOf("month")
+    .format("YYYY-MM-DD 23:59");
+
+  Permission.findAll({
+    where: {
+      userId: idUser,
+      typology: { [Op.eq]: "Malattia" },
       createdAt: {
         [Op.between]: [startOfMonth, endOfMonth],
       },
@@ -86,7 +137,6 @@ exports.allPermissions = (req, res) => {
         },
       ],
       order: [["createdAt", "DESC"]],
-
     })
       .then((permissions) => {
         res.status(200).send(permissions);
@@ -98,7 +148,6 @@ exports.allPermissions = (req, res) => {
 };
 
 exports.approvePermission = (req, res) => {
-
   Permission.update(
     {
       status: "Approvato",
@@ -113,8 +162,23 @@ exports.approvePermission = (req, res) => {
     });
 };
 
-exports.rejectPermission = (req, res) => {
+exports.addProtocolNumberPermission = (req, res) => {
+  Permission.update(
+    {
+      note: req.body.note,
+      protocolNumber: req.body.protocolNumber,
+    },
+    { where: { id: req.body.idPermission } }
+  )
+    .then((permission) => {
+      res.status(201).send({ message: "Permesso aggiornato con successo!" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
 
+exports.rejectPermission = (req, res) => {
   Permission.update(
     {
       status: "Negato",

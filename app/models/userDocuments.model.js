@@ -1,29 +1,28 @@
-const db = require("../models");
-const User = db.user;
+const db = require(".");
 
 module.exports = (sequelize, Sequelize) => {
-  const Permission = sequelize.define("permissions", {
+  const userDocuments = sequelize.define("userDocuments", {
     userId: {
       type: Sequelize.INTEGER,
       references: db.user,
       referencesKey: "id",
     },
-    companyId: {
-      type: Sequelize.INTEGER,
-    },
-    typology: {
+    fiscalCode: {
       type: Sequelize.STRING,
     },
-    dates: {
+    category: {
       type: Sequelize.STRING,
     },
-    note: {
+    etag: {
       type: Sequelize.STRING,
     },
-    protocolNumber: {
+    location: {
       type: Sequelize.STRING,
     },
-    status: {
+    keyFile: {
+      type: Sequelize.STRING,
+    },
+    bucket: {
       type: Sequelize.STRING,
     },
     createdAt: {
@@ -34,5 +33,5 @@ module.exports = (sequelize, Sequelize) => {
     },
   });
 
-  return Permission;
+  return userDocuments;
 };

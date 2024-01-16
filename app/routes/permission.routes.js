@@ -9,12 +9,30 @@ module.exports = function (app) {
     );
     next();
   });
-  
-   app.post(
-     "/api/permission/getMyPermissions",
-     [authJwt.verifyToken],
-     controller.getMyPermissions
-   );
+
+  app.post(
+    "/api/permission/getMyPermissions",
+    [authJwt.verifyToken],
+    controller.getMyPermissions
+  );
+
+  app.post(
+    "/api/permission/getMyMedicalLeave",
+    [authJwt.verifyToken],
+    controller.getMyMedicalLeave
+  );
+
+  app.post(
+    "/api/permission/getPermissionById",
+    [authJwt.verifyToken],
+    controller.getPermissionById
+  );
+
+  app.post(
+    "/api/permission/addProtocolNumberPermission",
+    [authJwt.verifyToken],
+    controller.addProtocolNumberPermission
+  );
 
   app.post(
     "/api/permission/createPermission",
