@@ -60,35 +60,34 @@ exports.allCeosByCompany = (req, res) => {
 exports.allUsers = (req, res) => {
   const idCompany = req.body.idCompany;
   if (idCompany > 0) {
-
-  User.findAll({
-    include: [
-      {
-        model: db.role,
-        attributes: {
-          include: ["id", "name", "label"],
-          order: [["label", "ASC"]],
+    User.findAll({
+      include: [
+        {
+          model: db.role,
+          attributes: {
+            include: ["id", "name", "label"],
+            order: [["label", "ASC"]],
+          },
+          as: "roles",
         },
-        as: "roles",
-      },
-      {
-        model: db.company,
-        as: "companies",
-        order: [["name", "ASC"]],
-        where: {
-          id: idCompany,
+        {
+          model: db.company,
+          as: "companies",
+          order: [["name", "ASC"]],
+          where: {
+            id: idCompany,
+          },
         },
-      },
-    ],
-    attributes: { exclude: ["password"] },
-  })
-    .then((users) => {
-      res.status(200).send(users);
+      ],
+      attributes: { exclude: ["password"] },
     })
-    .catch((err) => {
-      res.status(500).send({ message: err.message });
-    });
-  }else{
+      .then((users) => {
+        res.status(200).send(users);
+      })
+      .catch((err) => {
+        res.status(500).send({ message: err.message });
+      });
+  } else {
     User.findAll({
       include: [
         {
@@ -117,65 +116,63 @@ exports.allUsers = (req, res) => {
 };
 
 exports.allUsersWithAttendances = (req, res) => {
-
   var ItalyZone = "Europe/Rome";
   const idCompany = req.body.idCompany;
 
   const startOfMonth = moment()
-  .set({ year: req.body.year, month: req.body.month })
-  .startOf("month")
-  .format("YYYY-MM-DD 00:00");
+    .set({ year: req.body.year, month: req.body.month })
+    .startOf("month")
+    .format("YYYY-MM-DD 00:00");
 
-const endOfMonth = moment()
-  .set({ year: req.body.year, month: req.body.month })
-  .endOf("month")
-  .format("YYYY-MM-DD 23:59");
+  const endOfMonth = moment()
+    .set({ year: req.body.year, month: req.body.month })
+    .endOf("month")
+    .format("YYYY-MM-DD 23:59");
 
   if (idCompany > 0) {
-
-  User.findAll({
-    include: [
-      {
-        model: db.role,
-        attributes: {
-          include: ["id", "name", "label"],
-        },
-        as: "roles",
-      },
-      {
-        model: db.company,
-        as: "companies",
-
-        where: {
-          id: idCompany,
-        },
-      },
-      {
-        model: db.attendance,
-        as: "attendances",
-        include: [
-          {
-            model: db.attendanceImage,
-            as: "attendanceImages",
+    User.findAll({
+      include: [
+        {
+          model: db.role,
+          attributes: {
+            include: ["id", "name", "label"],
           },
-        ],
-        where: {
-          checkIn: {
-            [Op.between]: [startOfMonth, endOfMonth],
+          as: "roles",
+        },
+        {
+          model: db.company,
+          as: "companies",
+
+          where: {
+            id: idCompany,
           },
         },
-      },
-    ],
-    attributes: { exclude: ["password"] },
-    order: [[{ model: db.attendance, as: "attendances" }, "checkIn", "DESC"]],
-  })
-    .then((users) => {
-      res.status(200).send(users);
+        {
+          model: db.attendance,
+          as: "attendances",
+          include: [
+            {
+              model: db.attendanceImage,
+              as: "attendanceImages",
+            },
+          ],
+          where: {
+            checkIn: {
+              [Op.between]: [startOfMonth, endOfMonth],
+            },
+          },
+        },
+      ],
+      attributes: { exclude: ["password"] },
+      order: [[{ model: db.attendance, as: "attendances" }, "checkIn", "DESC"]],
     })
-    .catch((err) => {
-      res.status(500).send({ message: err.message });
-    });
-  }else{
+      .then((users) => {
+        res.status(200).send(users);
+      })
+      .catch((err) => {
+        res.status(500).send({ message: err.message });
+      });
+  } else {
     User.findAll({
       include: [
         {
@@ -216,7 +213,6 @@ const endOfMonth = moment()
       });
   }
 };
-
 
 exports.createUser = (req, res) => {
   // Save User to Database
@@ -310,26 +306,44 @@ exports.patchUser = (req, res) => {
     { where: { id: req.params.id } }
   )
     .then((user) => {
-      res.send({ message: "User registered successfully!" });
+      res.status(201).send({ message: "Utente modificato con successo!" });
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
     });
 };
 
+exports.saveProfileUser = (req, res) => {
+  // Save User to Database
+  User.update(
+    {
+      fiscalCode: req.body.fiscalCode,
+      name: req.body.name,
+      surname: req.body.surname,
+      email: req.body.email,
+      cellphone: req.body.cellphone,
+    },
+    { where: { id: req.body.id } }
+  )
+    .then((user) => {
+      res.send({ message: "Profile registered successfully!" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
 
-// exports.allAccess = (req, res) => {
-//   res.status(200).send("Public Content.");
-// };
-
-// exports.userBoard = (req, res) => {
-//   res.status(200).send("User Content.");
-// };
-
-// exports.adminBoard = (req, res) => {
-//   res.status(200).send("Admin Content.");
-// };
-
-// exports.moderatorBoard = (req, res) => {
-//   res.status(200).send("Moderator Content.");
-// };
+exports.saveNewPassword = (req, res) => {
+  User.update(
+    {
+      password: bcrypt.hashSync(req.body.password, 8),
+    },
+    { where: { id: req.body.id } }
+  )
+    .then((user) => {
+      res.send({ message: "Password changed successfully!" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};

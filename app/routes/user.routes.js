@@ -22,7 +22,11 @@ module.exports = function (app) {
 
   app.post("/api/user/allUsers", [authJwt.verifyToken], controller.allUsers);
 
-  app.post("/api/user/allUsersWithAttendances", [authJwt.verifyToken], controller.allUsersWithAttendances);
+  app.post(
+    "/api/user/allUsersWithAttendances",
+    [authJwt.verifyToken],
+    controller.allUsersWithAttendances
+  );
 
   app.get("/api/user/getUser/:id", [authJwt.verifyToken], controller.getUser);
 
@@ -36,6 +40,18 @@ module.exports = function (app) {
     "/api/user/patchUser/:id",
     [authJwt.verifyToken],
     controller.patchUser
+  );
+
+  app.patch(
+    "/api/user/saveProfileUser",
+    [authJwt.verifyToken],
+    controller.saveProfileUser
+  );
+
+  app.patch(
+    "/api/user/saveNewPassword",
+    [authJwt.verifyToken],
+    controller.saveNewPassword
   );
 
   app.delete(

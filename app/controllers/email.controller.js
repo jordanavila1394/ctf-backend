@@ -29,7 +29,7 @@ exports.sendEmail = (req, res) => {
   htmlContent = htmlContent.replace("{{message}}", message);
 
   const mailOptions = {
-    from: "avila@ctfitalia.com",
+    from: "info@ctfitalia.com",
     to: recipient,
     subject: subject,
     html: htmlContent,
