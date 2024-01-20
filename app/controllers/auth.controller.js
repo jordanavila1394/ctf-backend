@@ -74,7 +74,7 @@ exports.signin = (req, res) => {
         for (let i = 0; i < roles.length; i++) {
           authorities.push("ROLE_" + roles[i].name.toUpperCase());
         }
-        res.status(201).send({
+        res.status(201).json({
           id: user.id,
           fiscalCode: user.fiscalCode,
           name: user.name,
