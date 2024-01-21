@@ -41,9 +41,11 @@ exports.signup = (req, res) => {
 };
 
 exports.signin = (req, res) => {
-  User.findOne({
+  const fiscalCode = req.body.fiscalCode;
+
+  User.findAll({
     where: {
-      fiscalCode: req.body.fiscalCode,
+      fiscalCode: "VLGGGN94L13Z605E",
     },
   })
     .then((user) => {
