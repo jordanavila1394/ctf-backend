@@ -90,3 +90,7 @@ exports.signin = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.test = (req, res) => {
+  res.json({ message: "workpath" });
+};
