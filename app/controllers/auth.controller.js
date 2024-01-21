@@ -41,19 +41,20 @@ exports.signup = (req, res) => {
 };
 
 exports.signin = (req, res) => {
-  const { fiscalCode, password } = req.body;
-
-  User.findAll({
+  User.findOne({
     where: {
-      fiscalCode: fiscalCode,
+      fiscalCode: req.body.username,
     },
   })
-    .then((user) => {
+    .then(user => {
       if (!user) {
         return res.status(404).send({ message: "Utente non trovato" });
       }
 
-      var passwordIsValid = bcrypt.compareSync(password, user.password);
+      var passwordIsValid = bcrypt.compareSync(
+        req.body.password,
+        user.password
+      );
 
       if (!passwordIsValid) {
         return res.status(401).send({
@@ -73,7 +74,7 @@ exports.signin = (req, res) => {
         for (let i = 0; i < roles.length; i++) {
           authorities.push("ROLE_" + roles[i].name.toUpperCase());
         }
-        res.status(201).json({
+        res.status(200).send({
           id: user.id,
           fiscalCode: user.fiscalCode,
           name: user.name,
