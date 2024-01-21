@@ -41,11 +41,11 @@ exports.signup = (req, res) => {
 };
 
 exports.signin = (req, res) => {
-  const fiscalCode = req.body.fiscalCode;
+  const { fiscalCode, password } = req.body;
 
   User.findAll({
     where: {
-      fiscalCode: "VLGGGN94L13Z605E",
+      fiscalCode: fiscalCode,
     },
   })
     .then((user) => {
@@ -53,10 +53,7 @@ exports.signin = (req, res) => {
         return res.status(404).send({ message: "Utente non trovato" });
       }
 
-      var passwordIsValid = bcrypt.compareSync(
-        req.body.password,
-        user.password
-      );
+      var passwordIsValid = bcrypt.compareSync(password, user.password);
 
       if (!passwordIsValid) {
         return res.status(401).send({
