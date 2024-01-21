@@ -5,8 +5,9 @@ const cors = require("cors");
 const app = express();
 
 var corsOptions = {
-  origin:
-    ["https://www.ctfitalia.cloud/,https://www.ctfitalia.cloud, www.ctfitalia.cloud"], // use your actual domain name (or localhost), using * is not recommended
+  origin: [
+    "https://www.ctfitalia.cloud/,https://www.ctfitalia.cloud, www.ctfitalia.cloud",
+  ], // use your actual domain name (or localhost), using * is not recommended
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
   allowedHeaders: [
     "Content-Type",
@@ -24,11 +25,13 @@ var corsOptions = {
 
 app.use(cors(corsOptions));
 
-// parse requests of content-type - application/json
-app.use(express.json());
+// // parse requests of content-type - application/json
+// app.use(express.json());
 
-// parse requests of content-type - application/x-www-form-urlencoded
-app.use(express.urlencoded({ extended: true }));
+// // parse requests of content-type - application/x-www-form-urlencoded
+// app.use(express.urlencoded({ extended: true }));
+
+app.use(bodyParser.json());
 
 // database
 const db = require("./app/models");
