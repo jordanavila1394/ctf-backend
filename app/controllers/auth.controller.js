@@ -41,12 +41,13 @@ exports.signup = (req, res) => {
 };
 
 exports.signin = (req, res) => {
+  console.log(req.body);
   User.findOne({
     where: {
-      fiscalCode: req.body.username,
+      fiscalCode: req.body.fiscalCode,
     },
   })
-    .then(user => {
+    .then((user) => {
       if (!user) {
         return res.status(404).send({ message: "Utente non trovato" });
       }
