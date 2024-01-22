@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const app = express();
 
 var corsOptions = {
-  origin: "ctfitalia.cloud", // use your actual domain name (or localhost), using * is not recommended
+  origin: "*", // use your actual domain name (or localhost), using * is not recommended
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
   allowedHeaders: [
     "Content-Type",
