@@ -6,7 +6,7 @@ const app = express();
 
 var corsOptions = {
   origin: [
-    "https://www.ctfitalia.cloud/, https://www.ctfitalia.cloud, http://www.ctfitalia.cloud,  www.ctfitalia.cloud",
+    "https://www.ctfitalia.cloud/, https://www.ctfitalia.cloud, http://www.ctfitalia.cloud, http://ctfitalia.cloud, https://ctfitalia.cloud, www.ctfitalia.cloud",
   ], // use your actual domain name (or localhost), using * is not recommended
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
   allowedHeaders: [
