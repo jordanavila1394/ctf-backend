@@ -6,7 +6,6 @@ const AttendanceImages = db.attendanceImage;
 const userDocuments = db.userDocument;
 module.exports = function (app) {
   const spacesEndpoint = new AWS.Endpoint("fra1.digitaloceanspaces.com");
-
   const s3Client = new AWS.S3({
     endpoint: spacesEndpoint,
     region: "fra1",
