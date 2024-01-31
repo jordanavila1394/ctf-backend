@@ -1,8 +1,8 @@
 module.exports = {
-  HOST: "mysql-jg3k",
-  USER: "mysql",
-  PASSWORD: "Gorillaz13!",
-  DB: "mysql",
+  HOST: process.env.MYSQL_HOST,
+  USER: process.env.MYSQL_USER,
+  PASSWORD: process.env.MYSQL_PASSWORD,
+  DB: process.env.MYSQL_DATABASE,
   dialect: "mysql",
   port: 3306,
   pool: {
