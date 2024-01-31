@@ -1,7 +1,7 @@
 module.exports = {
   HOST: "mysql-jg3k:3306",
   USER: "mysql",
-  PASSWORD: "JkP/55pRI6MT/4GalqAgJF89T2FPccJmzMz8bxkCsA4=",
+  PASSWORD: "Gorillaz13!",
   DB: "mysql",
   dialect: "mysql",
   port: 3306,
