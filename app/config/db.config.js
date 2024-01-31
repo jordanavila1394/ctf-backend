@@ -1,5 +1,5 @@
 module.exports = {
-  HOST: "mysql-jg3k:3306",
+  HOST: "mysql-jg3k",
   USER: "mysql",
   PASSWORD: "Gorillaz13!",
   DB: "mysql",
