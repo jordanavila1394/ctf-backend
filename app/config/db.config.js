@@ -1,8 +1,8 @@
 module.exports = {
-  HOST: "127.0.0.1",
-  USER: "jordan",
-  PASSWORD: "Gorillaz13!",
-  DB: "ams_db",
+  HOST: "mysql-jg3k:3306",
+  USER: "mysql",
+  PASSWORD: "JkP/55pRI6MT/4GalqAgJF89T2FPccJmzMz8bxkCsA4=",
+  DB: "mysql",
   dialect: "mysql",
   port: 3306,
   pool: {
