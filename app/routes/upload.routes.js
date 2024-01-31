@@ -1,7 +1,6 @@
 const { authJwt } = require("../middleware");
 const multer = require("multer");
 const AWS = require("aws-sdk");
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const db = require("../models");
 const AttendanceImages = db.attendanceImage;
 const userDocuments = db.userDocument;
