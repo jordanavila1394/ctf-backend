@@ -1,7 +1,6 @@
 const db = require("../models");
 const User = db.user;
-const Company = db.company;
-const Role = db.role;
+const UserCompanies = db.userCompanies;
 var moment = require("moment/moment");
 
 const Op = db.Sequelize.Op;
@@ -306,7 +305,11 @@ exports.patchUser = (req, res) => {
     { where: { id: req.params.id } }
   )
     .then((user) => {
-      user.addCompany(req.body.companyId);
+      UserCompanies.update(
+        { companyId: req.body.companyId },
+        { where: { userId: req.params.id } }
+      );
+
       res.status(201).send({ message: "Utente modificato con successo!" });
     })
     .catch((err) => {
