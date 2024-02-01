@@ -32,6 +32,8 @@ db.userDocument = require("../models/userDocuments.model.js")(
   sequelize,
   Sequelize
 );
+db.userCompanies = require("../models/userCompanies.model.js")(sequelize, Sequelize);
+
 
 UserRoles = sequelize.define("user_roles", {
   userId: Sequelize.STRING,
