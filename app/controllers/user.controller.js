@@ -306,6 +306,7 @@ exports.patchUser = (req, res) => {
     { where: { id: req.params.id } }
   )
     .then((user) => {
+      user.addCompany(req.body.companyId);
       res.status(201).send({ message: "Utente modificato con successo!" });
     })
     .catch((err) => {
