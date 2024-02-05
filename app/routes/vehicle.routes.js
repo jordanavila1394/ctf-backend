@@ -9,7 +9,15 @@ module.exports = function (app) {
     );
     next();
   });
-    
-  app.post("/api/vehicle/allVehicles", [authJwt.verifyToken], controller.allVehicles);
 
+  app.post(
+    "/api/vehicle/allVehicles",
+    [authJwt.verifyToken],
+    controller.allVehicles
+  );
+  app.post(
+    "/api/vehicle/createVehicle",
+    [authJwt.verifyToken],
+    controller.createVehicle
+  );
 };
