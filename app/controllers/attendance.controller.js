@@ -276,11 +276,11 @@ exports.checkInAttendance = (req, res) => {
           if (!found || found == undefined) {
             missingDay.push({
               checkIn: moment(checkInInMonth)
-                .set({ hour: 9, minute: 0 })
+                .set({ hour: 8, minute: 0 })
                 .utc()
                 .format(),
               checkOut: moment(checkInInMonth)
-                .set({ hour: 18, minute: 0 })
+                .set({ hour: 17, minute: 0 })
                 .utc()
                 .format(),
             });

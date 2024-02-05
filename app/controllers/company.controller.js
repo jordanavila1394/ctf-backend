@@ -22,7 +22,7 @@ exports.allCompanies = (req, res) => {
         as: "places",
       },
     ],
-    order: [["id", "ASC"]],
+    order: [["updatedAt", "ASC"]],
   })
     .then((companies) => {
       res.status(200).send(companies);
