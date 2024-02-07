@@ -330,6 +330,8 @@ exports.saveProfileUser = (req, res) => {
       surname: req.body.surname,
       email: req.body.email,
       cellphone: req.body.cellphone,
+      address: req.body.address,
+      iban: req.body.iban,
     },
     { where: { id: req.body.id } }
   )
