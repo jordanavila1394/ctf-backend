@@ -225,6 +225,8 @@ exports.createUser = (req, res) => {
     fiscalCode: req.body.fiscalCode,
     workerNumber: req.body.workerNumber,
     position: req.body.position,
+    iban: req.body.iban,
+    address: req.body.address,
     status: req.body.status,
   })
     .then((user) => {
@@ -300,6 +302,8 @@ exports.patchUser = (req, res) => {
       fiscalCode: req.body.fiscalCode,
       workerNumber: req.body.workerNumber,
       position: req.body.position,
+      iban: req.body.iban,
+      address: req.body.address,
       status: req.body.status,
     },
     { where: { id: req.params.id } }
