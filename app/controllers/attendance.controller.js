@@ -142,6 +142,7 @@ exports.getDataAttendances = (req, res) => {
         checkIn: {
           [Op.between]: [dateFrom, dateTo],
         },
+        status: "Presente",
         companyId: idCompany,
       },
       attributes: [
@@ -179,6 +180,7 @@ exports.getDataAttendances = (req, res) => {
         checkIn: {
           [Op.between]: [dateFrom, dateTo],
         },
+        status: "Presente",
       },
       attributes: [
         [db.Sequelize.literal(`DATE(checkIn)`), "date"],
@@ -252,7 +254,7 @@ exports.checkInAttendance = (req, res) => {
             Attendance.update(
               {
                 checkOut: moment(attendance?.checkIn)
-                  .set({ hour: 18, minute: 0 })
+                  .set({ hour: 17, minute: 0 })
                   .utc()
                   .format(),
                 status: "CheckOut?",
