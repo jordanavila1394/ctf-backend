@@ -5,11 +5,9 @@ var moment = require("moment/moment");
 const Document = db.userDocument;
 
 exports.getDocumentsByUser = (req, res) => {
-  const idUser = req.body.idUser;
   const fiscalCode = req.body.fiscalCode;
   Document.findAll({
     where: {
-      userId: idUser,
       fiscalCode: fiscalCode,
     },
     order: ["category"],
