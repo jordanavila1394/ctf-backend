@@ -36,6 +36,12 @@ module.exports = function (app) {
     controller.createUser
   );
 
+  app.post(
+    "/api/user/checkIfExistUser",
+    [authJwt.verifyToken],
+    controller.checkIfExistUser
+  );
+
   app.patch(
     "/api/user/patchUser/:id",
     [authJwt.verifyToken],
