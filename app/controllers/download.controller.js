@@ -8,7 +8,7 @@ exports.getDocumentsByUser = (req, res) => {
   const fiscalCode = req.body.fiscalCode;
   Document.findAll({
     where: {
-      fiscalCode: fiscalCode,
+      fiscalCode: fiscalCode.trim().toUpperCase(),
     },
     order: ["category"],
   })
