@@ -3,12 +3,16 @@ const db = require("../models");
 var moment = require("moment/moment");
 
 const Document = db.userDocument;
+const Op = db.Sequelize.Op;
 
 exports.getDocumentsByUser = (req, res) => {
   const fiscalCode = req.body.fiscalCode;
   Document.findAll({
     where: {
       fiscalCode: fiscalCode,
+      category: {
+        [Op.ne]: "cedolino", // Exclude documents with category 'cedolino'
+      },
     },
     order: ["category"],
   })
