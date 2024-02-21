@@ -366,10 +366,10 @@ exports.checkIfExistUser = (req, res) => {
       if (user) {
         res.status(200).send({ userExist: true });
       } else {
-        res.status(200).send({ userExist: false });
+        res.status(500).send({ userExist: false });
       }
     })
     .catch((err) => {
-      res.status(200).send({ userExist: false });
+      res.status(500).send({ userExist: false });
     });
 };
