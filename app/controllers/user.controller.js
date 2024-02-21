@@ -360,16 +360,16 @@ exports.saveNewPassword = (req, res) => {
 
 exports.checkIfExistUser = (req, res) => {
   User.findOne({
-    where: { fiscalCode: req.params.fiscalCode },
+    where: { fiscalCode: req.body.fiscalCode },
   })
     .then((user) => {
       if (user) {
         res.status(200).send({ userExist: true });
       } else {
-        res.status(500).send({ userExist: false });
+        res.status(404).send({ userExist: false });
       }
     })
     .catch((err) => {
-      res.status(500).send({ userExist: false });
+      res.status(404).send({ userExist: false });
     });
 };
