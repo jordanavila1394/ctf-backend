@@ -16,5 +16,9 @@ module.exports = function (app) {
     controller.getDocumentsByUser
   );
 
-
+  app.post(
+    "/api/download/getWorkDocumentsByUser",
+    [authJwt.verifyToken],
+    controller.getWorkDocumentsByUser
+  );
 };

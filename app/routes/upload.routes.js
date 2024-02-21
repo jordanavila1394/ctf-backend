@@ -121,8 +121,7 @@ module.exports = function (app) {
             files: results,
           };
           for (let result of results) {
-            console.log(result);
-            userDocuments.create({
++            userDocuments.create({
               userId: userId,
               fiscalCode: fiscalCode,
               category: category,

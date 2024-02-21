@@ -357,3 +357,19 @@ exports.saveNewPassword = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.checkIfExistUser = (req, res) => {
+  User.findOne({
+    where: { fiscalCode: req.body.fiscalCode },
+  })
+    .then((user) => {
+      if (user) {
+        res.status(200).send({ userExist: true });
+      } else {
+        res.status(404).send({ userExist: false });
+      }
+    })
+    .catch((err) => {
+      res.status(404).send({ userExist: false });
+    });
+};
