@@ -19,3 +19,19 @@ exports.getDocumentsByUser = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.getWorkDocumentsByUser = (req, res) => {
+  const fiscalCode = req.body.fiscalCode;
+  Document.findAll({
+    where: {
+      fiscalCode: fiscalCode,
+      category: "cedolino",
+    },
+  })
+    .then((documents) => {
+      res.status(200).send(documents);
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
