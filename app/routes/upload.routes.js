@@ -145,4 +145,40 @@ module.exports = function (app) {
         });
     }
   );
+
+  // Route to delete a file
+  app.delete("/api/upload/deleteFile", async (req, res) => {
+    const key = req.body.key;
+
+    const params = {
+      Bucket: "ctf.images",
+      Key: key,
+    };
+
+    s3Client.deleteObject(params, (err, data) => {
+      if (err) {
+        console.error("Error deleting file", err);
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      console.log("File deleted successfully", data);
+      // After deleting the file from S3, delete its entry from the database
+      userDocuments
+        .destroy({ where: { keyFile: key } })
+        .then(() => {
+          console.log("Document entry deleted from the database");
+          return res
+            .status(201)
+            .send({ message: "Documento cancellato con successo!" });
+
+        })
+        .catch((error) => {
+          console.error(
+            "Error deleting document entry from the database",
+            error
+          );
+          return res.status(500).json({ success: false, error: error.message });
+        });
+      return res.json({ success: true, message: "File deleted successfully" });
+    });
+  });
 };
