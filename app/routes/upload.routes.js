@@ -147,7 +147,7 @@ module.exports = function (app) {
   );
 
   // Route to delete a file
-  app.delete("/api/upload/deleteFile", async (req, res) => {
+  app.post("/api/upload/deleteDocument", async (req, res) => {
     const key = req.body.key;
 
     const params = {
@@ -169,7 +169,6 @@ module.exports = function (app) {
           return res
             .status(201)
             .send({ message: "Documento cancellato con successo!" });
-
         })
         .catch((error) => {
           console.error(
