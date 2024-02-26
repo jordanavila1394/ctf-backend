@@ -91,6 +91,7 @@ module.exports = function (app) {
       const userId = req.body.userId;
       const category = req.body.category;
       const fiscalCode = req.body.fiscalCode;
+      const expireDate = req.body.expireDate ? req.body.expireDate : null;
 
       if (!files) {
         return res.status(400).send("No files were uploaded.");
@@ -121,7 +122,7 @@ module.exports = function (app) {
             files: results,
           };
           for (let result of results) {
-+            userDocuments.create({
+            +userDocuments.create({
               userId: userId,
               fiscalCode: fiscalCode,
               category: category,
@@ -129,6 +130,7 @@ module.exports = function (app) {
               location: result?.Location,
               keyFile: result?.Key,
               bucket: result?.Bucket,
+              expireDate: expireDate,
             });
           }
           res.status(201).send({ message: "Documento aggiunto con successo!" });
