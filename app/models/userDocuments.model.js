@@ -25,6 +25,9 @@ module.exports = (sequelize, Sequelize) => {
     bucket: {
       type: Sequelize.STRING,
     },
+    expireDate: {
+      type: Sequelize.DATE,
+    },
     createdAt: {
       type: Sequelize.DATE,
     },
