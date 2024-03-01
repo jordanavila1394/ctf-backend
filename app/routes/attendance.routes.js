@@ -47,5 +47,10 @@ module.exports = function (app) {
     controller.checkOutAttendance
   );
   
+  app.post(
+    "/api/attendance/validateAttendance",
+    [authJwt.verifyToken],
+    controller.validateAttendance
+  );
   
 };

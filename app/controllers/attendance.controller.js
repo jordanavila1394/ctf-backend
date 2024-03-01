@@ -327,3 +327,18 @@ exports.checkOutAttendance = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.validateAttendance = (req, res) => {
+  Attendance.update(
+    {
+      status: "Presente",
+    },
+    { where: { id: req.body.id, userId: req.body.userId } }
+  )
+    .then((attendance) => {
+      res.status(201).send({ message: "Presenza validata con successo!" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
