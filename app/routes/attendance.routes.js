@@ -53,4 +53,9 @@ module.exports = function (app) {
     controller.validateAttendance
   );
   
+   app.post(
+     "/api/attendance/unvalidateAttendance",
+     [authJwt.verifyToken],
+     controller.unvalidateAttendance
+   );
 };
