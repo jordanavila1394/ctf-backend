@@ -342,3 +342,18 @@ exports.validateAttendance = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.unvalidateAttendance = (req, res) => {
+  Attendance.update(
+    {
+      status: "Verificare",
+    },
+    { where: { id: req.body.id, userId: req.body.userId } }
+  )
+    .then((attendance) => {
+      res.status(201).send({ message: "Presenza messa su verificare" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
