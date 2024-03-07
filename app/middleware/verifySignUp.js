@@ -15,6 +15,7 @@ checkDuplicateUser = (req, res, next) => {
       });
       return;
     }
+    next();
   });
 };
 
