@@ -48,6 +48,36 @@ checkDuplicateUser = (req, res, next) => {
   });
 };
 
+checkDuplicateUserByFiscalCode = (req, res, next) => {
+  // fiscalCode
+  User.findOne({
+    where: {
+      fiscalCode: req.body.fiscalCode,
+    },
+  }).then((user) => {
+    if (user) {
+      res.status(400).send({
+        message: "Failed! Codice fiscale è già stato usato!",
+      });
+      return;
+    }
+
+    // FISCAL CODE
+    User.findOne({
+      where: {
+        fiscalCode: req.body.fiscalCode,
+      },
+    }).then((user) => {
+      if (user) {
+        res.status(400).send({
+          message: "Errore! Il codice fiscale inserita è gia stata usato",
+        });
+        return;
+      }
+    });
+  });
+};
+
 checkRolesExisted = (req, res, next) => {
   if (req.body.roles) {
     for (let i = 0; i < req.body.roles.length; i++) {
@@ -66,6 +96,7 @@ checkRolesExisted = (req, res, next) => {
 const verifySignUp = {
   checkDuplicateUser: checkDuplicateUser,
   checkRolesExisted: checkRolesExisted,
+  checkDuplicateUserByFiscalCode: checkDuplicateUserByFiscalCode,
 };
 
 module.exports = verifySignUp;
