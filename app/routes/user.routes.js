@@ -32,7 +32,7 @@ module.exports = function (app) {
 
   app.post(
     "/api/user/createUser",
-    [authJwt.verifyToken, verifySignUp.checkDuplicateUserByFiscalCode],
+    [authJwt.verifyToken, verifySignUp.checkDuplicateUser],
     controller.createUser
   );
 

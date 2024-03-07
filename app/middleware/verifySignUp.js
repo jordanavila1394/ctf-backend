@@ -11,70 +11,10 @@ checkDuplicateUser = (req, res, next) => {
   }).then((user) => {
     if (user) {
       res.status(400).send({
-        message: "Failed! Codice fiscale is already in use!",
+        message: "Errore! Il codice fiscale inserita è gia stata usato",
       });
       return;
     }
-
-    // FISCAL CODE
-    User.findOne({
-      where: {
-        fiscalCode: req.body.fiscalCode,
-      },
-    }).then((user) => {
-      if (user) {
-        res.status(400).send({
-          message: "Errore! Il codice fiscale inserita è gia stata usato",
-        });
-        return;
-      }
-
-      // Email
-      User.findOne({
-        where: {
-          email: req.body.email,
-        },
-      }).then((user) => {
-        if (user) {
-          res.status(400).send({
-            message: "Errore! La mail inserita è gia stata usata",
-          });
-          return;
-        }
-
-        next();
-      });
-    });
-  });
-};
-
-checkDuplicateUserByFiscalCode = (req, res, next) => {
-  // fiscalCode
-  User.findOne({
-    where: {
-      fiscalCode: req.body.fiscalCode,
-    },
-  }).then((user) => {
-    if (user) {
-      res.status(400).send({
-        message: "Failed! Codice fiscale è già stato usato!",
-      });
-      return;
-    }
-
-    // FISCAL CODE
-    User.findOne({
-      where: {
-        fiscalCode: req.body.fiscalCode,
-      },
-    }).then((user) => {
-      if (user) {
-        res.status(400).send({
-          message: "Errore! Il codice fiscale inserita è gia stata usato",
-        });
-        return;
-      }
-    });
   });
 };
 
@@ -96,7 +36,6 @@ checkRolesExisted = (req, res, next) => {
 const verifySignUp = {
   checkDuplicateUser: checkDuplicateUser,
   checkRolesExisted: checkRolesExisted,
-  checkDuplicateUserByFiscalCode: checkDuplicateUserByFiscalCode,
 };
 
 module.exports = verifySignUp;
