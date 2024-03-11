@@ -58,4 +58,11 @@ module.exports = function (app) {
      [authJwt.verifyToken],
      controller.unvalidateAttendance
    );
+  
+  app.post(
+    "/api/attendance/changeStatusAttendance",
+    [authJwt.verifyToken],
+    controller.changeStatusAttendance
+  );
+
 };

@@ -357,3 +357,18 @@ exports.unvalidateAttendance = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.changeStatusAttendance = (req, res) => {
+  Attendance.update(
+    {
+      status: req.body.status,
+    },
+    { where: { id: req.body.id } }
+  )
+    .then((attendance) => {
+      res.status(201).send({ message: "Presenza modificata con successo" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
