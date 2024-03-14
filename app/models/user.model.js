@@ -30,6 +30,12 @@ module.exports = (sequelize, Sequelize) => {
     password: {
       type: Sequelize.STRING,
     },
+    birthCountry: {
+      type: Sequelize.STRING,
+    },
+    birthDate: {
+      type: Sequelize.STRING,
+    },
     status: {
       type: Sequelize.BOOLEAN,
     },
