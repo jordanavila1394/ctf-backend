@@ -227,6 +227,8 @@ exports.createUser = (req, res) => {
     position: req.body.position,
     iban: req.body.iban,
     address: req.body.address,
+    birthCountry: req.body.birthCountry,
+    birthDate: req.body.birthDate,
     status: req.body.status,
   })
     .then((user) => {
@@ -304,6 +306,8 @@ exports.patchUser = (req, res) => {
       position: req.body.position,
       iban: req.body.iban,
       address: req.body.address,
+      birthCountry: req.body.birthCountry,
+      birthDate: req.body.birthDate,
       status: req.body.status,
     },
     { where: { id: req.params.id } }
@@ -332,6 +336,8 @@ exports.saveProfileUser = (req, res) => {
       cellphone: req.body.cellphone,
       address: req.body.address,
       iban: req.body.iban,
+      birthCountry: req.body.birthCountry,
+      birthDate: req.body.birthDate,
     },
     { where: { id: req.body.id } }
   )

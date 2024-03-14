@@ -372,3 +372,71 @@ exports.changeStatusAttendance = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.getUserAttendanceByMonth = (req, res) => {
+  const year = req.body.year;
+  const month = req.body.month;
+
+  // Calcola la data di inizio e fine del mese
+  const startOfMonth = moment()
+    .set({ year: year, month: month - 1 })
+    .startOf("month");
+  const endOfMonth = moment()
+    .set({ year: year, month: month - 1 })
+    .endOf("month");
+
+  // Recupera tutti gli utenti
+  User.findAll({
+    attributes: ["name", "surname", "fiscalCode"],
+  })
+    .then((users) => {
+      const usersWithAttendance = [];
+
+      // Per ogni utente, recuperare le presenze per ogni giorno del mese
+      Promise.all(
+        users.map((user) => {
+          return Attendance.findAll({
+            where: {
+              userId: user.id,
+              checkIn: {
+                [Op.between]: [startOfMonth, endOfMonth],
+              },
+            },
+            order: [["checkIn", "ASC"]],
+          }).then((attendances) => {
+            // Costruisci un oggetto con le informazioni dell'utente e le presenze per ogni giorno del mese
+            const userWithAttendance = {
+              user: {
+                name: user.name,
+                surname: user.surname,
+                fiscalCode: user.fiscalCode,
+              },
+              attendances: [],
+            };
+
+            // Riempire l'array delle presenze con le informazioni di presenza per ogni giorno
+            let currentDate = moment(startOfMonth);
+            while (currentDate.isSameOrBefore(endOfMonth)) {
+              const attendanceOfDay = attendances.find((attendance) =>
+                moment(attendance.checkIn).isSame(currentDate, "day")
+              );
+
+              userWithAttendance.attendances.push({
+                date: currentDate.format("YYYY-MM-DD"),
+                presence: attendanceOfDay ? true : false,
+              });
+
+              currentDate.add(1, "day");
+            }
+
+            usersWithAttendance.push(userWithAttendance);
+          });
+        })
+      ).then(() => {
+        res.status(200).send(usersWithAttendance);
+      });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
