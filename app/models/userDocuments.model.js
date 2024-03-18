@@ -25,6 +25,12 @@ module.exports = (sequelize, Sequelize) => {
     bucket: {
       type: Sequelize.STRING,
     },
+    releaseMonth: {
+      type: Sequelize.STRING,
+    },
+    releaseYear: {
+      type: Sequelize.STRING,
+    },
     expireDate: {
       type: Sequelize.DATE,
     },
