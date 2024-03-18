@@ -17,8 +17,13 @@ module.exports = function (app) {
   );
 
   app.post(
-    "/api/download/getWorkDocumentsByUser",
+    "/api/download/getCedoliniDocumentsByUser",
     [authJwt.verifyToken],
-    controller.getWorkDocumentsByUser
+    controller.getCedoliniDocumentsByUser
+  );
+  app.post(
+    "/api/download/getCUDDocumentsByUser",
+    [authJwt.verifyToken],
+    controller.getCUDDocumentsByUser
   );
 };
