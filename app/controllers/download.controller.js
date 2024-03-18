@@ -24,12 +24,27 @@ exports.getDocumentsByUser = (req, res) => {
     });
 };
 
-exports.getWorkDocumentsByUser = (req, res) => {
+exports.getCedoliniDocumentsByUser = (req, res) => {
   const fiscalCode = req.body.fiscalCode;
   Document.findAll({
     where: {
       fiscalCode: fiscalCode,
       category: "cedolino",
+    },
+  })
+    .then((documents) => {
+      res.status(200).send(documents);
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+exports.getCUDDocumentsByUser = (req, res) => {
+  const fiscalCode = req.body.fiscalCode;
+  Document.findAll({
+    where: {
+      fiscalCode: fiscalCode,
+      category: "cud",
     },
   })
     .then((documents) => {
