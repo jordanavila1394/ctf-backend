@@ -11,7 +11,7 @@ exports.getDocumentsByUser = (req, res) => {
     where: {
       fiscalCode: fiscalCode,
       category: {
-        [Op.ne]: "cedolino", // Exclude documents with category 'cedolino'
+        [Op.notIn]: ["cedolino", "cud"], // Exclude documents with category 'cedolino'
       },
     },
     order: ["category"],
