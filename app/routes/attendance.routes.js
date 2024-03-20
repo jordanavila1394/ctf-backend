@@ -65,4 +65,10 @@ module.exports = function (app) {
     controller.changeStatusAttendance
   );
 
+  app.post(
+    "/api/attendance/getUserAttendanceSummaryByMonth",
+    [authJwt.verifyToken],
+    controller.getUserAttendanceSummaryByMonth
+  );
+
 };
