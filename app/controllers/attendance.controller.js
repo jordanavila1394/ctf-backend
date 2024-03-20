@@ -374,27 +374,6 @@ exports.changeStatusAttendance = (req, res) => {
 };
 
 exports.getUserAttendanceSummaryByMonth = (req, res) => {
-
-  function formatDifferenceHours(date2, date1) {
-    let tempHours = 0;
-    if (date2) {
-      var difference = (date2.getTime() - date1.getTime()) / 1000;
-      difference /= 60 * 60;
-      tempHours = Math.abs(Math.round(difference));
-      if (this.formatIsWeekendOrFestivo(date1)) {
-        return 0;
-      }
-      if (tempHours < 6) {
-        return 6;
-      } else if (tempHours > 6) {
-        return 8;
-      } else {
-        return 0;
-      }
-    } else {
-      return 0;
-    }
-  }
   const year = req.body.year;
   const month = req.body.month;
 
@@ -490,3 +469,28 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+function formatDifferenceHours(date2, date1) {
+  let tempHours = 0;
+  if (date2) {
+    var difference = (date2.getTime() - date1.getTime()) / 1000;
+    difference /= 60 * 60;
+    tempHours = Math.abs(Math.round(difference));
+    if (formatIsWeekendOrFestivo(date1)) {
+      return 0;
+    }
+    if (tempHours < 6) {
+      return 6;
+    } else if (tempHours > 6) {
+      return 8;
+    } else {
+      return 0;
+    }
+  } else {
+    return 0;
+  }
+}
+function formatIsWeekendOrFestivo(date) {
+  if (date.getDay() == 6 || date.getDay() == 0) return true;
+  return false;
+}
