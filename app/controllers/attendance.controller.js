@@ -374,41 +374,19 @@ exports.changeStatusAttendance = (req, res) => {
 };
 
 exports.getUserAttendanceSummaryByMonth = (req, res) => {
-
-  function formatDifferenceHours(date2, date1) {
-    let tempHours = 0;
-    if (date2) {
-      var difference = (date2.getTime() - date1.getTime()) / 1000;
-      difference /= 60 * 60;
-      tempHours = Math.abs(Math.round(difference));
-      if (this.formatIsWeekendOrFestivo(date1)) {
-        return 0;
-      }
-      if (tempHours < 6) {
-        return 6;
-      } else if (tempHours > 6) {
-        return 8;
-      } else {
-        return 0;
-      }
-    } else {
-      return 0;
-    }
-  }
-  const year = req.body.year;
-  const month = req.body.month;
-
   // Calcola la data di inizio e fine del mese
   const startOfMonth = moment()
-    .set({ year: year, month: month - 1 })
-    .startOf("month");
+    .set({ year: req.body.year, month: req.body.month })
+    .startOf("month")
+    .format("YYYY-MM-DD 00:00");
   const endOfMonth = moment()
-    .set({ year: year, month: month - 1 })
-    .endOf("month");
+    .set({ year: req.body.year, month: req.body.month })
+    .endOf("month")
+    .format("YYYY-MM-DD 23:59");
 
   // Recupera tutti gli utenti
   User.findAll({
-    attributes: ["id", "name", "surname"],
+    attributes: ["id", "name", "surname", "fiscalCode"],
   })
     .then((users) => {
       const usersAttendanceSummary = [];
@@ -442,12 +420,13 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
                 moment(attendance.checkIn).isSame(currentDate, "day")
               );
 
-              userAttendanceSummary[currentDate.format("DD")] = attendanceOfDay
-                ? formatDifferenceHours(
-                    new Date(attendance?.checkOut),
-                    new Date(attendance?.checkIn)
-                  )
-                : 0;
+              userAttendanceSummary["GG-" + currentDate.format("DD")] =
+                attendanceOfDay
+                  ? formatDifferenceHours(
+                      new Date(attendanceOfDay?.checkOut),
+                      new Date(attendanceOfDay?.checkIn)
+                    )
+                  : 0;
 
               // Aggiorna il conteggio di presenze "Presente"
               if (attendanceOfDay && attendanceOfDay.status === "Presente") {
@@ -461,32 +440,59 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
             userAttendanceSummary.attendanceCount = presentCount;
             // Rearrange object properties
             const rearrangedSummary = {
+              id: userAttendanceSummary.id,
               name: userAttendanceSummary.name,
               surname: userAttendanceSummary.surname,
               fiscalCode: userAttendanceSummary.fiscalCode,
-
               ...Object.entries(userAttendanceSummary)
                 .filter(
                   ([key]) =>
+                    key !== "id" &&
                     key !== "name" &&
                     key !== "surname" &&
                     key !== "fiscalCode" &&
                     key !== "attendanceCount"
                 )
                 .reduce((obj, [key, value]) => {
-                  obj[key] = value;
+                  obj[key] = parseInt(value, 10);
                   return obj;
                 }, {}),
               attendanceCount: userAttendanceSummary.attendanceCount,
             };
-            usersAttendanceSummary.push(rearrangedSummary);
+            return rearrangedSummary; // Return the rearranged object
           });
         })
-      ).then(() => {
-        res.status(200).send(usersAttendanceSummary);
+      ).then((rearrangedSummaries) => {
+        // Change here
+        res.status(200).send(rearrangedSummaries); // Change here
       });
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+function formatDifferenceHours(date2, date1) {
+  let tempHours = 0;
+  if (date2) {
+    var difference = (date2.getTime() - date1.getTime()) / 1000;
+    difference /= 60 * 60;
+    tempHours = Math.abs(Math.round(difference));
+    if (formatIsWeekendOrFestivo(date1)) {
+      return 0;
+    }
+    if (tempHours < 6) {
+      return 6;
+    } else if (tempHours > 6) {
+      return 8;
+    } else {
+      return 0;
+    }
+  } else {
+    return 0;
+  }
+}
+function formatIsWeekendOrFestivo(date) {
+  if (date.getDay() == 6 || date.getDay() == 0) return true;
+  return false;
+}
