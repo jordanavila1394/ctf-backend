@@ -374,20 +374,19 @@ exports.changeStatusAttendance = (req, res) => {
 };
 
 exports.getUserAttendanceSummaryByMonth = (req, res) => {
-
   // Calcola la data di inizio e fine del mese
- const startOfMonth = moment()
-   .set({ year: req.body.year, month: req.body.month })
-   .startOf("month")
-   .format("YYYY-MM-DD 00:00");
- const endOfMonth = moment()
-   .set({ year: req.body.year, month: req.body.month })
-   .endOf("month")
-   .format("YYYY-MM-DD 23:59");
+  const startOfMonth = moment()
+    .set({ year: req.body.year, month: req.body.month })
+    .startOf("month")
+    .format("YYYY-MM-DD 00:00");
+  const endOfMonth = moment()
+    .set({ year: req.body.year, month: req.body.month })
+    .endOf("month")
+    .format("YYYY-MM-DD 23:59");
 
   // Recupera tutti gli utenti
   User.findAll({
-    attributes: ["id", "name", "surname","fiscalCode"],
+    attributes: ["id", "name", "surname", "fiscalCode"],
   })
     .then((users) => {
       const usersAttendanceSummary = [];
@@ -457,11 +456,12 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
                 }, {}),
               attendanceCount: userAttendanceSummary.attendanceCount,
             };
-            usersAttendanceSummary.push(rearrangedSummary);
+            return rearrangedSummary; // Return the rearranged object
           });
         })
-      ).then(() => {
-        res.status(200).send(usersAttendanceSummary);
+      ).then((rearrangedSummaries) => {
+        // Change here
+        res.status(200).send(rearrangedSummaries); // Change here
       });
     })
     .catch((err) => {
