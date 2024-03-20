@@ -7,7 +7,6 @@ const User = db.user;
 const Vehicle = db.vehicle;
 const Op = db.Sequelize.Op;
 
-
 exports.allAttendances = (req, res) => {
   const idCompany = req.body.idCompany;
   if (idCompany > 0) {
@@ -375,6 +374,27 @@ exports.changeStatusAttendance = (req, res) => {
 };
 
 exports.getUserAttendanceSummaryByMonth = (req, res) => {
+
+  function formatDifferenceHours(date2, date1) {
+    let tempHours = 0;
+    if (date2) {
+      var difference = (date2.getTime() - date1.getTime()) / 1000;
+      difference /= 60 * 60;
+      tempHours = Math.abs(Math.round(difference));
+      if (this.formatIsWeekendOrFestivo(date1)) {
+        return 0;
+      }
+      if (tempHours < 6) {
+        return 6;
+      } else if (tempHours > 6) {
+        return 8;
+      } else {
+        return 0;
+      }
+    } else {
+      return 0;
+    }
+  }
   const year = req.body.year;
   const month = req.body.month;
 
@@ -409,6 +429,7 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
             const userAttendanceSummary = {
               name: user.name,
               surname: user.surname,
+              fiscalCode: user.fiscalCode,
             };
 
             // Inizializza il conteggio di presenze "Presente" per l'utente
@@ -422,8 +443,11 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
               );
 
               userAttendanceSummary[currentDate.format("DD")] = attendanceOfDay
-                ? attendanceOfDay.status
-                : "Assente";
+                ? formatDifferenceHours(
+                    new Date(attendance?.checkOut),
+                    new Date(attendance?.checkIn)
+                  )
+                : 0;
 
               // Aggiorna il conteggio di presenze "Presente"
               if (attendanceOfDay && attendanceOfDay.status === "Presente") {
@@ -435,8 +459,27 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
 
             // Aggiungi il conteggio di presenze "Presente" all'oggetto
             userAttendanceSummary.attendanceCount = presentCount;
+            // Rearrange object properties
+            const rearrangedSummary = {
+              name: userAttendanceSummary.name,
+              surname: userAttendanceSummary.surname,
+              fiscalCode: userAttendanceSummary.fiscalCode,
 
-            usersAttendanceSummary.push(userAttendanceSummary);
+              ...Object.entries(userAttendanceSummary)
+                .filter(
+                  ([key]) =>
+                    key !== "name" &&
+                    key !== "surname" &&
+                    key !== "fiscalCode" &&
+                    key !== "attendanceCount"
+                )
+                .reduce((obj, [key, value]) => {
+                  obj[key] = value;
+                  return obj;
+                }, {}),
+              attendanceCount: userAttendanceSummary.attendanceCount,
+            };
+            usersAttendanceSummary.push(rearrangedSummary);
           });
         })
       ).then(() => {
