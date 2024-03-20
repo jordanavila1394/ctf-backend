@@ -420,7 +420,7 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
                 moment(attendance.checkIn).isSame(currentDate, "day")
               );
 
-              userAttendanceSummary["GG " + currentDate.format("DD")] =
+              userAttendanceSummary["GG-" + currentDate.format("DD")] =
                 attendanceOfDay
                   ? formatDifferenceHours(
                       new Date(attendanceOfDay?.checkOut),
@@ -452,7 +452,7 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
                     key !== "attendanceCount"
                 )
                 .reduce((obj, [key, value]) => {
-                  obj[parseInt(key, 10)] = parseInt(value, 10);
+                  obj[key] = parseInt(value, 10);
                   return obj;
                 }, {}),
               attendanceCount: userAttendanceSummary.attendanceCount,
