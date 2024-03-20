@@ -7,6 +7,7 @@ const User = db.user;
 const Vehicle = db.vehicle;
 const Op = db.Sequelize.Op;
 
+
 exports.allAttendances = (req, res) => {
   const idCompany = req.body.idCompany;
   if (idCompany > 0) {
@@ -373,7 +374,7 @@ exports.changeStatusAttendance = (req, res) => {
     });
 };
 
-exports.getUserAttendanceByMonth = (req, res) => {
+exports.getUserAttendanceSummaryByMonth = (req, res) => {
   const year = req.body.year;
   const month = req.body.month;
 
@@ -387,10 +388,10 @@ exports.getUserAttendanceByMonth = (req, res) => {
 
   // Recupera tutti gli utenti
   User.findAll({
-    attributes: ["name", "surname", "fiscalCode"],
+    attributes: ["id", "name", "surname"],
   })
     .then((users) => {
-      const usersWithAttendance = [];
+      const usersAttendanceSummary = [];
 
       // Per ogni utente, recuperare le presenze per ogni giorno del mese
       Promise.all(
@@ -404,36 +405,42 @@ exports.getUserAttendanceByMonth = (req, res) => {
             },
             order: [["checkIn", "ASC"]],
           }).then((attendances) => {
-            // Costruisci un oggetto con le informazioni dell'utente e le presenze per ogni giorno del mese
-            const userWithAttendance = {
-              user: {
-                name: user.name,
-                surname: user.surname,
-                fiscalCode: user.fiscalCode,
-              },
-              attendances: [],
+            // Costruisci un oggetto con le informazioni dell'utente e lo stato di presenza per ogni giorno del mese
+            const userAttendanceSummary = {
+              name: user.name,
+              surname: user.surname,
             };
 
-            // Riempire l'array delle presenze con le informazioni di presenza per ogni giorno
+            // Inizializza il conteggio di presenze "Presente" per l'utente
+            let presentCount = 0;
+
+            // Riempire l'oggetto con lo stato di presenza per ogni giorno del mese
             let currentDate = moment(startOfMonth);
             while (currentDate.isSameOrBefore(endOfMonth)) {
               const attendanceOfDay = attendances.find((attendance) =>
                 moment(attendance.checkIn).isSame(currentDate, "day")
               );
 
-              userWithAttendance.attendances.push({
-                date: currentDate.format("YYYY-MM-DD"),
-                presence: attendanceOfDay ? true : false,
-              });
+              userAttendanceSummary[currentDate.format("DD")] = attendanceOfDay
+                ? attendanceOfDay.status
+                : "Assente";
+
+              // Aggiorna il conteggio di presenze "Presente"
+              if (attendanceOfDay && attendanceOfDay.status === "Presente") {
+                presentCount++;
+              }
 
               currentDate.add(1, "day");
             }
 
-            usersWithAttendance.push(userWithAttendance);
+            // Aggiungi il conteggio di presenze "Presente" all'oggetto
+            userAttendanceSummary.attendanceCount = presentCount;
+
+            usersAttendanceSummary.push(userAttendanceSummary);
           });
         })
       ).then(() => {
-        res.status(200).send(usersWithAttendance);
+        res.status(200).send(usersAttendanceSummary);
       });
     })
     .catch((err) => {
