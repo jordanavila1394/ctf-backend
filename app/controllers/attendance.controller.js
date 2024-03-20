@@ -387,7 +387,7 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
 
   // Recupera tutti gli utenti
   User.findAll({
-    attributes: ["id", "name", "surname"],
+    attributes: ["id", "name", "surname","fiscalCode"],
   })
     .then((users) => {
       const usersAttendanceSummary = [];
@@ -443,7 +443,6 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
               name: userAttendanceSummary.name,
               surname: userAttendanceSummary.surname,
               fiscalCode: userAttendanceSummary.fiscalCode,
-
               ...Object.entries(userAttendanceSummary)
                 .filter(
                   ([key]) =>
