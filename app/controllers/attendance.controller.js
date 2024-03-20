@@ -374,16 +374,16 @@ exports.changeStatusAttendance = (req, res) => {
 };
 
 exports.getUserAttendanceSummaryByMonth = (req, res) => {
-  const year = req.body.year;
-  const month = req.body.month;
 
   // Calcola la data di inizio e fine del mese
-  const startOfMonth = moment()
-    .set({ year: year, month: month - 1 })
-    .startOf("month");
-  const endOfMonth = moment()
-    .set({ year: year, month: month - 1 })
-    .endOf("month");
+ const startOfMonth = moment()
+   .set({ year: req.body.year, month: req.body.month })
+   .startOf("month")
+   .format("YYYY-MM-DD 00:00");
+ const endOfMonth = moment()
+   .set({ year: req.body.year, month: req.body.month })
+   .endOf("month")
+   .format("YYYY-MM-DD 23:59");
 
   // Recupera tutti gli utenti
   User.findAll({
