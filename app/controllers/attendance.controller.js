@@ -420,12 +420,13 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
                 moment(attendance.checkIn).isSame(currentDate, "day")
               );
 
-              userAttendanceSummary[currentDate.format("DD")] = attendanceOfDay
-                ? formatDifferenceHours(
-                    new Date(attendanceOfDay?.checkOut),
-                    new Date(attendanceOfDay?.checkIn)
-                  )
-                : 0;
+              userAttendanceSummary["GG " + currentDate.format("DD")] =
+                attendanceOfDay
+                  ? formatDifferenceHours(
+                      new Date(attendanceOfDay?.checkOut),
+                      new Date(attendanceOfDay?.checkIn)
+                    )
+                  : 0;
 
               // Aggiorna il conteggio di presenze "Presente"
               if (attendanceOfDay && attendanceOfDay.status === "Presente") {
