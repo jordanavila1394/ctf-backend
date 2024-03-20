@@ -440,12 +440,14 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
             userAttendanceSummary.attendanceCount = presentCount;
             // Rearrange object properties
             const rearrangedSummary = {
+              id: userAttendanceSummary.id,
               name: userAttendanceSummary.name,
               surname: userAttendanceSummary.surname,
               fiscalCode: userAttendanceSummary.fiscalCode,
               ...Object.entries(userAttendanceSummary)
                 .filter(
                   ([key]) =>
+                    key !== "id" &&
                     key !== "name" &&
                     key !== "surname" &&
                     key !== "fiscalCode" &&
