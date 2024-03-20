@@ -420,7 +420,7 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
                 moment(attendance.checkIn).isSame(currentDate, "day")
               );
 
-              userAttendanceSummary[currentDate.format("DD")] = attendanceOfDay
+              userAttendanceSummary[parseInt(currentDate.format("DD"),10)] = attendanceOfDay
                 ? formatDifferenceHours(
                     new Date(attendanceOfDay?.checkOut),
                     new Date(attendanceOfDay?.checkIn)
