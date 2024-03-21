@@ -15,6 +15,9 @@ module.exports = (sequelize, Sequelize) => {
     position: {
       type: Sequelize.STRING,
     },
+    associatedClient: {
+      type: Sequelize.STRING,
+    },
     email: {
       type: Sequelize.STRING,
     },
