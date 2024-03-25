@@ -82,3 +82,103 @@ exports.allDeadlines = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.monthlySummary = (req, res) => {
+  const idCompany = req.body.idCompany;
+  const year = req.body.year;
+
+  // Array per memorizzare i risultati di ogni mese
+  const monthlySummary = [];
+
+  // Array di nomi dei mesi
+  const monthNames = moment.months();
+
+  // Per ogni mese, creiamo un oggetto summary e lo aggiungiamo a monthlySummary
+  for (let month = 0; month < 12; month++) {
+    const startOfMonth = moment()
+      .set({ year: year, month: month })
+      .startOf("month")
+      .format("YYYY-MM-DD 00:00");
+    const endOfMonth = moment()
+      .set({ year: year, month: month })
+      .endOf("month")
+      .format("YYYY-MM-DD 23:59");
+
+    let queryOptions;
+    if (idCompany > 0) {
+      queryOptions = {
+        include: [
+          {
+            model: Deadlines,
+            as: "deadlines",
+            where: {
+              expireDate: {
+                [Op.between]: [startOfMonth, endOfMonth],
+              },
+            },
+          },
+          {
+            model: Company,
+            as: "company",
+            where: {
+              companyId: idCompany,
+            },
+          },
+        ],
+      };
+    } else {
+      queryOptions = {
+        include: [
+          {
+            model: Deadlines,
+            as: "deadlines",
+            where: {
+              expireDate: {
+                [Op.between]: [startOfMonth, endOfMonth],
+              },
+            },
+          },
+          {
+            model: Company,
+            as: "company",
+          },
+        ],
+      };
+    }
+
+    // Esegui la query per trovare le entità con le scadenze per questo mese
+    Entity.findAll(queryOptions)
+      .then((entities) => {
+        // Calcoliamo il totale e l'importo mancante per questo mese
+        const totalImportToPay = entities.reduce(
+          (total, entity) => total + parseFloat(entity.deadlines.importToPay),
+          0
+        );
+        const missingImportToPay = entities.reduce((total, entity) => {
+          if (entity.deadlines.status !== "paid") {
+            return total + parseFloat(entity.deadlines.importToPay);
+          }
+          return total;
+        }, 0);
+
+        // Creiamo l'oggetto summary per questo mese
+        const summary = {
+          name: monthNames[month],
+          id: month,
+          totalImportToPay: totalImportToPay,
+          missingImportToPay: missingImportToPay,
+        };
+
+        // Aggiungiamo summary a monthlySummary
+        monthlySummary.push(summary);
+
+        // Se abbiamo ottenuto i risultati di tutti i mesi, inviamo la risposta
+        if (monthlySummary.length === 12) {
+          res.status(200).json(monthlySummary);
+        }
+      })
+      .catch((err) => {
+        res.status(500).send({ message: err.message });
+      });
+  }
+};

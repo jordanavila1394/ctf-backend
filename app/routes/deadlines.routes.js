@@ -15,4 +15,9 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.allDeadlines
   );
+  app.post(
+    "/api/deadlines/monthlySummary",
+    [authJwt.verifyToken],
+    controller.monthlySummary
+  );
 };
