@@ -1,7 +1,5 @@
 const db = require("../models");
-
-
-const Entity = db.Entity;
+const Entity = db.entity;
 const Op = db.Sequelize.Op;
 
 exports.allDeadlines = (req, res) => {
@@ -15,7 +13,7 @@ exports.allDeadlines = (req, res) => {
     order: [["checkIn", "DESC"]],
   })
     .then((deadlines) => {
-      res.status(200).send(attendances);
+      res.status(200).send(deadlines);
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
