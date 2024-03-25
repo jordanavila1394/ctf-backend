@@ -198,9 +198,8 @@ exports.monthlySummary = async (req, res) => {
 
 exports.sendEmailsUnpaidDeadlines = async (req, res) => {
   try {
-    let dateTo = moment().add(30, "d").format("YYYY-MM-DD 23:59");
-    let dateFrom = moment().subtract(30, "d").format("YYYY-MM-DD 00:00");
-    const unpaidDeadlines = [];
+    const dateTo = moment().add(30, "d").format("YYYY-MM-DD 23:59");
+    const dateFrom = moment().subtract(30, "d").format("YYYY-MM-DD 00:00");
 
     const queryOptions = {
       include: [
@@ -211,6 +210,7 @@ exports.sendEmailsUnpaidDeadlines = async (req, res) => {
             expireDate: {
               [Op.between]: [dateFrom, dateTo],
             },
+            status: "Non pagato",
           },
         },
         {
@@ -223,28 +223,30 @@ exports.sendEmailsUnpaidDeadlines = async (req, res) => {
       ],
     };
 
-    // Retrieve all entities with unpaid deadlines
     const entities = await Entity.findAll(queryOptions);
 
-    entities.forEach((entity) => {
+    const unpaidDeadlines = entities.reduce((acc, entity) => {
       if (entity.deadlines && Array.isArray(entity.deadlines)) {
-        entity.deadlines.forEach((deadline) => {
-          if (deadline.status === "Non pagato") {
-            const unpaidDeadline = {
-              entityId: entity.id,
-              entityName: entity.name,
-              deadlineId: deadline.id,
-              deadlineDate: deadline.expireDate,
-              importToPay: deadline.importToPay,
-            };
-            const subject = `Scadenza non pagata - ${entity.name}, N° ${unpaidDeadline.loanNumber} - ${unpaidDeadline.importToPay} EUR `;
-            const message = `La scadenza ${unpaidDeadline.id} con numero rata ${unpaidDeadline.loanNumber}  per ${entity.name} non è stata ancora pagata.<br> Importo da pagare: ${unpaidDeadline.importToPay} € <br> `;
-            emailController.sendEmail(recipient, subject, message);
-            unpaidDeadlines.push(unpaidDeadline);
-          }
-        });
+        const unpaidDeadlinesForEntity = entity.deadlines
+          .filter((deadline) => deadline.status === "Non pagato")
+          .map((deadline) => ({
+            entityId: entity.id,
+            entityName: entity.name,
+            deadlineId: deadline.id,
+            deadlineDate: deadline.expireDate,
+            importToPay: deadline.importToPay,
+          }));
+
+        acc.push(...unpaidDeadlinesForEntity);
       }
-    });
+      return acc;
+    }, []);
+
+    for (const unpaidDeadline of unpaidDeadlines) {
+      const subject = `Scadenza non pagata - ${unpaidDeadline.entityName}, N° ${unpaidDeadline.deadlineId} - ${unpaidDeadline.importToPay} EUR `;
+      const message = `La scadenza ${unpaidDeadline.deadlineId} per ${unpaidDeadline.entityName} non è stata ancora pagata.<br> Importo da pagare: ${unpaidDeadline.importToPay} € <br> `;
+      await emailController.sendEmail(recipient, subject, message);
+    }
 
     res.status(200).json("Mail mandate con successo");
   } catch (error) {
