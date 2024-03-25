@@ -151,24 +151,25 @@ exports.monthlySummary = (req, res) => {
       .then((entities) => {
         // Verifica se ci sono entità trovate per il mese corrente
         if (entities.length > 0) {
-          // Calcola il totale e l'importo mancante per questo mese
-          const totalImportToPay = entities.reduce((total, entity) => {
-            // Controlla se l'importo da pagare è valido
-            if (entity.deadlines && entity.deadlines.importToPay) {
-              return total + parseFloat(entity.deadlines.importToPay);
-            }
-            return total;
-          }, 0);
+          // Calcoliamo il totale e l'importo mancante per questo mese
+          let totalImportToPay = 0;
+          let missingImportToPay = 0;
 
-          const missingImportToPay = entities.reduce((total, entity) => {
-            if (entity.deadlines && entity.deadlines.importToPay) {
-              // Controlla se lo stato è "Pagato" (case-sensitive)
-              if (entity.deadlines.status !== "Pagato") {
-                return total + parseFloat(entity.deadlines.importToPay);
-              }
+          entities.forEach((entity) => {
+            // Verifica se l'entità ha deadlines e che sia un array
+            if (entity.deadlines && Array.isArray(entity.deadlines)) {
+              entity.deadlines.forEach((deadline) => {
+                // Controlliamo se l'importo da pagare è valido
+                if (deadline.importToPay) {
+                  totalImportToPay += parseFloat(deadline.importToPay);
+                  // Controlliamo se lo stato è "Pagato" (case-sensitive)
+                  if (deadline.status !== "Pagato") {
+                    missingImportToPay += parseFloat(deadline.importToPay);
+                  }
+                }
+              });
             }
-            return total;
-          }, 0);
+          });
 
           // Creiamo l'oggetto summary per questo mese
           const summary = {
