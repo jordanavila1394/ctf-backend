@@ -198,7 +198,6 @@ exports.monthlySummary = async (req, res) => {
 
 exports.sendEmailsUnpaidDeadlines = async (req, res) => {
   try {
-    const year = req.body.year;
     let dateTo = moment().add(30, "d").format("YYYY-MM-DD 23:59");
     let dateFrom = moment().subtract(30, "d").format("YYYY-MM-DD 00:00");
     const unpaidDeadlines = [];
@@ -209,7 +208,6 @@ exports.sendEmailsUnpaidDeadlines = async (req, res) => {
           model: Deadlines,
           as: "deadlines",
           where: {
-            status: "Non pagato",
             expireDate: {
               [Op.between]: [dateFrom, dateTo],
             },
