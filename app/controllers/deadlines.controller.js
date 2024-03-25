@@ -14,9 +14,6 @@ exports.allDeadlines = (req, res) => {
   // Array per memorizzare le promesse di ricerca delle scadenze per ogni mese
   const promises = [];
 
-  // Oggetto per memorizzare la somma di importToPay per ogni mese
-  const monthlySum = {};
-
   // Per ogni mese nell'array dei mesi, creiamo una promessa per trovare le scadenze
   months.forEach((month) => {
     const startOfMonth = moment()
@@ -71,18 +68,7 @@ exports.allDeadlines = (req, res) => {
     }
 
     // Esegui la query per trovare le entità con le scadenze per questo mese
-    promises.push(
-      Entity.findAll(queryOptions).then((data) => {
-        // Calcola la somma di importToPay per questo mese
-        const sum = data.reduce(
-          (acc, val) =>
-            acc + val.deadlines.reduce((acc, val) => acc + val.importToPay, 0),
-          0
-        );
-        monthlySum[moment().month(month).format("MMMM")] = sum; // Memorizza la somma per questo mese
-        return data;
-      })
-    );
+    promises.push(Entity.findAll(queryOptions));
   });
 
   // Aspetta che tutte le promesse siano risolte e restituisci i dati quando tutte sono state completate
@@ -90,7 +76,7 @@ exports.allDeadlines = (req, res) => {
     .then((data) => {
       // Concatena i risultati di ciascuna ricerca dei mesi
       const allEntities = data.reduce((acc, val) => acc.concat(val), []);
-      res.status(200).send({ allEntities, monthlySum }); // Restituisci sia i dati delle entità che la somma mensile
+      res.status(200).send(allEntities);
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
