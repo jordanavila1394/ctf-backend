@@ -131,6 +131,7 @@ db.entity.hasMany(db.deadlines, {
   as: "deadlines",
 });
 
+
 //Attendances - User
 db.permission.belongsTo(db.user, { foreignKey: "userId", as: "user" });
 
