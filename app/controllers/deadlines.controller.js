@@ -163,9 +163,9 @@ exports.monthlySummary = (req, res) => {
                   if (deadline.status !== "Pagato") {
                     missingImportToPay += parseFloat(deadline.importToPay);
                   }
-                   if (deadline.status === "Pagato") {
-                     alreadyImportToPay += parseFloat(deadline.importToPay);
-                   }
+                  if (deadline.status === "Pagato") {
+                    alreadyImportToPay += parseFloat(deadline.importToPay);
+                  }
                 }
               });
             }
@@ -177,6 +177,8 @@ exports.monthlySummary = (req, res) => {
             totalImportToPay: totalImportToPay,
             missingImportToPay: missingImportToPay,
             alreadyImportToPay: alreadyImportToPay,
+            alreadyImportToPayPerc:
+              (alreadyImportToPay * 100) / totalImportToPay,
           };
 
           // Aggiungiamo summary a monthlySummary
@@ -188,6 +190,7 @@ exports.monthlySummary = (req, res) => {
             totalImportToPay: 0,
             missingImportToPay: 0,
             alreadyImportToPay: 0,
+            alreadyImportToPayPerc: 0,
           };
           monthlySummary.push(summary);
         }
