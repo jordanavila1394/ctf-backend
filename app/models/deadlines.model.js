@@ -1,0 +1,36 @@
+const db = require("../models");
+module.exports = (sequelize, Sequelize) => {
+  const Deadlines = sequelize.define("deadlines", {
+    entityId: {
+      type: Sequelize.INTEGER,
+      references: db.Entity,
+      referencesKey: "id",
+    },
+    loanNumber: {
+      type: Sequelize.INTEGER,
+    },
+    expireDate: {
+      type: DataTypes.DATE,
+    },
+    paymentDate: {
+      type: DataTypes.DATE,
+    },
+    status: {
+      type: Sequelize.STRING,
+    },
+    importToPay: {
+      type: Sequelize.DECIMAL(10, 2),
+    },
+    note: {
+      type: Sequelize.TEXT,
+    },
+    createdAt: {
+      type: Sequelize.DATE,
+    },
+    updatedAt: {
+      type: Sequelize.DATE,
+    },
+  });
+
+  return Deadlines;
+};
