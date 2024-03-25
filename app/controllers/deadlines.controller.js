@@ -5,6 +5,8 @@ const Company = db.company;
 
 const Op = db.Sequelize.Op;
 var moment = require("moment/moment");
+const emailController = require("./email.controller");
+var recipient = ["avila@ctfitalia.com", "jordanavila1394@gmail.com"]; // Sostituisci con l'indirizzo email appropriato
 
 exports.allDeadlines = (req, res) => {
   const idCompany = req.body.idCompany;
@@ -189,6 +191,61 @@ exports.monthlySummary = async (req, res) => {
     });
 
     res.status(200).json(monthlySummary);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.sendEmailsUnpaidDeadlines = async (req, res) => {
+  try {
+    const idCompany = req.body.idCompany;
+    const year = req.body.year;
+
+    const unpaidDeadlines = [];
+
+    const queryOptions = {
+      include: [
+        {
+          model: Deadlines,
+          as: "deadlines",
+          where: {
+            status: "Non pagato",
+          },
+        },
+        {
+          model: Company,
+          as: "company",
+          where: {
+            id: idCompany > 0 ? idCompany : { [Op.not]: null },
+          },
+        },
+      ],
+    };
+
+    // Retrieve all entities with unpaid deadlines
+    const entities = await Entity.findAll(queryOptions);
+
+    entities.forEach((entity) => {
+      if (entity.deadlines && Array.isArray(entity.deadlines)) {
+        entity.deadlines.forEach((deadline) => {
+          if (deadline.status === "Non pagato") {
+            const unpaidDeadline = {
+              entityId: entity.id,
+              entityName: entity.name,
+              deadlineId: deadline.id,
+              deadlineDate: deadline.expireDate,
+              importToPay: deadline.importToPay,
+            };
+            const subject = `Scadenza non pagata - ${entity.name}, N° ${unpaidDeadline.loanNumber} - ${unpaidDeadline.importToPay} EUR `;
+            const message = `La scadenza ${unpaidDeadline.id} con numero rata ${unpaidDeadline.loanNumber}  per ${entity.name} non è stata ancora pagata.<br> Importo da pagare: ${unpaidDeadline.importToPay} € <br> `;
+            emailController.sendEmail(recipient, subject, message);
+            unpaidDeadlines.push(unpaidDeadline);
+          }
+        });
+      }
+    });
+
+    res.status(200).json("Mail mandate con successo");
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
