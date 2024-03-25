@@ -81,14 +81,12 @@ exports.allDeadlines = (req, res) => {
       allEntities.forEach((entity) => {
         if (entity.deadlines && Array.isArray(entity.deadlines)) {
           entity.deadlines.forEach((deadline) => {
-            if (deadline.status !== "Pagato") {
-              const daysDiff = moment(deadline.expireDate).diff(
-                currentDate,
-                "days"
-              );
-              deadline["styleClass"] = daysDiff < 0 ? "danger" : "warning";
-              deadline["daysRemaining"] = daysDiff;
-            }
+            const daysDiff = moment(deadline.expireDate).diff(
+              currentDate,
+              "days"
+            );
+            deadline.styleClass = daysDiff < 0 ? "danger" : "warning";
+            deadline.daysRemaining = daysDiff;
           });
         }
       });
