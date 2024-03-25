@@ -42,7 +42,7 @@ exports.allDeadlines = (req, res) => {
             model: Company,
             as: "company",
             where: {
-              companyId: idCompany,
+              id: idCompany,
             },
           },
         ],
