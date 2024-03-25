@@ -90,9 +90,6 @@ exports.monthlySummary = (req, res) => {
   // Array per memorizzare i risultati di ogni mese
   const monthlySummary = [];
 
-  // Array di nomi dei mesi
-  const monthNames = moment.months();
-
   // Per ogni mese, creiamo un oggetto summary e lo aggiungiamo a monthlySummary
   for (let month = 0; month < 12; month++) {
     const startOfMonth = moment()
@@ -173,7 +170,6 @@ exports.monthlySummary = (req, res) => {
 
           // Creiamo l'oggetto summary per questo mese
           const summary = {
-            name: monthNames[month],
             id: month,
             totalImportToPay: totalImportToPay,
             missingImportToPay: missingImportToPay,
@@ -184,7 +180,6 @@ exports.monthlySummary = (req, res) => {
         } else {
           // Se non ci sono entità trovate per il mese, impostiamo i valori su zero
           const summary = {
-            name: monthNames[month],
             id: month,
             totalImportToPay: 0,
             missingImportToPay: 0,
