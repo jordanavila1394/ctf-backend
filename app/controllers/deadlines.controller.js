@@ -151,7 +151,7 @@ exports.monthlySummary = (req, res) => {
           // Calcoliamo il totale e l'importo mancante per questo mese
           let totalImportToPay = 0;
           let missingImportToPay = 0;
-          let alreadyImportToPay = 0;
+          let importPayed = 0;
           entities.forEach((entity) => {
             // Verifica se l'entità ha deadlines e che sia un array
             if (entity.deadlines && Array.isArray(entity.deadlines)) {
@@ -164,7 +164,7 @@ exports.monthlySummary = (req, res) => {
                     missingImportToPay += parseFloat(deadline.importToPay);
                   }
                   if (deadline.status === "Pagato") {
-                    alreadyImportToPay += parseFloat(deadline.importToPay);
+                    importPayed += parseFloat(deadline.importToPay);
                   }
                 }
               });
@@ -176,9 +176,8 @@ exports.monthlySummary = (req, res) => {
             id: month,
             totalImportToPay: totalImportToPay,
             missingImportToPay: missingImportToPay,
-            alreadyImportToPay: alreadyImportToPay,
-            alreadyImportToPayPerc:
-              (alreadyImportToPay * 100) / totalImportToPay,
+            importPayed: importPayed,
+            importPayedPerc: (importPayed * 100) / totalImportToPay,
           };
 
           // Aggiungiamo summary a monthlySummary
@@ -189,8 +188,8 @@ exports.monthlySummary = (req, res) => {
             id: month,
             totalImportToPay: 0,
             missingImportToPay: 0,
-            alreadyImportToPay: 0,
-            alreadyImportToPayPerc: 0,
+            importPayed: 0,
+            importPayedPerc: 0,
           };
           monthlySummary.push(summary);
         }
