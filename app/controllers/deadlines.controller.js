@@ -149,28 +149,47 @@ exports.monthlySummary = (req, res) => {
     // Esegui la query per trovare le entità con le scadenze per questo mese
     Entity.findAll(queryOptions)
       .then((entities) => {
-        // Calcoliamo il totale e l'importo mancante per questo mese
-        const totalImportToPay = entities.reduce(
-          (total, entity) => total + parseFloat(entity.deadlines.importToPay),
-          0
-        );
-        const missingImportToPay = entities.reduce((total, entity) => {
-          if (entity.deadlines.status !== "paid") {
-            return total + parseFloat(entity.deadlines.importToPay);
-          }
-          return total;
-        }, 0);
+        // Verifica se ci sono entità trovate per il mese corrente
+        if (entities.length > 0) {
+          // Calcola il totale e l'importo mancante per questo mese
+          const totalImportToPay = entities.reduce((total, entity) => {
+            // Controlla se l'importo da pagare è valido
+            if (entity.deadlines && entity.deadlines.importToPay) {
+              return total + parseFloat(entity.deadlines.importToPay);
+            }
+            return total;
+          }, 0);
 
-        // Creiamo l'oggetto summary per questo mese
-        const summary = {
-          name: monthNames[month],
-          id: month,
-          totalImportToPay: totalImportToPay,
-          missingImportToPay: missingImportToPay,
-        };
+          const missingImportToPay = entities.reduce((total, entity) => {
+            if (entity.deadlines && entity.deadlines.importToPay) {
+              // Controlla se lo stato è "Pagato" (case-sensitive)
+              if (entity.deadlines.status !== "Pagato") {
+                return total + parseFloat(entity.deadlines.importToPay);
+              }
+            }
+            return total;
+          }, 0);
 
-        // Aggiungiamo summary a monthlySummary
-        monthlySummary.push(summary);
+          // Creiamo l'oggetto summary per questo mese
+          const summary = {
+            name: monthNames[month],
+            id: month,
+            totalImportToPay: totalImportToPay,
+            missingImportToPay: missingImportToPay,
+          };
+
+          // Aggiungiamo summary a monthlySummary
+          monthlySummary.push(summary);
+        } else {
+          // Se non ci sono entità trovate per il mese, impostiamo i valori su zero
+          const summary = {
+            name: monthNames[month],
+            id: month,
+            totalImportToPay: 0,
+            missingImportToPay: 0,
+          };
+          monthlySummary.push(summary);
+        }
 
         // Se abbiamo ottenuto i risultati di tutti i mesi, inviamo la risposta
         if (monthlySummary.length === 12) {
