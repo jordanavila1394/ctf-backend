@@ -25,26 +25,9 @@ exports.allDeadlines = (req, res) => {
       .endOf("month")
       .format("YYYY-MM-DD 23:59");
 
-    let queryOptions = {
-      include: [
-        {
-          model: Deadlines,
-          as: "deadlines",
-          where: {
-            expireDate: {
-              [Op.between]: [startOfMonth, endOfMonth],
-            },
-          },
-        },
-        {
-          model: Company,
-          as: "company",
-        },
-      ],
-    };
-
+    let queryOptions;
     if (idCompany > 0) {
-      let queryOptions = {
+      queryOptions = {
         include: [
           {
             model: Deadlines,
@@ -61,6 +44,24 @@ exports.allDeadlines = (req, res) => {
             where: {
               companyId: idCompany,
             },
+          },
+        ],
+      };
+    } else {
+      queryOptions = {
+        include: [
+          {
+            model: Deadlines,
+            as: "deadlines",
+            where: {
+              expireDate: {
+                [Op.between]: [startOfMonth, endOfMonth],
+              },
+            },
+          },
+          {
+            model: Company,
+            as: "company",
           },
         ],
       };
