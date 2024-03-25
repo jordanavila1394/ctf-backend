@@ -76,6 +76,23 @@ exports.allDeadlines = (req, res) => {
     .then((data) => {
       // Concatena i risultati di ciascuna ricerca dei mesi
       const allEntities = data.reduce((acc, val) => acc.concat(val), []);
+      // Calcola la differenza tra la data corrente e la data di scadenza per ogni deadline
+      const currentDate = moment();
+      allEntities.forEach((entity) => {
+        if (entity.deadlines && Array.isArray(entity.deadlines)) {
+          entity.deadlines.forEach((deadline) => {
+            if (deadline.status !== "Pagato") {
+              deadline.styleClass = daysDiff < 0 ? "danger" : "warning";
+              const daysDiff = moment(deadline.expireDate).diff(
+                currentDate,
+                "days"
+              );
+              deadline.daysRemaining = daysDiff;
+            }
+          });
+        }
+      });
+
       res.status(200).send(allEntities);
     })
     .catch((err) => {
