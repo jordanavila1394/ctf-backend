@@ -75,7 +75,7 @@ exports.allDeadlines = (req, res) => {
   Promise.all(promises)
     .then((data) => {
       // Concatena i risultati di ciascuna ricerca dei mesi
-      const allEntities = data.reduce((acc, val) => acc.concat(val), []);
+      let allEntities = data.reduce((acc, val) => acc.concat(val), []);
       // Calcola la differenza tra la data corrente e la data di scadenza per ogni deadline
       const currentDate = moment();
       allEntities.forEach((entity) => {
@@ -86,8 +86,8 @@ exports.allDeadlines = (req, res) => {
                 currentDate,
                 "days"
               );
-              deadline.styleClass = daysDiff < 0 ? "danger" : "warning";
-              deadline.daysRemaining = daysDiff;
+              deadline["styleClass"] = daysDiff < 0 ? "danger" : "warning";
+              deadline["daysRemaining"] = daysDiff;
             }
           });
         }
