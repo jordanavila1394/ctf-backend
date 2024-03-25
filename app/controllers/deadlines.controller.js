@@ -1,6 +1,6 @@
 const db = require("../models");
-const Deadlines = db.deadlines;
 const Entity = db.entity;
+const Deadlines = db.deadlines;
 
 const Op = db.Sequelize.Op;
 
@@ -8,7 +8,7 @@ exports.allDeadlines = (req, res) => {
   Entity.findAll({
     include: [
       {
-        model: db.deadlines,
+        model: Deadlines,
         as: "deadlines",
       },
     ],

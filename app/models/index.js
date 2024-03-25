@@ -34,8 +34,10 @@ db.userDocument = require("../models/userDocuments.model.js")(
   sequelize,
   Sequelize
 );
-db.userCompanies = require("../models/userCompanies.model.js")(sequelize, Sequelize);
-
+db.userCompanies = require("../models/userCompanies.model.js")(
+  sequelize,
+  Sequelize
+);
 
 UserRoles = sequelize.define("user_roles", {
   userId: Sequelize.STRING,
@@ -119,8 +121,6 @@ db.attendance.hasMany(db.attendanceImage, {
   as: "attendanceImages",
 });
 
-//deadlines - entities
-
 db.deadlines.belongsTo(db.entity, {
   foreignKey: "entityId",
   as: "entity",
@@ -130,7 +130,6 @@ db.entity.hasMany(db.deadlines, {
   foreignKey: "entityId",
   as: "deadlines",
 });
-
 
 //Attendances - User
 db.permission.belongsTo(db.user, { foreignKey: "userId", as: "user" });
