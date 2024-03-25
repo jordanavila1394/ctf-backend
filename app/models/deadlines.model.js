@@ -3,7 +3,7 @@ module.exports = (sequelize, Sequelize) => {
   const Deadlines = sequelize.define("deadlines", {
     entityId: {
       type: Sequelize.INTEGER,
-      references: db.Entity,
+      references: db.entity,
       referencesKey: "id",
     },
     loanNumber: {

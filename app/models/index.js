@@ -123,11 +123,12 @@ db.attendance.hasMany(db.attendanceImage, {
 
 db.deadlines.belongsTo(db.entity, {
   foreignKey: "entityId",
-  as: "deadlines",
+  as: "entity",
 });
+
 db.entity.hasMany(db.deadlines, {
   foreignKey: "entityId",
-  as: "entity",
+  as: "deadlines",
 });
 
 //Attendances - User

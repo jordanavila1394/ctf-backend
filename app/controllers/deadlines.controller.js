@@ -10,7 +10,6 @@ exports.allDeadlines = (req, res) => {
         as: "deadlines",
       },
     ],
-    order: [["checkIn", "DESC"]],
   })
     .then((deadlines) => {
       res.status(200).send(deadlines);
