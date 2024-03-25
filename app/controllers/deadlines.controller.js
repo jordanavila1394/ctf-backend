@@ -1,6 +1,7 @@
 const db = require("../models");
 const Entity = db.entity;
 const Deadlines = db.deadlines;
+const Company = db.company;
 
 const Op = db.Sequelize.Op;
 
@@ -10,6 +11,10 @@ exports.allDeadlines = (req, res) => {
       {
         model: Deadlines,
         as: "deadlines",
+      },
+      {
+        model: Company,
+        as: "company",
       },
     ],
   })

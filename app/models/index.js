@@ -121,6 +121,17 @@ db.attendance.hasMany(db.attendanceImage, {
   as: "attendanceImages",
 });
 
+//Entities
+
+//Places - Company
+db.entity.belongsTo(db.company, { foreignKey: "companyId", as: "companies" });
+
+db.company.hasMany(db.entity, {
+  foreignKey: "companyId",
+  as: "entities",
+});
+
+
 db.deadlines.belongsTo(db.entity, {
   foreignKey: "entityId",
   as: "entities",
