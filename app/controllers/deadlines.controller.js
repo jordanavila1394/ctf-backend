@@ -44,7 +44,26 @@ exports.allDeadlines = (req, res) => {
     };
 
     if (idCompany > 0) {
-      queryOptions.include[0].where.companyId = idCompany;
+      let queryOptions = {
+        include: [
+          {
+            model: Deadlines,
+            as: "deadlines",
+            where: {
+              expireDate: {
+                [Op.between]: [startOfMonth, endOfMonth],
+              },
+            },
+          },
+          {
+            model: Company,
+            as: "company",
+            where: {
+              companyId: idCompany,
+            },
+          },
+        ],
+      };
     }
 
     // Esegui la query per trovare le entità con le scadenze per questo mese
