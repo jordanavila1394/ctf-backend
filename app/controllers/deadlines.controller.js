@@ -120,7 +120,7 @@ exports.monthlySummary = async (req, res) => {
               model: Company,
               as: "company",
               where: {
-                companyId: idCompany,
+                id: idCompany,
               },
             },
           ],
