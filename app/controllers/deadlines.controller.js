@@ -196,7 +196,7 @@ exports.monthlySummary = async (req, res) => {
   }
 };
 
-exports.sendEmailsUnpaidDeadlines = async (req, res) => {
+exports.sendEmailsUnpaidDeadlines = async () => {
   try {
     const dateTo = moment().add(30, "d").format("YYYY-MM-DD 23:59");
     const dateFrom = moment().subtract(30, "d").format("YYYY-MM-DD 00:00");
@@ -210,7 +210,6 @@ exports.sendEmailsUnpaidDeadlines = async (req, res) => {
             expireDate: {
               [Op.between]: [dateFrom, dateTo],
             },
-            status: "Non pagato",
           },
         },
         {
@@ -247,9 +246,7 @@ exports.sendEmailsUnpaidDeadlines = async (req, res) => {
       const message = `La scadenza ${unpaidDeadline.deadlineId} per ${unpaidDeadline.entityName} non è stata ancora pagata.<br> Importo da pagare: ${unpaidDeadline.importToPay} € <br> `;
       await emailController.sendEmail(recipient, subject, message);
     }
-
-    res.status(200).json("Mail mandate con successo");
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error({ message: error.message });
   }
 };
