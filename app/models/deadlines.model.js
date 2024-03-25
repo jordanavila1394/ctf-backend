@@ -10,10 +10,10 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
     },
     expireDate: {
-      type: DataTypes.DATE,
+      type: Sequelize.DATE,
     },
     paymentDate: {
-      type: DataTypes.DATE,
+      type: Sequelize.DATE,
     },
     status: {
       type: Sequelize.STRING,
