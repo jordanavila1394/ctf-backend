@@ -13,8 +13,8 @@ exports.allDeadlines = (req, res) => {
       },
     ],
   })
-    .then((entities) => {
-      res.status(200).send(entities);
+    .then((data) => {
+      res.status(200).send(data);
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
