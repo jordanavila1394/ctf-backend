@@ -55,11 +55,13 @@ require("./app/routes/email.routes")(app);
 const deadlinesController = require("./app/controllers/deadlines.controller");
 
 cron.schedule(
-  "5 9 * * *",
+  "11 9 * * *",
   async () => {
     try {
       // Chiamata al controller sendEmailsUnpaidDeadlines
+      console.log("start send email unpaid");
       await deadlinesController.sendEmailsUnpaidDeadlines();
+      console.log("end send email unpaid");
     } catch (error) {
       console.error("Error sending emails for unpaid deadlines:", error);
     }
