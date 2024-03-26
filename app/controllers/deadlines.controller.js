@@ -197,10 +197,7 @@ exports.monthlySummary = async (req, res) => {
 };
 
 exports.sendEmailsUnpaidDeadlines = async () => {
-  console.log("Try send Emails for unpaid deadlines");
   try {
-    console.log("start");
-
     const dateTo = moment().add(30, "d").format("YYYY-MM-DD 23:59");
     const dateFrom = moment().subtract(30, "d").format("YYYY-MM-DD 00:00");
 
@@ -216,6 +213,10 @@ exports.sendEmailsUnpaidDeadlines = async () => {
             status: "Non pagato", // Filtra per scadenze non pagate
           },
         },
+        {
+          model: Company,
+          as: "company",
+        },
       ],
     };
 
@@ -226,6 +227,7 @@ exports.sendEmailsUnpaidDeadlines = async () => {
         const unpaidDeadlinesForEntity = entity.deadlines.map((deadline) => ({
           entityId: entity.id,
           entityName: entity.name,
+          companyName: entity?.company?.name,
           deadlineId: deadline.id,
           deadlineDate: deadline.expireDate,
           importToPay: deadline.importToPay,
@@ -237,12 +239,8 @@ exports.sendEmailsUnpaidDeadlines = async () => {
     }, []);
 
     for (const unpaidDeadline of unpaidDeadlines) {
-      console.log("unpaidDeadline", unpaidDeadline);
-      const subject = `Scadenza non pagata - ${unpaidDeadline.entityName}, N° ${unpaidDeadline.deadlineId} - ${unpaidDeadline.importToPay} EUR `;
-      const message = `La scadenza ${unpaidDeadline.deadlineId} per ${unpaidDeadline.entityName} non è stata ancora pagata.<br> Importo da pagare: ${unpaidDeadline.importToPay} € <br> `;
-      console.log("recipient", recipient);
-      console.log("subject", subject);
-      console.log("message", message);
+      const subject = `${unpaidDeadline.companyName} - Scadenza non pagata - ${unpaidDeadline.entityName}, N° ${unpaidDeadline.deadlineId} - ${unpaidDeadline.importToPay} EUR `;
+      const message = `La scadenza ${unpaidDeadline.deadlineId} per ${unpaidDeadline.entityName}, azienda  ${unpaidDeadline.companyName} non è stata ancora pagata.<br> Importo da pagare: ${unpaidDeadline.importToPay} € <br> `;
 
       const req = {
         body: {
