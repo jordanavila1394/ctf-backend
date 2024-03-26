@@ -231,6 +231,7 @@ exports.sendEmailsUnpaidDeadlines = async () => {
           deadlineId: deadline.id,
           deadlineDate: deadline.expireDate,
           importToPay: deadline.importToPay,
+          deadlineNote: deadline.note,
         }));
 
         acc.push(...unpaidDeadlinesForEntity);
@@ -239,8 +240,8 @@ exports.sendEmailsUnpaidDeadlines = async () => {
     }, []);
 
     for (const unpaidDeadline of unpaidDeadlines) {
-      const subject = `${unpaidDeadline.companyName} - Scadenza non pagata - ${unpaidDeadline.entityName}, N° ${unpaidDeadline.deadlineId} - ${unpaidDeadline.importToPay} EUR `;
-      const message = `La scadenza ${unpaidDeadline.deadlineId} per ${unpaidDeadline.entityName}, azienda  ${unpaidDeadline.companyName} non è stata ancora pagata.<br> Importo da pagare: ${unpaidDeadline.importToPay} € <br> `;
+      const subject = `${unpaidDeadline.companyName} - Scadenza non pagata - ${unpaidDeadline.entityName}, N° rata ${unpaidDeadline.deadlineId} - ${unpaidDeadline.importToPay} EUR - Data scadenza ${unpaidDeadline.deadlineDate}`;
+      const message = `La scadenza (id ${unpaidDeadline.deadlineId}) per ${unpaidDeadline.entityName}, azienda  ${unpaidDeadline.companyName} non è stata ancora pagata. <br> Bisogna pagare entro il: ${unpaidDeadline.deadlineDate} <br> Importo da pagare: ${unpaidDeadline.importToPay} € <br> Note: ${unpaidDeadline.deadlineNote} <br>  `;
 
       const req = {
         body: {
