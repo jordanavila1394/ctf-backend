@@ -77,8 +77,32 @@ exports.allDeadlines = (req, res) => {
   Promise.all(promises)
     .then((data) => {
       // Concatena i risultati di ciascuna ricerca dei mesi
-      const allEntities = data.reduce((acc, val) => acc.concat(val), []);
-      // Calcola la differenza tra la data corrente e la data di scadenza per ogni deadline
+      let allEntities = data.reduce((acc, val) => acc.concat(val), []);
+      // Raggruppa per entity.id
+      const groupedByEntityId = allEntities.reduce((acc, entity) => {
+        acc[entity.id] = acc[entity.id] || [];
+        acc[entity.id].push(entity);
+        return acc;
+      }, {});
+
+      // Ora raggruppa per deadline.entityId all'interno di ciascun gruppo di entity.id
+      for (let entityId in groupedByEntityId) {
+        const group = groupedByEntityId[entityId];
+        const deadlinesByEntityId = group.reduce((acc, entity) => {
+          entity.deadlines.forEach((deadline) => {
+            acc[deadline.entityId] = acc[deadline.entityId] || [];
+            acc[deadline.entityId].push(deadline);
+          });
+          return acc;
+        }, {});
+        // Aggiungi i deadlinesByEntityId a ciascun entity
+        group.forEach((entity) => {
+          entity.deadlinesByEntityId = deadlinesByEntityId;
+        });
+      }
+
+      // Flattening dei dati raggruppati
+      allEntities = Object.values(groupedByEntityId).flat();
 
       res.status(200).send(allEntities);
     })
@@ -86,6 +110,7 @@ exports.allDeadlines = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
 
 exports.changeStatusDeadline = (req, res) => {
   Deadlines.update(
