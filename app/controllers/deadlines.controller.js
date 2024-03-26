@@ -213,9 +213,9 @@ exports.sendEmailsUnpaidDeadlines = async () => {
             expireDate: {
               [Op.between]: [dateFrom, dateTo],
             },
-            status: "Non pagato" // Filtra per scadenze non pagate
+            status: "Non pagato", // Filtra per scadenze non pagate
           },
-        }
+        },
       ],
     };
 
@@ -244,11 +244,14 @@ exports.sendEmailsUnpaidDeadlines = async () => {
       console.log("subject", subject);
       console.log("message", message);
 
-      await emailController.sendEmail({
-        recipient: recipient,
-        subject: subject,
-        message: message
-      });
+      const req = {
+        body: {
+          recipient: recipient,
+          subject: subject,
+          message: message,
+        },
+      };
+      await emailController.sendEmail(req, res);
     }
   } catch (error) {
     console.error({ message: error.message });
