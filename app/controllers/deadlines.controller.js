@@ -229,7 +229,7 @@ exports.sendEmailsUnpaidDeadlines = async () => {
           entityName: entity.name,
           companyName: entity?.company?.name,
           deadlineId: deadline.id,
-          deadlineDate: deadline.expireDate,
+          deadlineDate: moment(deadline.expireDate).format("DD-MM-YYYY"),
           importToPay: deadline.importToPay,
           deadlineNote: deadline.note,
         }));
