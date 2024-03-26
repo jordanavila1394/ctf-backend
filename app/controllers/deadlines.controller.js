@@ -251,7 +251,7 @@ exports.sendEmailsUnpaidDeadlines = async () => {
           message: message,
         },
       };
-      await emailController.sendEmail(req, res);
+      await emailController.sendEmail(req);
     }
   } catch (error) {
     console.error({ message: error.message });
