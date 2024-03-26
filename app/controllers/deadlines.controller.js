@@ -197,7 +197,10 @@ exports.monthlySummary = async (req, res) => {
 };
 
 exports.sendEmailsUnpaidDeadlines = async () => {
+  console.log("Try send Emails for unpaid deadlines");
   try {
+    console.log("start");
+
     const dateTo = moment().add(30, "d").format("YYYY-MM-DD 23:59");
     const dateFrom = moment().subtract(30, "d").format("YYYY-MM-DD 00:00");
 
@@ -242,8 +245,13 @@ exports.sendEmailsUnpaidDeadlines = async () => {
     }, []);
 
     for (const unpaidDeadline of unpaidDeadlines) {
+      console.log("unpaidDeadline", unpaidDeadline);
       const subject = `Scadenza non pagata - ${unpaidDeadline.entityName}, N° ${unpaidDeadline.deadlineId} - ${unpaidDeadline.importToPay} EUR `;
       const message = `La scadenza ${unpaidDeadline.deadlineId} per ${unpaidDeadline.entityName} non è stata ancora pagata.<br> Importo da pagare: ${unpaidDeadline.importToPay} € <br> `;
+      console.log("recipient", recipient);
+      console.log("subject", subject);
+      console.log("message", message);
+
       await emailController.sendEmail(recipient, subject, message);
     }
   } catch (error) {
