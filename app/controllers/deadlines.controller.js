@@ -213,15 +213,9 @@ exports.sendEmailsUnpaidDeadlines = async () => {
             expireDate: {
               [Op.between]: [dateFrom, dateTo],
             },
+            status: "Non pagato" // Filtra per scadenze non pagate
           },
-        },
-        {
-          model: Company,
-          as: "company",
-          where: {
-            id: 0,
-          },
-        },
+        }
       ],
     };
 
@@ -229,15 +223,13 @@ exports.sendEmailsUnpaidDeadlines = async () => {
 
     const unpaidDeadlines = entities.reduce((acc, entity) => {
       if (entity.deadlines && Array.isArray(entity.deadlines)) {
-        const unpaidDeadlinesForEntity = entity.deadlines
-          .filter((deadline) => deadline.status === "Non pagato")
-          .map((deadline) => ({
-            entityId: entity.id,
-            entityName: entity.name,
-            deadlineId: deadline.id,
-            deadlineDate: deadline.expireDate,
-            importToPay: deadline.importToPay,
-          }));
+        const unpaidDeadlinesForEntity = entity.deadlines.map((deadline) => ({
+          entityId: entity.id,
+          entityName: entity.name,
+          deadlineId: deadline.id,
+          deadlineDate: deadline.expireDate,
+          importToPay: deadline.importToPay,
+        }));
 
         acc.push(...unpaidDeadlinesForEntity);
       }
@@ -252,7 +244,11 @@ exports.sendEmailsUnpaidDeadlines = async () => {
       console.log("subject", subject);
       console.log("message", message);
 
-      await emailController.sendEmail(recipient, subject, message);
+      await emailController.sendEmail({
+        recipient: recipient,
+        subject: subject,
+        message: message
+      });
     }
   } catch (error) {
     console.error({ message: error.message });
