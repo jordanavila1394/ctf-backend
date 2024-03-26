@@ -20,4 +20,9 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.monthlySummary
   );
+  app.post(
+    "/api/deadlines/changeStatusDeadline",
+    [authJwt.verifyToken],
+    controller.changeStatusDeadline
+  );
 };

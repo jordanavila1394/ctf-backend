@@ -87,6 +87,21 @@ exports.allDeadlines = (req, res) => {
     });
 };
 
+exports.changeStatusDeadline = (req, res) => {
+  Deadlines.update(
+    {
+      status: req.body.status,
+    },
+    { where: { id: req.body.id } }
+  )
+    .then((deadline) => {
+      res.status(201).send({ message: "Scadenza modificata con successo" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
 exports.monthlySummary = async (req, res) => {
   try {
     const idCompany = req.body.idCompany;
