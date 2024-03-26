@@ -78,9 +78,30 @@ exports.allDeadlines = (req, res) => {
     .then((data) => {
       // Concatena i risultati di ciascuna ricerca dei mesi
       const allEntities = data.reduce((acc, val) => acc.concat(val), []);
-      // Calcola la differenza tra la data corrente e la data di scadenza per ogni deadline
 
-      res.status(200).send(allEntities);
+      // Raggruppa gli elementi per id e companyId
+      const groupedEntities = {};
+      allEntities.forEach((entity) => {
+        const key = `${entity.id}-${entity.companyId}`;
+        if (!groupedEntities[key]) {
+          groupedEntities[key] = {
+            id: entity.id,
+            name: entity.name,
+            identifier: entity.identifier,
+            createdAt: entity.createdAt,
+            updatedAt: entity.updatedAt,
+            companyId: entity.companyId,
+            deadlines: [],
+            company: entity.company,
+          };
+        }
+        groupedEntities[key].deadlines.push(...entity.deadlines);
+      });
+
+      // Converte l'oggetto raggruppato in un array di valori
+      const result = Object.values(groupedEntities);
+
+      res.status(200).send(result);
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
