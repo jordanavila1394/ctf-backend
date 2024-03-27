@@ -23,6 +23,8 @@ db.company = require("../models/company.model.js")(sequelize, Sequelize);
 db.place = require("../models/place.model.js")(sequelize, Sequelize);
 db.vehicle = require("../models/vehicle.model.js")(sequelize, Sequelize);
 db.attendance = require("../models/attendance.model.js")(sequelize, Sequelize);
+db.deadlines = require("../models/deadlines.model.js")(sequelize, Sequelize);
+db.entity = require("../models/entity.model.js")(sequelize, Sequelize);
 db.permission = require("../models/permission.model.js")(sequelize, Sequelize);
 db.attendanceImage = require("../models/attendanceImages.model.js")(
   sequelize,
@@ -32,8 +34,10 @@ db.userDocument = require("../models/userDocuments.model.js")(
   sequelize,
   Sequelize
 );
-db.userCompanies = require("../models/userCompanies.model.js")(sequelize, Sequelize);
-
+db.userCompanies = require("../models/userCompanies.model.js")(
+  sequelize,
+  Sequelize
+);
 
 UserRoles = sequelize.define("user_roles", {
   userId: Sequelize.STRING,
@@ -115,6 +119,27 @@ db.attendanceImage.belongsTo(db.attendance, {
 db.attendance.hasMany(db.attendanceImage, {
   foreignKey: "attendanceId",
   as: "attendanceImages",
+});
+
+//Entities
+
+//Places - Company
+db.entity.belongsTo(db.company, { foreignKey: "companyId", as: "company" });
+
+db.company.hasMany(db.entity, {
+  foreignKey: "companyId",
+  as: "entities",
+});
+
+
+db.deadlines.belongsTo(db.entity, {
+  foreignKey: "entityId",
+  as: "entities",
+});
+
+db.entity.hasMany(db.deadlines, {
+  foreignKey: "entityId",
+  as: "deadlines",
 });
 
 //Attendances - User

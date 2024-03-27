@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const cron = require("node-cron");
+const nodemailer = require("nodemailer");
 const bodyParser = require("body-parser");
 
 const app = express();
@@ -43,11 +45,28 @@ require("./app/routes/company.routes")(app);
 require("./app/routes/place.routes")(app);
 require("./app/routes/vehicle.routes")(app);
 require("./app/routes/attendance.routes")(app);
+require("./app/routes/deadlines.routes")(app);
 require("./app/routes/upload.routes")(app);
 require("./app/routes/download.routes")(app);
 require("./app/routes/permission.routes")(app);
 require("./app/routes/email.routes")(app);
 
+//Cron jobs
+const deadlinesController = require("./app/controllers/deadlines.controller");
+
+cron.schedule(
+  "0 9 * * *",
+  async () => {
+    try {
+      deadlinesController.sendEmailsUnpaidDeadlines();
+    } catch (error) {
+      console.error("Error sending emails for unpaid deadlines:", error);
+    }
+  },
+  {
+    timezone: "Europe/Rome", // Imposta il fuso orario italiano
+  }
+);
 // set port, listen for requests
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

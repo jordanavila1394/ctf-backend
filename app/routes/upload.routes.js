@@ -101,6 +101,7 @@ module.exports = function (app) {
 
       // Upload each file to Digital Ocean Spaces
       const uploadPromises = files.map((file, index) => {
+        const timestamp = Date.now();
         const params = {
           Bucket: "ctf.images",
           Key:
@@ -108,6 +109,8 @@ module.exports = function (app) {
             fiscalCode +
             "/" +
             category +
+            "/" +
+            timestamp +
             "/" +
             file.originalname,
           Body: file.buffer,
@@ -123,7 +126,7 @@ module.exports = function (app) {
             message: "Documents uploaded successfully",
             files: results,
           };
-        
+
           for (let result of results) {
             +userDocuments.create({
               userId: userId,
@@ -137,8 +140,13 @@ module.exports = function (app) {
               releaseMonth: releaseMonth,
               releaseYear: releaseYear,
             });
+            var parts = result?.Key.split("/");
+            var fileName = parts[parts.length - 1];
+
+            res
+              .status(201)
+              .send({ message: fileName + " aggiunto con successo!" });
           }
-          res.status(201).send({ message: "Documento aggiunto con successo!" });
         })
         .catch((error) => {
           const response = {
