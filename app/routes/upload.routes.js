@@ -101,6 +101,7 @@ module.exports = function (app) {
 
       // Upload each file to Digital Ocean Spaces
       const uploadPromises = files.map((file, index) => {
+        const timestamp = Date.now();
         const params = {
           Bucket: "ctf.images",
           Key:
@@ -109,6 +110,8 @@ module.exports = function (app) {
             "/" +
             category +
             "/" +
+            timestamp +
+            "-" +
             file.originalname,
           Body: file.buffer,
         };
@@ -123,7 +126,7 @@ module.exports = function (app) {
             message: "Documents uploaded successfully",
             files: results,
           };
-        
+
           for (let result of results) {
             +userDocuments.create({
               userId: userId,
