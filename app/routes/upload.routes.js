@@ -111,7 +111,7 @@ module.exports = function (app) {
             category +
             "/" +
             timestamp +
-            "-" +
+            "/" +
             file.originalname,
           Body: file.buffer,
         };
