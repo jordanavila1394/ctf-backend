@@ -140,8 +140,13 @@ module.exports = function (app) {
               releaseMonth: releaseMonth,
               releaseYear: releaseYear,
             });
+            var parts = result?.Key.split("/");
+            var fileName = parts[parts.length - 1];
+
+            res
+              .status(201)
+              .send({ message: fileName + " aggiunto con successo!" });
           }
-          res.status(201).send({ message: "Documento aggiunto con successo!" });
         })
         .catch((error) => {
           const response = {
