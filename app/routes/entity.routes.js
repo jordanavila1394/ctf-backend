@@ -10,7 +10,7 @@ module.exports = function (app) {
     next();
   });
 
-  app.get(
+  app.post(
     "/api/entity/allEntities",
     [authJwt.verifyToken],
     controller.allEntities
