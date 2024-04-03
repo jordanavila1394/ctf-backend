@@ -18,7 +18,7 @@ exports.allEntities= (req, res) => {
         res.status(500).send({ message: err.message });
       });
   } else {
-    Attendance.findAll({
+    Entity.findAll({
       order: [["createdAt", "DESC"]],
     })
       .then((entities) => {
