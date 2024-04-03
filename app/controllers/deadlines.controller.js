@@ -107,15 +107,20 @@ exports.allDeadlines = (req, res) => {
           },
           0
         );
-         groupedEntities[key].totalImportNotPayed += entity.deadlines.reduce(
-           (total, deadline) => {
-             if (deadline.status === "Non pagato") {
-               return total + parseFloat(deadline.importToPay);
-             }
-             return total;
-           },
-           0
-         );
+        groupedEntities[key].totalImportNotPayed += entity.deadlines.reduce(
+          (total, deadline) => {
+            if (deadline.status === "Non pagato") {
+              return total + parseFloat(deadline.importToPay);
+            }
+            return total;
+          },
+          0
+        );
+      });
+      // Aggiungi il campo totalImportSum che somma totalImportToPay e totalImportNotPayed
+      Object.values(groupedEntities).forEach((entity) => {
+        entity.totalImportSum =
+          entity.totalImportToPay + entity.totalImportNotPayed;
       });
 
       // Converte l'oggetto raggruppato in un array di valori
