@@ -126,14 +126,14 @@ exports.allDeadlines = (req, res) => {
       // Converte l'oggetto raggruppato in un array di valori
       const entities = Object.values(groupedEntities);
 
-      const totalImportToPaySum = result.reduce((acc, entity) => {
+      const totalImportToPaySum = entities.reduce((acc, entity) => {
         return acc + entity.totalImportToPay;
       }, 0);
 
-      const totalImportNotPayedSum = result.reduce((acc, entity) => {
+      const totalImportNotPayedSum = entities.reduce((acc, entity) => {
         return acc + entity.totalImportNotPayed;
       }, 0);
-      const totalImportSum = result.reduce((acc, entity) => {
+      const totalImportSum = entities.reduce((acc, entity) => {
         return acc + entity.totalImportSum;
       }, 0);
 
