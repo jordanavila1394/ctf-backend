@@ -27,6 +27,15 @@ exports.allEntities = (req, res) => {
       });
   } else {
     Entity.findAll({
+      include: [
+        {
+          model: Company,
+          as: "company",
+          where: {
+            id: idCompany,
+          },
+        },
+      ],
       order: [["createdAt", "DESC"]],
     })
       .then((entities) => {
