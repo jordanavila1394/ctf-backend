@@ -25,4 +25,10 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.changeStatusDeadline
   );
+
+  app.post(
+    "/api/deadlines/uploadDeadlinesCSV",
+    [authJwt.verifyToken],
+    controller.uploadDeadlinesCSV
+  );
 };
