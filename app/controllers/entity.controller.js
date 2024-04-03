@@ -1,6 +1,6 @@
 const db = require("../models");
 const Entity = db.entity;
-
+const Company = db.company;
 exports.allEntities = (req, res) => {
   const idCompany = req.body.idCompany;
   if (idCompany > 0) {
