@@ -6,7 +6,7 @@ const Company = db.company;
 const Op = db.Sequelize.Op;
 var moment = require("moment/moment");
 const emailController = require("./email.controller");
-var recipient = ["avila@ctfitalia.com", "jordanavila1394@gmail.com"]; // Sostituisci con l'indirizzo email appropriato
+var recipient = ["avila@ctfitalia.com"]; // Sostituisci con l'indirizzo email appropriato
 
 exports.allDeadlines = (req, res) => {
   const idCompany = req.body.idCompany;
@@ -119,14 +119,30 @@ exports.allDeadlines = (req, res) => {
       });
       // Aggiungi il campo totalImportSum che somma totalImportToPay e totalImportNotPayed
       Object.values(groupedEntities).forEach((entity) => {
-        entity.totalImportSum =
+        entity.totalImportPartialSum =
           entity.totalImportToPay + entity.totalImportNotPayed;
       });
 
       // Converte l'oggetto raggruppato in un array di valori
-      const result = Object.values(groupedEntities);
+      const entities = Object.values(groupedEntities);
 
-      res.status(200).send(result);
+      const totalImportToPaySum = result.reduce((acc, entity) => {
+        return acc + entity.totalImportToPay;
+      }, 0);
+
+      const totalImportNotPayedSum = result.reduce((acc, entity) => {
+        return acc + entity.totalImportNotPayed;
+      }, 0);
+      const totalImportSum = result.reduce((acc, entity) => {
+        return acc + entity.totalImportSum;
+      }, 0);
+
+      res.status(200).send({
+        entities,
+        totalImportToPaySum,
+        totalImportNotPayedSum,
+        totalImportSum,
+      });
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
