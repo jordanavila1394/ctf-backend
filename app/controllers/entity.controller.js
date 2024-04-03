@@ -1,11 +1,19 @@
 const db = require("../models");
 const Entity = db.entity;
 
-
-exports.allEntities= (req, res) => {
+exports.allEntities = (req, res) => {
   const idCompany = req.body.idCompany;
   if (idCompany > 0) {
     Entity.findAll({
+      include: [
+        {
+          model: Company,
+          as: "company",
+          where: {
+            id: idCompany,
+          },
+        },
+      ],
       where: {
         companyId: idCompany,
       },
