@@ -33,7 +33,7 @@ module.exports = function (app) {
 
   app.post(
     "/api/deadlines/uploadDeadlinesCSV",
-    upload.array("files"),
+    upload.single("file"),
     [authJwt.verifyToken],
     controller.uploadDeadlinesCSV
   );
