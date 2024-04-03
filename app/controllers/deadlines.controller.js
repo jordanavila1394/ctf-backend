@@ -134,7 +134,7 @@ exports.allDeadlines = (req, res) => {
         return acc + entity.totalImportNotPayed;
       }, 0);
       const totalImportSum = entities.reduce((acc, entity) => {
-        return acc + entity.totalImportSum;
+        return acc + entity.totalImportPartialSum;
       }, 0);
 
       res.status(200).send({
