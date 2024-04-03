@@ -2,7 +2,7 @@ const db = require("../models");
 const Entity = db.entity;
 const Company = db.company;
 exports.allEntities = (req, res) => {
-  const idCompany = parseInt(req.body.idCompany,10);
+  const idCompany = req.body.idCompany;
   if (idCompany > 0) {
     Entity.findAll({
       include: [
