@@ -93,9 +93,29 @@ exports.allDeadlines = (req, res) => {
             companyId: entity.companyId,
             deadlines: [],
             company: entity.company,
+            totalImportToPay: 0, // Inizializza il totale a 0
+            totalImportNotPayed: 0,
           };
         }
         groupedEntities[key].deadlines.push(...entity.deadlines);
+        groupedEntities[key].totalImportToPay += entity.deadlines.reduce(
+          (total, deadline) => {
+            if (deadline.status === "Pagato") {
+              return total + parseFloat(deadline.importToPay);
+            }
+            return total;
+          },
+          0
+        );
+         groupedEntities[key].totalImportNotPayed += entity.deadlines.reduce(
+           (total, deadline) => {
+             if (deadline.status === "Non pagato") {
+               return total + parseFloat(deadline.importToPay);
+             }
+             return total;
+           },
+           0
+         );
       });
 
       // Converte l'oggetto raggruppato in un array di valori
