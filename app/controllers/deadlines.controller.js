@@ -277,17 +277,17 @@ exports.monthlySummary = async (req, res) => {
 };
 
 exports.uploadDeadlinesCSV = (req, res) => {
-  const files = req.files;
+  const file = req.file;
   console.log("req", req);
 
-  console.log("files", files);
-  if (!files) {
+  console.log("files", file);
+  if (!file) {
     return res.status(400).send("Nessun file è stato caricato.");
   }
 
-  console.log(files.file);
+  console.log(file);
   // Assicurati di passare il percorso corretto del file caricato
-  const csvFilePath = files.file.tempFilePath;
+  const csvFilePath = file.tempFilePath;
 
   // Leggi il file CSV riga per riga e crea una nuova voce in Deadlines per ogni riga
   fs.createReadStream(csvFilePath)
