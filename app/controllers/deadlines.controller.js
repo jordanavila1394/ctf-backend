@@ -278,9 +278,8 @@ exports.monthlySummary = async (req, res) => {
 
 exports.uploadDeadlinesCSV = (req, res) => {
   const file = req.file;
-  console.log("req", req);
 
-  console.log("files", file);
+  console.log("file", file);
   if (!file) {
     return res.status(400).send("Nessun file è stato caricato.");
   }
