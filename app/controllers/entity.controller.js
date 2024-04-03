@@ -14,9 +14,6 @@ exports.allEntities = (req, res) => {
           },
         },
       ],
-      where: {
-        companyId: idCompany,
-      },
       order: [["createdAt", "DESC"]],
     })
       .then((entities) => {
@@ -31,9 +28,6 @@ exports.allEntities = (req, res) => {
         {
           model: Company,
           as: "company",
-          where: {
-            id: idCompany,
-          },
         },
       ],
       order: [["createdAt", "DESC"]],
