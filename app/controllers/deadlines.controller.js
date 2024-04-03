@@ -116,11 +116,12 @@ exports.allDeadlines = (req, res) => {
           },
           0
         );
-      });
-      // Aggiungi il campo totalImportSum che somma totalImportToPay e totalImportNotPayed
-      Object.values(groupedEntities).forEach((entity) => {
-        entity.totalImportPartialSum =
-          entity.totalImportToPay + entity.totalImportNotPayed;
+        groupedEntities[key].totalImportSum += entity.deadlines.reduce(
+          (total, deadline) => {
+            return total + parseFloat(deadline.importToPay);
+          },
+          0
+        );
       });
 
       // Converte l'oggetto raggruppato in un array di valori
@@ -134,7 +135,7 @@ exports.allDeadlines = (req, res) => {
         return acc + entity.totalImportNotPayed;
       }, 0);
       const totalImportSum = entities.reduce((acc, entity) => {
-        return acc + entity.totalImportPartialSum;
+        return acc + entity.totalImportSum;
       }, 0);
 
       res.status(200).send({
