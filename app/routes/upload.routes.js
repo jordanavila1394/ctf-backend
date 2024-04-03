@@ -33,7 +33,7 @@ module.exports = function (app) {
       let currentDate = `${day}-${month}-${year}`;
 
       if (!files) {
-        return res.status(400).send("No files were uploaded.");
+        return res.status(400).send("Nessun file è stato caricato.");
       }
 
       // Upload each file to Digital Ocean Spaces
