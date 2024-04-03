@@ -95,6 +95,7 @@ exports.allDeadlines = (req, res) => {
             company: entity.company,
             totalImportToPay: 0, // Inizializza il totale a 0
             totalImportNotPayed: 0,
+            totalImportSum : 0,
           };
         }
         groupedEntities[key].deadlines.push(...entity.deadlines);
