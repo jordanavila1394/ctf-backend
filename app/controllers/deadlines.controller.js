@@ -8,6 +8,7 @@ const Op = db.Sequelize.Op;
 var moment = require("moment/moment");
 const emailController = require("./email.controller");
 var recipient = ["avila@ctfitalia.com"]; // Sostituisci con l'indirizzo email appropriato
+const fs = require("fs");
 
 exports.allDeadlines = (req, res) => {
   const idCompany = req.body.idCompany;
