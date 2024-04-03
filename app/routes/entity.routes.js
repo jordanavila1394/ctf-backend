@@ -15,4 +15,10 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.allEntities
   );
+    
+  app.post(
+    "/api/entity/createEntity",
+    [authJwt.verifyToken],
+    controller.createEntity
+  );
 };

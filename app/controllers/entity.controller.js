@@ -40,3 +40,18 @@ exports.allEntities = (req, res) => {
       });
   }
 };
+
+exports.createEntity = (req, res) => {
+  // Save User to Database
+  Entity.create({
+    companyId: req.body.companyId,
+    name: req.body.name,
+    identifier: req.body.identifier,
+  })
+    .then((entity) => {
+      res.status(201).send({ message: "Ente aggiunto con successo!" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
