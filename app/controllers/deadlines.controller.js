@@ -287,10 +287,9 @@ exports.uploadDeadlinesCSV = (req, res) => {
 
   console.log(file);
   // Assicurati di passare il percorso corretto del file caricato
-  const csvFilePath = file.tempFilePath;
 
   // Leggi il file CSV riga per riga e crea una nuova voce in Deadlines per ogni riga
-  fs.createReadStream(csvFilePath)
+  fs.createReadStream(file.path)
     .pipe(csv())
     .on("data", async (row) => {
       try {
