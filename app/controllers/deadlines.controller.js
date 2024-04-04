@@ -176,7 +176,9 @@ exports.changePaymentDateDeadline = (req, res) => {
     { where: { id: req.body.id } }
   )
     .then((deadline) => {
-      res.status(201).send({ message: "Data pagamento modificata con successo" });
+      res
+        .status(201)
+        .send({ message: "Data pagamento modificata con successo" });
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
@@ -324,6 +326,16 @@ exports.uploadDeadlinesExcel = async (req, res) => {
     expireDate.setDate(expireDate.getDate() - 1); // Subtract one day
 
     try {
+      const entityExists = await Entity.findOne({
+        where: { id: entityId },
+      });
+
+      if (!entityExists) {
+        console.log(`Entity with entityId ${entityId} does not exist.`);
+        res.status(500).send({ message: `${entityId} non esiste` });
+        continue; // Skip to the next iteration if the entity does not exist
+      }
+
       // Try to find the deadline record in the database
       let deadline = await Deadlines.findOne({
         where: { entityId, loanNumber },
