@@ -312,7 +312,7 @@ exports.uploadDeadlinesExcel = async (req, res) => {
 
     try {
       // Try to find the deadline record in the database
-      let deadline = await db.Deadlines.findOne({
+      let deadline = await Deadlines.findOne({
         where: { entityId, loanNumber },
       });
 
@@ -324,7 +324,7 @@ exports.uploadDeadlinesExcel = async (req, res) => {
         );
       } else {
         // If the deadline record does not exist, create a new one
-        await db.Deadlines.create({
+        await Deadlines.create({
           entityId,
           loanNumber,
           expireDate,
