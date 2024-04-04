@@ -168,6 +168,20 @@ exports.changeStatusDeadline = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+exports.changePaymentDateDeadline = (req, res) => {
+  Deadlines.update(
+    {
+      paymentDate: req.body.paymentDate,
+    },
+    { where: { id: req.body.id } }
+  )
+    .then((deadline) => {
+      res.status(201).send({ message: "Data pagamento modificata con successo" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
 
 exports.monthlySummary = async (req, res) => {
   try {

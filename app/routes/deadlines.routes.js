@@ -34,7 +34,11 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.changeStatusDeadline
   );
-
+  app.post(
+    "/api/deadlines/changePaymentDateDeadline",
+    [authJwt.verifyToken],
+    controller.changePaymentDateDeadline
+  );
   app.post(
     "/api/deadlines/uploadDeadlinesExcel",
     upload.single("file"),
