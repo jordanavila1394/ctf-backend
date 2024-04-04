@@ -286,7 +286,7 @@ exports.uploadDeadlinesCSV = (req, res) => {
 
   try {
     const csvData = [];
-
+    console.log(file);
     // Leggi il file CSV riga per riga
     fs.createReadStream(file.path)
       .pipe(csv())
