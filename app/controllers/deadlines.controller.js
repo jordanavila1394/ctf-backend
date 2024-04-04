@@ -305,14 +305,9 @@ exports.uploadDeadlinesExcel = async (req, res) => {
     const excelExpireDate = row[2];
     const importToPay = row[3];
     const status = row[4];
-    console.log(entityId);
-    console.log(loanNumber);
-    console.log(importToPay);
-    console.log(status);
-    console.log("date ", excelExpireDate);
 
-    // Parse the date string using moment
-    const expireDate = new Date((excelExpireDate - (25567 + 1)) * 86400 * 1000); // Convert Excel date to milliseconds
+    let expireDate = new Date((excelExpireDate - (25567 + 1)) * 86400 * 1000); // Convert Excel date to milliseconds
+    expireDate.setDate(expireDate.getDate() - 1); // Subtract one day
 
     try {
       // Try to find the deadline record in the database
