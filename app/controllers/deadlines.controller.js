@@ -1,5 +1,6 @@
 const db = require("../models");
-const csv = require("csv-parser");
+const XLSX = require("xlsx");
+
 const Entity = db.entity;
 const Deadlines = db.deadlines;
 const Company = db.company;
@@ -277,35 +278,64 @@ exports.monthlySummary = async (req, res) => {
   }
 };
 
-exports.uploadDeadlinesCSV = (req, res) => {
+
+exports.uploadDeadlinesExcel = (req, res) => {
   const file = req.file;
 
   if (!file) {
     return res.status(400).send("Nessun file è stato caricato.");
   }
 
-  try {
-    const csvData = [];
-    console.log(file);
-    // Leggi il file CSV riga per riga
-    fs.createReadStream(file.path)
-      .pipe(csv())
-      .on("data", (row) => {
-        // Esegui le operazioni desiderate con ogni riga del file CSV
-        console.log(row);
+  // Assuming the uploaded file is in 'xlsx' format
+  const workbook = XLSX.readFile(file.path);
+
+  // Assuming your data is in the first sheet
+  const sheet_name_list = workbook.SheetNames;
+  const worksheet = workbook.Sheets[sheet_name_list[0]];
+
+  // Convert the worksheet to an array of rows
+  const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+  // Process each row
+  rows.forEach((row) => {
+    // Assuming each row has three columns: 'deadline', 'description', 'status'
+    const entityId = row[0];
+    const loanNumber = row[1];
+    const expireDate = row[2];
+    const importToPay = row[3];
+    const status = row[4];
+
+    console.log(entityId);
+    console.log(loanNumber);
+    console.log(expireDate);
+    console.log(importToPay);
+    console.log(status);
+
+    // Now, you can do whatever you want with this row data
+    // For example, you can save it to a database
+    // Example database saving code using Mongoose
+    /*
+    const Deadline = require('./models/deadline'); // Import your Deadline model
+
+    const newDeadline = new Deadline({
+      deadline: deadline,
+      description: description,
+      status: status
+    });
+
+    newDeadline.save()
+      .then(savedDeadline => {
+        console.log("Deadline saved:", savedDeadline);
       })
-      .on("end", () => {
-        // Invia una risposta al client indicando il successo del caricamento
-        res.status(200).send("File CSV caricato e processato con successo.");
+      .catch(error => {
+        console.error("Error saving deadline:", error);
       });
-  } catch (error) {
-    console.error("Errore durante la lettura del file CSV:", error);
-    // Invia una risposta al client indicando che si è verificato un errore durante la lettura del file
-    res
-      .status(500)
-      .send("Si è verificato un errore durante la lettura del file CSV.");
-  }
+    */
+  });
+
+  res.status(200).send("File caricato con successo e elaborato.");
 };
+
 
 exports.sendEmailsUnpaidDeadlines = async () => {
   try {
