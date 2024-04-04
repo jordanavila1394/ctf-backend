@@ -318,18 +318,20 @@ exports.uploadDeadlinesExcel = async (req, res) => {
 
       if (deadline) {
         // If the deadline record exists, update it
-        await deadline.update({ expireDate, importToPay, status });
+        await deadline.update({ expireDate: expireDate, importToPay: importToPay, status: status });
         console.log(
           `Deadline with entityId ${entityId} and loanNumber ${loanNumber} updated.`
         );
       } else {
         // If the deadline record does not exist, create a new one
         await Deadlines.create({
-          entityId,
-          loanNumber,
-          expireDate,
-          importToPay,
-          status,
+          entityId: entityId,
+          loanNumber: loanNumber,
+          expireDate: expireDate,
+          importToPay: importToPay,
+          status: status,
+        }).then((deadline) => {
+          res.status(201).send("File caricato con successo e elaborato.");
         });
         console.log(
           `Deadline with entityId ${entityId} and loanNumber ${loanNumber} created.`
