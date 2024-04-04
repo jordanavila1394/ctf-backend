@@ -295,6 +295,8 @@ exports.uploadDeadlinesExcel = async (req, res) => {
   // Convert the worksheet to an array of rows
   const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
+  let rowsInsert = [];
+  let rowsUpdate = [];
   // Process each row
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
@@ -320,6 +322,7 @@ exports.uploadDeadlinesExcel = async (req, res) => {
 
       if (deadline) {
         // If the deadline record exists, update it
+        rowsUpdate.push({ entityId: entityId, loanNumber: loanNumber });
         await deadline.update({
           expireDate: expireDate,
           importToPay: importToPay,
@@ -330,6 +333,7 @@ exports.uploadDeadlinesExcel = async (req, res) => {
         );
       } else {
         // If the deadline record does not exist, create a new one
+        rowsInsert.push({ entityId: entityId, loanNumber: loanNumber });
         await Deadlines.create({
           entityId: entityId,
           loanNumber: loanNumber,
@@ -347,7 +351,7 @@ exports.uploadDeadlinesExcel = async (req, res) => {
     }
   }
 
-  res.status(200).send("File caricato con successo e elaborato.");
+  res.status(200).send({ rowsInsert, rowsUpdate });
 };
 
 exports.sendEmailsUnpaidDeadlines = async () => {
