@@ -278,8 +278,7 @@ exports.monthlySummary = async (req, res) => {
   }
 };
 
-
-exports.uploadDeadlinesExcel = (req, res) => {
+exports.uploadDeadlinesExcel = async (req, res) => {
   const file = req.file;
 
   if (!file) {
@@ -297,8 +296,7 @@ exports.uploadDeadlinesExcel = (req, res) => {
   const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
   // Process each row
-  rows.forEach((row) => {
-    // Assuming each row has three columns: 'deadline', 'description', 'status'
+  for (let i = 1; i < rows.length; i++) {
     const entityId = row[0];
     const loanNumber = row[1];
     const expireDate = row[2];
@@ -311,31 +309,38 @@ exports.uploadDeadlinesExcel = (req, res) => {
     console.log(importToPay);
     console.log(status);
 
-    // Now, you can do whatever you want with this row data
-    // For example, you can save it to a database
-    // Example database saving code using Mongoose
-    /*
-    const Deadline = require('./models/deadline'); // Import your Deadline model
-
-    const newDeadline = new Deadline({
-      deadline: deadline,
-      description: description,
-      status: status
-    });
-
-    newDeadline.save()
-      .then(savedDeadline => {
-        console.log("Deadline saved:", savedDeadline);
-      })
-      .catch(error => {
-        console.error("Error saving deadline:", error);
+    try {
+      // Try to find the deadline record in the database
+      let deadline = await db.Deadlines.findOne({
+        where: { entityId, loanNumber },
       });
-    */
-  });
+
+      if (deadline) {
+        // If the deadline record exists, update it
+        await deadline.update({ expireDate, importToPay, status });
+        console.log(
+          `Deadline with entityId ${entityId} and loanNumber ${loanNumber} updated.`
+        );
+      } else {
+        // If the deadline record does not exist, create a new one
+        await db.Deadlines.create({
+          entityId,
+          loanNumber,
+          expireDate,
+          importToPay,
+          status,
+        });
+        console.log(
+          `Deadline with entityId ${entityId} and loanNumber ${loanNumber} created.`
+        );
+      }
+    } catch (error) {
+      console.error("Error processing deadline:", error);
+    }
+  }
 
   res.status(200).send("File caricato con successo e elaborato.");
 };
-
 
 exports.sendEmailsUnpaidDeadlines = async () => {
   try {
