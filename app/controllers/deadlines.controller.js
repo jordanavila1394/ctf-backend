@@ -300,9 +300,7 @@ exports.uploadDeadlinesExcel = async (req, res) => {
     const row = rows[i];
     const entityId = row[0];
     const loanNumber = row[1];
-    console.log("date ", row[2]);
-
-    const expireDate = moment(row[2], "DD-MM-YYYY").toDate();
+    const expireDateStr = row[2];
     const importToPay = row[3];
     const status = row[4];
     console.log(entityId);
@@ -310,6 +308,15 @@ exports.uploadDeadlinesExcel = async (req, res) => {
     console.log(expireDate);
     console.log(importToPay);
     console.log(status);
+    console.log("date ", expireDateStr);
+
+    // Parse the date string using moment
+    const expireDate = moment(expireDateStr, "DD/MM/YYYY", true); // true to enable strict parsing
+
+    if (!expireDate.isValid()) {
+      console.error(`Invalid date format for expireDate: ${expireDateStr}`);
+      continue; // Skip processing this row if date is invalid
+    }
 
     try {
       // Try to find the deadline record in the database
@@ -320,7 +327,7 @@ exports.uploadDeadlinesExcel = async (req, res) => {
       if (deadline) {
         // If the deadline record exists, update it
         await deadline.update({
-          expireDate: expireDate,
+          expireDate: expireDate.toDate(),
           importToPay: importToPay,
           status: status,
         });
@@ -332,7 +339,7 @@ exports.uploadDeadlinesExcel = async (req, res) => {
         await Deadlines.create({
           entityId: entityId,
           loanNumber: loanNumber,
-          expireDate: expireDate,
+          expireDate: expireDate.toDate(),
           importToPay: importToPay,
           status: status,
         }).then((deadline) => {
