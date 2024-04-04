@@ -300,7 +300,7 @@ exports.uploadDeadlinesExcel = async (req, res) => {
     const row = rows[i];
     const entityId = row[0];
     const loanNumber = row[1];
-    const expireDate = row[2];
+    const expireDate = moment(row[2], "DD/MM/YYYY").toDate();
     const importToPay = row[3];
     const status = row[4];
 
@@ -318,7 +318,11 @@ exports.uploadDeadlinesExcel = async (req, res) => {
 
       if (deadline) {
         // If the deadline record exists, update it
-        await deadline.update({ expireDate: expireDate, importToPay: importToPay, status: status });
+        await deadline.update({
+          expireDate: expireDate,
+          importToPay: importToPay,
+          status: status,
+        });
         console.log(
           `Deadline with entityId ${entityId} and loanNumber ${loanNumber} updated.`
         );
