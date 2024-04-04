@@ -280,77 +280,34 @@ exports.monthlySummary = async (req, res) => {
 exports.uploadDeadlinesCSV = (req, res) => {
   const file = req.file;
 
-  console.log("file", file);
   if (!file) {
     return res.status(400).send("Nessun file è stato caricato.");
   }
 
-  console.log(file);
-  // Assicurati di passare il percorso corretto del file caricato
+  try {
+    const csvData = [];
 
-  // Leggi il file CSV riga per riga e crea una nuova voce in Deadlines per ogni riga
-  fs.createReadStream(file.path)
-    .pipe(csv())
-    .on("data", async (row) => {
-      try {
-        // Controlla se esiste già una scadenza con le stesse informazioni
-        console.log("controlla esiste gia");
-        const existingDeadline = await Deadlines.findOne({
-          where: {
-            entityId: row.field1,
-            loanNumber: row.field2,
-            // Continua con gli altri campi necessari
-          },
-        });
+    // Leggi il file CSV riga per riga
+    fs.createReadStream(file.path)
+      .pipe(csv())
+      .on("data", (row) => {
+        // Esegui le operazioni desiderate con ogni riga del file CSV
+        csvData.push(row);
+      })
+      .on("end", () => {
+        // Fai qualcosa con i dati CSV, come salvare in database
+        console.log("Dati CSV:", csvData);
 
-        // Se esiste una scadenza già nel database, aggiorna i suoi valori anziché crearne una nuova
-        if (existingDeadline) {
-          console.log("existingDeadline");
-
-          await existingDeadline.update({
-            // Aggiorna i valori della scadenza esistente
-            entityId: row.field1,
-            loanNumber: row.field2,
-            expireDate: row.field3,
-            importToPay: row.field4 ? row.field4 : "0",
-            status: row.field5 ? row.field5 : "Non pagato",
-            // Continua con gli altri campi necessari
-          });
-
-          console.log("Scadenza esistente aggiornata:", existingDeadline);
-        } else {
-          // Se non esiste una scadenza con le stesse informazioni, crea una nuova
-          const newDeadline = await Deadlines.create({
-            // Assicurati di mappare i campi del file CSV ai campi corretti della tabella Deadlines
-            entityId: row.field1,
-            loanNumber: row.field2,
-            expireDate: row.field3,
-            importToPay: row.field4 ? row.field4 : "0",
-            status: row.field5 ? row.field5 : "Non pagato",
-            // Continua con gli altri campi necessari
-          });
-
-          console.log("Nuova scadenza creata:", newDeadline);
-        }
-      } catch (error) {
-        console.error(
-          "Errore durante la creazione/modifica della scadenza:",
-          error
-        );
-      }
-    })
-    .on("end", () => {
-      console.log("Lettura del file CSV completata.");
-      // Invia una risposta al client indicando il successo del caricamento
-      res.status(200).send("File CSV caricato e processato con successo.");
-    })
-    .on("error", (error) => {
-      console.error("Errore durante la lettura del file CSV:", error);
-      // Invia una risposta al client indicando che si è verificato un errore durante la lettura del file
-      res
-        .status(500)
-        .send("Si è verificato un errore durante la lettura del file CSV.");
-    });
+        // Invia una risposta al client indicando il successo del caricamento
+        res.status(200).send("File CSV caricato e processato con successo.");
+      });
+  } catch (error) {
+    console.error("Errore durante la lettura del file CSV:", error);
+    // Invia una risposta al client indicando che si è verificato un errore durante la lettura del file
+    res
+      .status(500)
+      .send("Si è verificato un errore durante la lettura del file CSV.");
+  }
 };
 
 exports.sendEmailsUnpaidDeadlines = async () => {
