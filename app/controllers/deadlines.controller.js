@@ -297,6 +297,7 @@ exports.uploadDeadlinesExcel = async (req, res) => {
 
   // Process each row
   for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
     const entityId = row[0];
     const loanNumber = row[1];
     const expireDate = row[2];
