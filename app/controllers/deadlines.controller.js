@@ -292,12 +292,9 @@ exports.uploadDeadlinesCSV = (req, res) => {
       .pipe(csv())
       .on("data", (row) => {
         // Esegui le operazioni desiderate con ogni riga del file CSV
-        csvData.push(row);
+        console.log(row);
       })
       .on("end", () => {
-        // Fai qualcosa con i dati CSV, come salvare in database
-        console.log("Dati CSV:", csvData);
-
         // Invia una risposta al client indicando il successo del caricamento
         res.status(200).send("File CSV caricato e processato con successo.");
       });
