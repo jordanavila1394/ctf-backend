@@ -337,11 +337,10 @@ exports.uploadDeadlinesExcel = async (req, res) => {
           importToPay: importToPay,
           status: status,
         }).then((deadline) => {
-          res.status(201).send("File caricato con successo e elaborato.");
+          console.log(
+            `Deadline with entityId ${entityId} and loanNumber ${loanNumber} created.`
+          );
         });
-        console.log(
-          `Deadline with entityId ${entityId} and loanNumber ${loanNumber} created.`
-        );
       }
     } catch (error) {
       console.error("Error processing deadline:", error);
