@@ -321,7 +321,7 @@ exports.uploadDeadlinesExcel = async (req, res) => {
       if (deadline) {
         // If the deadline record exists, update it
         await deadline.update({
-          expireDate: expireDate.toDate(),
+          expireDate: expireDate,
           importToPay: importToPay,
           status: status,
         });
@@ -333,7 +333,7 @@ exports.uploadDeadlinesExcel = async (req, res) => {
         await Deadlines.create({
           entityId: entityId,
           loanNumber: loanNumber,
-          expireDate: expireDate.toDate(),
+          expireDate: expireDate,
           importToPay: importToPay,
           status: status,
         }).then((deadline) => {
