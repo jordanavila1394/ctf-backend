@@ -36,9 +36,9 @@ module.exports = function (app) {
   );
 
   app.post(
-    "/api/deadlines/uploadDeadlinesCSV",
+    "/api/deadlines/uploadDeadlinesExcel",
     upload.single("file"),
     [authJwt.verifyToken],
-    controller.uploadDeadlinesCSV
+    controller.uploadDeadlinesExcel
   );
 };
