@@ -332,7 +332,7 @@ exports.uploadDeadlinesExcel = async (req, res) => {
 
       if (!entityExists) {
         console.log(`Entity with entityId ${entityId} does not exist.`);
-        res.status(500).send({ message: `${entityId} non esiste` });
+        res.status(500).send({ message: `Entita con id ${entityId} non esiste` });
         continue; // Skip to the next iteration if the entity does not exist
       }
 
