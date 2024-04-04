@@ -300,10 +300,11 @@ exports.uploadDeadlinesExcel = async (req, res) => {
     const row = rows[i];
     const entityId = row[0];
     const loanNumber = row[1];
-    const expireDate = moment(row[2], "DD/MM/YYYY").toDate();
+    console.log("date ", row[2]);
+
+    const expireDate = moment(row[2], "DD-MM-YYYY").toDate();
     const importToPay = row[3];
     const status = row[4];
-
     console.log(entityId);
     console.log(loanNumber);
     console.log(expireDate);
