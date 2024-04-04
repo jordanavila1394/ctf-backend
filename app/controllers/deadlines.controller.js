@@ -305,7 +305,6 @@ exports.uploadDeadlinesExcel = async (req, res) => {
     const status = row[4];
     console.log(entityId);
     console.log(loanNumber);
-    console.log(expireDate);
     console.log(importToPay);
     console.log(status);
     console.log("date ", expireDateStr);
