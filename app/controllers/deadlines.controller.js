@@ -1,4 +1,6 @@
 const db = require("../models");
+const XLSX = require("xlsx");
+
 const Entity = db.entity;
 const Deadlines = db.deadlines;
 const Company = db.company;
@@ -6,7 +8,8 @@ const Company = db.company;
 const Op = db.Sequelize.Op;
 var moment = require("moment/moment");
 const emailController = require("./email.controller");
-var recipient = ["avila@ctfitalia.com", "jordanavila1394@gmail.com"]; // Sostituisci con l'indirizzo email appropriato
+var recipient = ["avila@ctfitalia.com"]; // Sostituisci con l'indirizzo email appropriato
+const fs = require("fs");
 
 exports.allDeadlines = (req, res) => {
   const idCompany = req.body.idCompany;
@@ -93,15 +96,58 @@ exports.allDeadlines = (req, res) => {
             companyId: entity.companyId,
             deadlines: [],
             company: entity.company,
+            totalImportToPay: 0, // Inizializza il totale a 0
+            totalImportNotPayed: 0,
+            totalImportSum: 0,
           };
         }
         groupedEntities[key].deadlines.push(...entity.deadlines);
+        groupedEntities[key].totalImportToPay += entity.deadlines.reduce(
+          (total, deadline) => {
+            if (deadline.status === "Pagato") {
+              return total + parseFloat(deadline.importToPay);
+            }
+            return total;
+          },
+          0
+        );
+        groupedEntities[key].totalImportNotPayed += entity.deadlines.reduce(
+          (total, deadline) => {
+            if (deadline.status === "Non pagato") {
+              return total + parseFloat(deadline.importToPay);
+            }
+            return total;
+          },
+          0
+        );
+        groupedEntities[key].totalImportSum += entity.deadlines.reduce(
+          (total, deadline) => {
+            return total + parseFloat(deadline.importToPay);
+          },
+          0
+        );
       });
 
       // Converte l'oggetto raggruppato in un array di valori
-      const result = Object.values(groupedEntities);
+      const entities = Object.values(groupedEntities);
 
-      res.status(200).send(result);
+      const totalImportToPaySum = entities.reduce((acc, entity) => {
+        return acc + entity.totalImportToPay;
+      }, 0);
+
+      const totalImportNotPayedSum = entities.reduce((acc, entity) => {
+        return acc + entity.totalImportNotPayed;
+      }, 0);
+      const totalImportSum = entities.reduce((acc, entity) => {
+        return acc + entity.totalImportSum;
+      }, 0);
+
+      res.status(200).send({
+        entities,
+        totalImportToPaySum,
+        totalImportNotPayedSum,
+        totalImportSum,
+      });
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
@@ -117,6 +163,22 @@ exports.changeStatusDeadline = (req, res) => {
   )
     .then((deadline) => {
       res.status(201).send({ message: "Scadenza modificata con successo" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+exports.changePaymentDateDeadline = (req, res) => {
+  Deadlines.update(
+    {
+      paymentDate: req.body.paymentDate,
+    },
+    { where: { id: req.body.id } }
+  )
+    .then((deadline) => {
+      res
+        .status(201)
+        .send({ message: "Data pagamento modificata con successo" });
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
@@ -230,6 +292,87 @@ exports.monthlySummary = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+exports.uploadDeadlinesExcel = async (req, res) => {
+  const file = req.file;
+
+  if (!file) {
+    return res.status(400).send("Nessun file è stato caricato.");
+  }
+
+  // Assuming the uploaded file is in 'xlsx' format
+  const workbook = XLSX.readFile(file.path);
+
+  // Assuming your data is in the first sheet
+  const sheet_name_list = workbook.SheetNames;
+  const worksheet = workbook.Sheets[sheet_name_list[0]];
+
+  // Convert the worksheet to an array of rows
+  const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+  let rowsInsert = [];
+  let rowsUpdate = [];
+  let entityNotExist = [];
+  // Process each row
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    const entityId = row[0];
+    const loanNumber = row[1];
+    const excelExpireDate = row[2];
+    const importToPay = row[3];
+    const status = row[4];
+
+    let expireDate = new Date((excelExpireDate - (25567 + 1)) * 86400 * 1000); // Convert Excel date to milliseconds
+    expireDate.setDate(expireDate.getDate() - 1); // Subtract one day
+
+    try {
+      const entityExists = await Entity.findOne({
+        where: { id: entityId },
+      });
+
+      if (!entityExists) {
+        entityNotExist = `Entità con id ${entityId} non esiste.`;
+        continue;
+      }
+
+      // Try to find the deadline record in the database
+      let deadline = await Deadlines.findOne({
+        where: { entityId, loanNumber },
+      });
+
+      if (deadline) {
+        // If the deadline record exists, update it
+        rowsUpdate.push({ entityId: entityId, loanNumber: loanNumber });
+        await deadline.update({
+          expireDate: expireDate,
+          importToPay: importToPay,
+          status: status,
+        });
+        console.log(
+          `Deadline with entityId ${entityId} and loanNumber ${loanNumber} updated.`
+        );
+      } else {
+        // If the deadline record does not exist, create a new one
+        rowsInsert.push({ entityId: entityId, loanNumber: loanNumber });
+        await Deadlines.create({
+          entityId: entityId,
+          loanNumber: loanNumber,
+          expireDate: expireDate,
+          importToPay: importToPay,
+          status: status,
+        }).then((deadline) => {
+          console.log(
+            `Deadline with entityId ${entityId} and loanNumber ${loanNumber} created.`
+          );
+        });
+      }
+    } catch (error) {
+      console.error("Error processing deadline:", error);
+    }
+  }
+
+  res.status(200).send({ rowsInsert, rowsUpdate, entityNotExist });
 };
 
 exports.sendEmailsUnpaidDeadlines = async () => {

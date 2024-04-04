@@ -46,6 +46,7 @@ require("./app/routes/place.routes")(app);
 require("./app/routes/vehicle.routes")(app);
 require("./app/routes/attendance.routes")(app);
 require("./app/routes/deadlines.routes")(app);
+require("./app/routes/entity.routes")(app);
 require("./app/routes/upload.routes")(app);
 require("./app/routes/download.routes")(app);
 require("./app/routes/permission.routes")(app);
