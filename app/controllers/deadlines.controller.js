@@ -300,17 +300,17 @@ exports.uploadDeadlinesExcel = async (req, res) => {
     const row = rows[i];
     const entityId = row[0];
     const loanNumber = row[1];
-    const expireDateStr = row[2];
+    const excelExpireDate = row[2];
     const importToPay = row[3];
     const status = row[4];
     console.log(entityId);
     console.log(loanNumber);
     console.log(importToPay);
     console.log(status);
-    console.log("date ", expireDateStr);
+    console.log("date ", excelExpireDate);
 
     // Parse the date string using moment
-    const expireDate = moment(expireDateStr, "DD/MM/YYYY", true); // true to enable strict parsing
+    const expireDate = new Date((excelExpireDate - (25567 + 1)) * 86400 * 1000); // Convert Excel date to milliseconds
 
     if (!expireDate.isValid()) {
       console.error(`Invalid date format for expireDate: ${expireDateStr}`);
