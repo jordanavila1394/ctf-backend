@@ -58,12 +58,24 @@ exports.createEntity = (req, res) => {
 };
 
 exports.deleteEntity = (req, res) => {
+  const entityId = req.params.id;
   // Delete company
   Entity.destroy({
-    where: { id: req.params.id },
+    where: { id: entityId },
   })
     .then((entity) => {
-      res.status(201).send({ message: "Entity eliminata con successo!" });
+      // Delete deadlines associated with the entity
+      Deadline.destroy({
+        where: { entityId: entityId },
+      })
+        .then((numDeleted) => {
+          res.status(201).send({
+            message: "Entity e relative scadenze eliminate con successo!",
+          });
+        })
+        .catch((err) => {
+          res.status(500).send({ message: err.message });
+        });
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
