@@ -312,11 +312,6 @@ exports.uploadDeadlinesExcel = async (req, res) => {
     // Parse the date string using moment
     const expireDate = new Date((excelExpireDate - (25567 + 1)) * 86400 * 1000); // Convert Excel date to milliseconds
 
-    if (!expireDate.isValid()) {
-      console.error(`Invalid date format for expireDate: ${expireDateStr}`);
-      continue; // Skip processing this row if date is invalid
-    }
-
     try {
       // Try to find the deadline record in the database
       let deadline = await Deadlines.findOne({
