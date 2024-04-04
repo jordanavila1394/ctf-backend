@@ -313,6 +313,7 @@ exports.uploadDeadlinesExcel = async (req, res) => {
 
   let rowsInsert = [];
   let rowsUpdate = [];
+  let entityNotExist = [];
   // Process each row
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
@@ -331,9 +332,8 @@ exports.uploadDeadlinesExcel = async (req, res) => {
       });
 
       if (!entityExists) {
-        console.log(`Entity with entityId ${entityId} does not exist.`);
-        res.status(500).send({ message: `Entita con id ${entityId} non esiste` });
-        continue; // Skip to the next iteration if the entity does not exist
+        entityNotExist = `Entità con id ${entityId} non esiste.`;
+        continue;
       }
 
       // Try to find the deadline record in the database
@@ -372,7 +372,7 @@ exports.uploadDeadlinesExcel = async (req, res) => {
     }
   }
 
-  res.status(200).send({ rowsInsert, rowsUpdate });
+  res.status(200).send({ rowsInsert, rowsUpdate, entityNotExist });
 };
 
 exports.sendEmailsUnpaidDeadlines = async () => {
