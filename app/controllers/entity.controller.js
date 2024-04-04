@@ -1,6 +1,7 @@
 const db = require("../models");
 const Entity = db.entity;
 const Company = db.company;
+const Deadline = db.deadlines;
 exports.allEntities = (req, res) => {
   const idCompany = req.body.idCompany;
   if (idCompany > 0) {
@@ -50,6 +51,19 @@ exports.createEntity = (req, res) => {
   })
     .then((entity) => {
       res.status(201).send({ message: "Ente aggiunto con successo!" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
+exports.deleteEntity = (req, res) => {
+  // Delete company
+  Entity.destroy({
+    where: { id: req.params.id },
+  })
+    .then((entity) => {
+      res.status(201).send({ message: "Entity eliminata con successo!" });
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
