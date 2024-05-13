@@ -29,6 +29,30 @@ module.exports = (sequelize, Sequelize) => {
     note: {
       type: Sequelize.STRING,
     },
+    includeFacchinaggio: {
+      type: Sequelize.BOOLEAN,
+    },
+    facchinaggioNameClient: {
+      type: Sequelize.STRING,
+    },
+    facchinaggioAddressClient: {
+      type: Sequelize.STRING,
+    },
+    facchinaggioValue: {
+      type: Sequelize.DECIMAL(10, 2),
+    },
+    includeViaggioExtra: {
+      type: Sequelize.BOOLEAN,
+    },
+    viaggioExtraNameClient: {
+      type: Sequelize.STRING,
+    },
+    viaggioExtraAddressClient: {
+      type: Sequelize.STRING,
+    },
+    viaggioExtraValue: {
+      type: Sequelize.DECIMAL(10, 2),
+    },
     createdAt: {
       type: Sequelize.DATE,
     },

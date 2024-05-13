@@ -318,7 +318,21 @@ exports.checkOutAttendance = (req, res) => {
     {
       checkOut: CURRENT_MOMENT,
     },
-    { where: { id: req.body.id, userId: req.body.userId } }
+    {
+      where: {
+        id: req.body.id,
+        userId: req.body.userId,
+        includeFacchinaggio: req.body.includeFacchinaggio,
+        facchinaggioNameClient: req.body.facchinaggioNameClient,
+        facchinaggioAddressClient: req.body.facchinaggioAddressClient,
+        facchinaggioValue: req.body.facchinaggioValue,
+        includeViaggioExtra: req.body.includeViaggioExtra,
+        viaggioExtraNameClient: req.body.viaggioExtraNameClient,
+        viaggioExtraAddressClient: req.body.viaggioExtraAddressClient,
+        viaggioExtraValue: req.body.viaggioExtraValue,
+
+      }
+    }
   )
     .then((attendance) => {
       res.status(201).send({ message: "CheckOut aggiunto con successo!" });
@@ -423,9 +437,9 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
               userAttendanceSummary["GG-" + currentDate.format("DD")] =
                 attendanceOfDay
                   ? formatDifferenceHours(
-                      new Date(attendanceOfDay?.checkOut),
-                      new Date(attendanceOfDay?.checkIn)
-                    )
+                    new Date(attendanceOfDay?.checkOut),
+                    new Date(attendanceOfDay?.checkIn)
+                  )
                   : 0;
 
               // Aggiorna il conteggio di presenze "Presente"
