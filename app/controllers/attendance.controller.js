@@ -322,11 +322,11 @@ exports.checkOutAttendance = (req, res) => {
       where: {
         id: req.body.id,
         userId: req.body.userId,
-        includeFacchinaggio: req.body.includeFacchinaggio,
+        includeFacchinaggio: req.body.includeFacchinaggio || false,
         facchinaggioNameClient: req.body.facchinaggioNameClient,
         facchinaggioAddressClient: req.body.facchinaggioAddressClient,
         facchinaggioValue: req.body.facchinaggioValue,
-        includeViaggioExtra: req.body.includeViaggioExtra,
+        includeViaggioExtra: req.body.includeViaggioExtra || false,
         viaggioExtraNameClient: req.body.viaggioExtraNameClient,
         viaggioExtraAddressClient: req.body.viaggioExtraAddressClient,
         viaggioExtraValue: req.body.viaggioExtraValue,
