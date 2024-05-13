@@ -317,19 +317,20 @@ exports.checkOutAttendance = (req, res) => {
   Attendance.update(
     {
       checkOut: CURRENT_MOMENT,
+      includeFacchinaggio: req.body.includeFacchinaggio || false,
+      facchinaggioNameClient: req.body.facchinaggioNameClient,
+      facchinaggioAddressClient: req.body.facchinaggioAddressClient,
+      facchinaggioValue: req.body.facchinaggioValue,
+      includeViaggioExtra: req.body.includeViaggioExtra || false,
+      viaggioExtraNameClient: req.body.viaggioExtraNameClient,
+      viaggioExtraAddressClient: req.body.viaggioExtraAddressClient,
+      viaggioExtraValue: req.body.viaggioExtraValue,
     },
     {
       where: {
         id: req.body.id,
         userId: req.body.userId,
-        includeFacchinaggio: req.body.includeFacchinaggio || false,
-        facchinaggioNameClient: req.body.facchinaggioNameClient,
-        facchinaggioAddressClient: req.body.facchinaggioAddressClient,
-        facchinaggioValue: req.body.facchinaggioValue,
-        includeViaggioExtra: req.body.includeViaggioExtra || false,
-        viaggioExtraNameClient: req.body.viaggioExtraNameClient,
-        viaggioExtraAddressClient: req.body.viaggioExtraAddressClient,
-        viaggioExtraValue: req.body.viaggioExtraValue,
+       
 
       }
     }
