@@ -42,6 +42,6 @@ exports.sendEmail = (req, res) => {
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
-    if (info.response) res.status(200).send("Email inviata: " + info.response);
+    if (info?.response) res.status(200).send("Email inviata: ");
   });
 };
