@@ -28,7 +28,7 @@ module.exports = function (app) {
     controller.getDataAttendances
   );
 
-  
+
   app.post(
     "/api/attendance/getMyAttendances",
     [authJwt.verifyToken],
@@ -46,19 +46,19 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.checkOutAttendance
   );
-  
+
   app.post(
     "/api/attendance/validateAttendance",
     [authJwt.verifyToken],
     controller.validateAttendance
   );
-  
-   app.post(
-     "/api/attendance/unvalidateAttendance",
-     [authJwt.verifyToken],
-     controller.unvalidateAttendance
-   );
-  
+
+  app.post(
+    "/api/attendance/unvalidateAttendance",
+    [authJwt.verifyToken],
+    controller.unvalidateAttendance
+  );
+
   app.post(
     "/api/attendance/changeStatusAttendance",
     [authJwt.verifyToken],
@@ -70,5 +70,12 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.getUserAttendanceSummaryByMonth
   );
+
+  app.post(
+    "/api/attendance/synchronizeAttendances",
+    [authJwt.verifyToken],
+    controller.synchronizeAttendances
+  );
+
 
 };

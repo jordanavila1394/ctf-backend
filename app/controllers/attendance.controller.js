@@ -7,6 +7,14 @@ const User = db.user;
 const Vehicle = db.vehicle;
 const Op = db.Sequelize.Op;
 
+// Utility function for date formatting
+const formatDate = (date, format) => moment(date).format(format);
+
+// Utility function for error handling
+const handleError = (res, err) => res.status(500).send({ message: err.message });
+
+
+
 exports.allAttendances = (req, res) => {
   const idCompany = req.body.idCompany;
   if (idCompany > 0) {
@@ -486,6 +494,88 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
     });
 };
 
+exports.synchronizeAttendances = async (req, res) => {
+  const userId = req.body.idUser;
+  const companyId = req.body.idCompany;
+  const month = req.body.month;  // month should be 0-11
+  const year = req.body.year;
+
+  const ItalyZone = "Europe/Rome";
+  const CURRENT_MOMENT = formatDate(moment().locale(ItalyZone), "YYYY-MM-DD HH:mm:ss");
+
+  try {
+    const startOfMonth = formatDate(moment().year(year).month(month).startOf("month"), "YYYY-MM-DD 00:00");
+
+    let endOfMonth;
+    if (moment().year() === year && moment().month() === month) {
+      // If the current month is selected, set endOfMonth to yesterday
+      endOfMonth = formatDate(moment().subtract(1, 'day').endOf('day'), "YYYY-MM-DD 23:59");
+    } else {
+      // Otherwise, set endOfMonth to the end of the selected month
+      endOfMonth = formatDate(moment().year(year).month(month).endOf("month"), "YYYY-MM-DD 23:59");
+    }
+
+    const attendances = await Attendance.findAll({
+      where: {
+        userId: userId,
+        checkIn: {
+          [Op.between]: [startOfMonth, endOfMonth],
+        },
+      },
+      order: [["checkIn", "DESC"]],
+    });
+
+    // Fix missing checkout
+    for (const attendance of attendances) {
+      if (moment(attendance.checkIn).format("DD") !== moment().format("DD") && !attendance.checkOut) {
+        await Attendance.update(
+          {
+            checkOut: formatDate(moment(attendance.checkIn).set({ hour: 17, minute: 0 }).utc(), ""),
+            status: "CheckOut?",
+          },
+          { where: { id: attendance.id } }
+        );
+      }
+    }
+
+    // Fix missing days of the month
+    const missingDays = [];
+    let checkInInMonth = moment(startOfMonth).set({ hour: 9, minute: 0 });
+    const monthEndDate = moment(endOfMonth).set({ hour: 23, minute: 59 });
+
+    while (checkInInMonth.isSameOrBefore(monthEndDate)) {
+      const found = attendances.find(
+        day => moment(day.checkIn).format("DD") === checkInInMonth.format("DD")
+      );
+
+      if (!found) {
+        missingDays.push({
+          checkIn: formatDate(moment(checkInInMonth).set({ hour: 8, minute: 0 }).utc(), ""),
+          checkOut: formatDate(moment(checkInInMonth).set({ hour: 17, minute: 0 }).utc(), ""),
+        });
+      }
+      checkInInMonth.add(1, "days");
+    }
+
+    for (const day of missingDays) {
+      await Attendance.create({
+        userId: userId,
+        companyId: companyId,
+        placeId: req.body.placeId,
+        vehicleId: req.body.vehicleId,
+        checkIn: day.checkIn,
+        checkOut: day.checkOut,
+        status: "Verificare",
+      });
+    }
+
+    res.status(200).send({ message: "Attendance data synchronized successfully for all users for the specified month!" });
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+
 function formatDifferenceHours(date2, date1) {
   let tempHours = 0;
   if (date2) {
@@ -506,7 +596,9 @@ function formatDifferenceHours(date2, date1) {
     return 0;
   }
 }
+
 function formatIsWeekendOrFestivo(date) {
   if (date.getDay() == 6 || date.getDay() == 0) return true;
   return false;
 }
+
