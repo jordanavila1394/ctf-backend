@@ -7,6 +7,14 @@ const User = db.user;
 const Vehicle = db.vehicle;
 const Op = db.Sequelize.Op;
 
+// Utility function for date formatting
+const formatDate = (date, format) => moment(date).format(format);
+
+// Utility function for error handling
+const handleError = (res, err) => res.status(500).send({ message: err.message });
+
+
+
 exports.allAttendances = (req, res) => {
   const idCompany = req.body.idCompany;
   if (idCompany > 0) {
@@ -486,6 +494,92 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
     });
 };
 
+exports.synchronizeAttendances = async (req, res) => {
+  const companyId = req.body.idCompany;
+  const ItalyZone = "Europe/Rome";
+  const CURRENT_MOMENT = formatDate(moment().locale(ItalyZone), "YYYY-MM-DD HH:mm:ss");
+
+  try {
+    const startOfLastMonth = formatDate(moment().subtract(1, 'month').startOf("month"), "YYYY-MM-DD 00:00");
+    const endOfLastMonth = formatDate(moment().subtract(1, 'month').endOf("month"), "YYYY-MM-DD 23:59");
+
+    // Fetch all users in the specified company
+    const users = await User.findAll({
+      include: [
+        {
+          model: db.company,
+          as: "companies",
+          where: { id: companyId },
+        },
+      ],
+    });
+
+    // Iterate through each user
+    for (const user of users) {
+      const userId = user.id;
+
+      // Get all attendances for the user in the last month
+      const attendances = await Attendance.findAll({
+        where: {
+          userId: userId,
+          checkIn: {
+            [Op.between]: [startOfLastMonth, endOfLastMonth],
+          },
+        },
+        order: [["checkIn", "DESC"]],
+      });
+
+      // Fix missing checkout
+      for (const attendance of attendances) {
+        if (moment(attendance.checkIn).format("DD") !== moment().format("DD") && !attendance.checkOut) {
+          await Attendance.update(
+            {
+              checkOut: formatDate(moment(attendance.checkIn).set({ hour: 17, minute: 0 }).utc(), ""),
+              status: "CheckOut?",
+            },
+            { where: { id: attendance.id } }
+          );
+        }
+      }
+
+      // Fix missing days of the month
+      const missingDays = [];
+      let checkInInMonth = moment(startOfLastMonth).set({ hour: 9, minute: 0 });
+      const lastMonthEndDate = moment(endOfLastMonth).set({ hour: 23, minute: 59 });
+
+      while (checkInInMonth.isSameOrBefore(lastMonthEndDate)) {
+        const found = attendances.find(
+          day => moment(day.checkIn).format("DD") === checkInInMonth.format("DD")
+        );
+
+        if (!found) {
+          missingDays.push({
+            checkIn: formatDate(moment(checkInInMonth).set({ hour: 8, minute: 0 }).utc(), ""),
+            checkOut: formatDate(moment(checkInInMonth).set({ hour: 17, minute: 0 }).utc(), ""),
+          });
+        }
+        checkInInMonth.add(1, "days");
+      }
+
+      for (const day of missingDays) {
+        await Attendance.create({
+          userId: userId,
+          companyId: companyId,
+          placeId: req.body.placeId,
+          vehicleId: req.body.vehicleId,
+          checkIn: day.checkIn,
+          checkOut: day.checkOut,
+          status: "Verificare",
+        });
+      }
+    }
+
+    res.status(201).send({ message: "Attendance data synchronized successfully for all users for the past month!" });
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
 function formatDifferenceHours(date2, date1) {
   let tempHours = 0;
   if (date2) {
@@ -506,7 +600,9 @@ function formatDifferenceHours(date2, date1) {
     return 0;
   }
 }
+
 function formatIsWeekendOrFestivo(date) {
   if (date.getDay() == 6 || date.getDay() == 0) return true;
   return false;
 }
+
