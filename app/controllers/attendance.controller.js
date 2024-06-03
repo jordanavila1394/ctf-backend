@@ -495,6 +495,7 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
 };
 
 exports.synchronizeAttendances = async (req, res) => {
+  const userId = req.body.idUser;
   const companyId = req.body.idCompany;
   const ItalyZone = "Europe/Rome";
   const CURRENT_MOMENT = formatDate(moment().locale(ItalyZone), "YYYY-MM-DD HH:mm:ss");
@@ -503,24 +504,9 @@ exports.synchronizeAttendances = async (req, res) => {
     const startOfLastMonth = formatDate(moment().subtract(1, 'month').startOf("month"), "YYYY-MM-DD 00:00");
     const endOfLastMonth = formatDate(moment().subtract(1, 'month').endOf("month"), "YYYY-MM-DD 23:59");
 
-    // Fetch all users in the specified company
-    // const users = await User.findAll({
-    //   include: [
-    //     {
-    //       model: db.company,
-    //       as: "companies",
-    //       where: { id: companyId },
-    //     },
-    //   ],
-    // });
-
-    // Iterate through each user
-    // for (const user of users) {
-    // const userId = user.id;
-    // Get all attendances for the user in the last month
     const attendances = await Attendance.findAll({
       where: {
-        userId: 1,
+        userId: userId,
         checkIn: {
           [Op.between]: [startOfLastMonth, endOfLastMonth],
         },
@@ -562,7 +548,7 @@ exports.synchronizeAttendances = async (req, res) => {
 
     for (const day of missingDays) {
       await Attendance.create({
-        userId: 1,
+        userId: userId,
         companyId: companyId,
         placeId: req.body.placeId,
         vehicleId: req.body.vehicleId,
