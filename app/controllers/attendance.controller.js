@@ -497,18 +497,29 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
 exports.synchronizeAttendances = async (req, res) => {
   const userId = req.body.idUser;
   const companyId = req.body.idCompany;
+  const month = req.body.month;  // month should be 0-11
+  const year = req.body.year;
+
   const ItalyZone = "Europe/Rome";
   const CURRENT_MOMENT = formatDate(moment().locale(ItalyZone), "YYYY-MM-DD HH:mm:ss");
 
   try {
-    const startOfLastMonth = formatDate(moment().subtract(1, 'month').startOf("month"), "YYYY-MM-DD 00:00");
-    const endOfLastMonth = formatDate(moment().subtract(1, 'month').endOf("month"), "YYYY-MM-DD 23:59");
+    const startOfMonth = formatDate(moment().year(year).month(month).startOf("month"), "YYYY-MM-DD 00:00");
+
+    let endOfMonth;
+    if (moment().year() === year && moment().month() === month) {
+      // If the current month is selected, set endOfMonth to yesterday
+      endOfMonth = formatDate(moment().subtract(1, 'day').endOf('day'), "YYYY-MM-DD 23:59");
+    } else {
+      // Otherwise, set endOfMonth to the end of the selected month
+      endOfMonth = formatDate(moment().year(year).month(month).endOf("month"), "YYYY-MM-DD 23:59");
+    }
 
     const attendances = await Attendance.findAll({
       where: {
         userId: userId,
         checkIn: {
-          [Op.between]: [startOfLastMonth, endOfLastMonth],
+          [Op.between]: [startOfMonth, endOfMonth],
         },
       },
       order: [["checkIn", "DESC"]],
@@ -529,10 +540,10 @@ exports.synchronizeAttendances = async (req, res) => {
 
     // Fix missing days of the month
     const missingDays = [];
-    let checkInInMonth = moment(startOfLastMonth).set({ hour: 9, minute: 0 });
-    const lastMonthEndDate = moment(endOfLastMonth).set({ hour: 23, minute: 59 });
+    let checkInInMonth = moment(startOfMonth).set({ hour: 9, minute: 0 });
+    const monthEndDate = moment(endOfMonth).set({ hour: 23, minute: 59 });
 
-    while (checkInInMonth.isSameOrBefore(lastMonthEndDate)) {
+    while (checkInInMonth.isSameOrBefore(monthEndDate)) {
       const found = attendances.find(
         day => moment(day.checkIn).format("DD") === checkInInMonth.format("DD")
       );
@@ -558,11 +569,12 @@ exports.synchronizeAttendances = async (req, res) => {
       });
     }
 
-    res.status(200).send({ message: "Attendance data synchronized successfully for all users for the past month!" });
+    res.status(200).send({ message: "Attendance data synchronized successfully for all users for the specified month!" });
   } catch (err) {
     handleError(res, err);
   }
 }
+
 
 function formatDifferenceHours(date2, date1) {
   let tempHours = 0;
