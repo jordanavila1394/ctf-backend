@@ -558,7 +558,7 @@ exports.synchronizeAttendances = async (req, res) => {
       });
     }
 
-    res.status(201).send({ message: "Attendance data synchronized successfully for all users for the past month!" });
+    res.status(200).send({ message: "Attendance data synchronized successfully for all users for the past month!" });
   } catch (err) {
     handleError(res, err);
   }
