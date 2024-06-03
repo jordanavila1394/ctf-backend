@@ -504,74 +504,72 @@ exports.synchronizeAttendances = async (req, res) => {
     const endOfLastMonth = formatDate(moment().subtract(1, 'month').endOf("month"), "YYYY-MM-DD 23:59");
 
     // Fetch all users in the specified company
-    const users = await User.findAll({
-      include: [
-        {
-          model: db.company,
-          as: "companies",
-          where: { id: companyId },
-        },
-      ],
-    });
+    // const users = await User.findAll({
+    //   include: [
+    //     {
+    //       model: db.company,
+    //       as: "companies",
+    //       where: { id: companyId },
+    //     },
+    //   ],
+    // });
 
     // Iterate through each user
-    for (const user of users) {
-      const userId = user.id;
-      console.log(user)
-      // Get all attendances for the user in the last month
-      const attendances = await Attendance.findAll({
-        where: {
-          userId: 1,
-          checkIn: {
-            [Op.between]: [startOfLastMonth, endOfLastMonth],
-          },
+    // for (const user of users) {
+    // const userId = user.id;
+    // Get all attendances for the user in the last month
+    const attendances = await Attendance.findAll({
+      where: {
+        userId: 1,
+        checkIn: {
+          [Op.between]: [startOfLastMonth, endOfLastMonth],
         },
-        order: [["checkIn", "DESC"]],
-      });
+      },
+      order: [["checkIn", "DESC"]],
+    });
 
-      // Fix missing checkout
-      for (const attendance of attendances) {
-        if (moment(attendance.checkIn).format("DD") !== moment().format("DD") && !attendance.checkOut) {
-          await Attendance.update(
-            {
-              checkOut: formatDate(moment(attendance.checkIn).set({ hour: 17, minute: 0 }).utc(), ""),
-              status: "CheckOut?",
-            },
-            { where: { id: attendance.id } }
-          );
-        }
-      }
-
-      // Fix missing days of the month
-      const missingDays = [];
-      let checkInInMonth = moment(startOfLastMonth).set({ hour: 9, minute: 0 });
-      const lastMonthEndDate = moment(endOfLastMonth).set({ hour: 23, minute: 59 });
-
-      while (checkInInMonth.isSameOrBefore(lastMonthEndDate)) {
-        const found = attendances.find(
-          day => moment(day.checkIn).format("DD") === checkInInMonth.format("DD")
+    // Fix missing checkout
+    for (const attendance of attendances) {
+      if (moment(attendance.checkIn).format("DD") !== moment().format("DD") && !attendance.checkOut) {
+        await Attendance.update(
+          {
+            checkOut: formatDate(moment(attendance.checkIn).set({ hour: 17, minute: 0 }).utc(), ""),
+            status: "CheckOut?",
+          },
+          { where: { id: attendance.id } }
         );
-
-        if (!found) {
-          missingDays.push({
-            checkIn: formatDate(moment(checkInInMonth).set({ hour: 8, minute: 0 }).utc(), ""),
-            checkOut: formatDate(moment(checkInInMonth).set({ hour: 17, minute: 0 }).utc(), ""),
-          });
-        }
-        checkInInMonth.add(1, "days");
       }
+    }
 
-      for (const day of missingDays) {
-        await Attendance.create({
-          userId: userId,
-          companyId: companyId,
-          placeId: req.body.placeId,
-          vehicleId: req.body.vehicleId,
-          checkIn: day.checkIn,
-          checkOut: day.checkOut,
-          status: "Verificare",
+    // Fix missing days of the month
+    const missingDays = [];
+    let checkInInMonth = moment(startOfLastMonth).set({ hour: 9, minute: 0 });
+    const lastMonthEndDate = moment(endOfLastMonth).set({ hour: 23, minute: 59 });
+
+    while (checkInInMonth.isSameOrBefore(lastMonthEndDate)) {
+      const found = attendances.find(
+        day => moment(day.checkIn).format("DD") === checkInInMonth.format("DD")
+      );
+
+      if (!found) {
+        missingDays.push({
+          checkIn: formatDate(moment(checkInInMonth).set({ hour: 8, minute: 0 }).utc(), ""),
+          checkOut: formatDate(moment(checkInInMonth).set({ hour: 17, minute: 0 }).utc(), ""),
         });
       }
+      checkInInMonth.add(1, "days");
+    }
+
+    for (const day of missingDays) {
+      await Attendance.create({
+        userId: userId,
+        companyId: companyId,
+        placeId: req.body.placeId,
+        vehicleId: req.body.vehicleId,
+        checkIn: day.checkIn,
+        checkOut: day.checkOut,
+        status: "Verificare",
+      });
     }
 
     res.status(201).send({ message: "Attendance data synchronized successfully for all users for the past month!" });
