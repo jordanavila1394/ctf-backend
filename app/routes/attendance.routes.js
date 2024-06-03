@@ -72,9 +72,9 @@ module.exports = function (app) {
   );
 
   app.post(
-    "/api/attendance/syncronizeAttendances",
+    "/api/attendance/synchronizeAttendances",
     [authJwt.verifyToken],
-    controller.syncronizeAttendances
+    controller.synchronizeAttendances
   );
 
 
