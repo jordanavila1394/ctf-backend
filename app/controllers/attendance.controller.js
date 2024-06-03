@@ -562,7 +562,7 @@ exports.synchronizeAttendances = async (req, res) => {
 
     for (const day of missingDays) {
       await Attendance.create({
-        userId: userId,
+        userId: 1,
         companyId: companyId,
         placeId: req.body.placeId,
         vehicleId: req.body.vehicleId,
