@@ -64,15 +64,11 @@ exports.getDocumentsExpiringSoonByUser = (req, res) => {
 
   const expireThresholdDate = moment().add(5, 'days').toDate();
 
-  console.log("expireThresholdDate", expireThresholdDate);
   Document.findAll({
     where: {
       userId: userId,
       expireDate: {
-        [Op.and]: [
-          { [Op.lte]: expireThresholdDate },
-          { [Op.ne]: null }
-        ],
+        [Op.lte]: expireThresholdDate,
       },
     },
     order: [['expireDate', 'ASC']],
