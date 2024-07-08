@@ -54,3 +54,25 @@ exports.getCUDDocumentsByUser = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.getDocumentsExpiringSoonByUser = (req, res) => {
+  const userId = req.body.userId;
+  const currentDate = moment().toDate();
+  const expireThresholdDate = moment().add(5, 'days').toDate();
+
+  Document.findAll({
+    where: {
+      userId: userId,
+      expireDate: {
+        [Op.lte]: expireThresholdDate,
+      },
+    },
+    order: ["expireDate"],
+  })
+    .then((documents) => {
+      res.status(200).send(documents);
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
