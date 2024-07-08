@@ -57,9 +57,14 @@ exports.getCUDDocumentsByUser = (req, res) => {
 
 exports.getDocumentsExpiringSoonByUser = (req, res) => {
   const userId = req.body.userId;
-  const currentDate = moment().toDate();
+
+  if (!userId) {
+    return res.status(400).send({ message: "User ID is required" });
+  }
+
   const expireThresholdDate = moment().add(5, 'days').toDate();
 
+  console.log("expireThresholdDate", expireThresholdDate);
   Document.findAll({
     where: {
       userId: userId,
@@ -67,12 +72,13 @@ exports.getDocumentsExpiringSoonByUser = (req, res) => {
         [Op.lte]: expireThresholdDate,
       },
     },
-    order: ["expireDate"],
+    order: [['expireDate', 'ASC']],
   })
     .then((documents) => {
       res.status(200).send(documents);
     })
     .catch((err) => {
-      res.status(500).send({ message: err.message });
+      console.error("Error fetching documents:", err);
+      res.status(500).send({ message: "An error occurred while retrieving documents." });
     });
 };
