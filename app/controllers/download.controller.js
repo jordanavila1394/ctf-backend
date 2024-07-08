@@ -54,3 +54,30 @@ exports.getCUDDocumentsByUser = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.getDocumentsExpiringSoonByUser = (req, res) => {
+  const userId = req.body.userId;
+
+  if (!userId) {
+    return res.status(400).send({ message: "User ID is required" });
+  }
+
+  const expireThresholdDate = moment().add(30, 'days').toDate();
+
+  Document.findAll({
+    where: {
+      userId: userId,
+      expireDate: {
+        [Op.lte]: expireThresholdDate,
+      },
+    },
+    order: [['expireDate', 'ASC']],
+  })
+    .then((documents) => {
+      res.status(200).send(documents);
+    })
+    .catch((err) => {
+      console.error("Error fetching documents:", err);
+      res.status(500).send({ message: "An error occurred while retrieving documents." });
+    });
+};

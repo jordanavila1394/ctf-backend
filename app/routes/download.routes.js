@@ -26,4 +26,9 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.getCUDDocumentsByUser
   );
+  app.post(
+    "/api/download/getDocumentsExpiringSoonByUser",
+    [authJwt.verifyToken],
+    controller.getDocumentsExpiringSoonByUser
+  );
 };
