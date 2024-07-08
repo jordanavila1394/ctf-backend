@@ -62,7 +62,7 @@ exports.getDocumentsExpiringSoonByUser = (req, res) => {
     return res.status(400).send({ message: "User ID is required" });
   }
 
-  const expireThresholdDate = moment().add(5, 'days').toDate();
+  const expireThresholdDate = moment().add(30, 'days').toDate();
 
   Document.findAll({
     where: {
