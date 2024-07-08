@@ -17,6 +17,9 @@ module.exports = (sequelize, Sequelize) => {
     dates: {
       type: Sequelize.STRING,
     },
+    hours: {
+      type: Sequelize.INTEGER,
+    },
     note: {
       type: Sequelize.STRING,
     },

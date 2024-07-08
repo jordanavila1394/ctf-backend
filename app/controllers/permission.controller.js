@@ -14,6 +14,7 @@ exports.createPermission = (req, res) => {
     companyId: req.body.companyId,
     typology: req.body.typology,
     dates: req.body.dates,
+    hours: req.body.hours ? req.body.hours : 0,
     note: req.body.note,
     status: req.body.typology === "Malattia" ? "Approvato" : "In Attesa",
     createdAt: CURRENT_MOMENT,
