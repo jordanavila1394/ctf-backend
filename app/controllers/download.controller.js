@@ -68,9 +68,6 @@ exports.getDocumentsExpiringSoonByUser = (req, res) => {
   Document.findAll({
     where: {
       userId: userId,
-      expireDate: {
-        [Op.lte]: expireThresholdDate,
-      },
     },
     order: [['expireDate', 'ASC']],
   })
