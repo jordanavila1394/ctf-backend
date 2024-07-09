@@ -382,7 +382,7 @@ exports.checkIfExistUser = (req, res) => {
     });
 };
 
-exports.allAssociatedClients = (req, res) => {
+exports.getAllAssociatedClients = (req, res) => {
   User.findAll({
     attributes: [
       [db.Sequelize.fn('DISTINCT', db.Sequelize.col('associatedClient')), 'associatedClient']
