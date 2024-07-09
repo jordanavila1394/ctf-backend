@@ -65,4 +65,6 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.deleteUser
   );
+
+  app.get("/api/user/allAssociatedClients", [authJwt.verifyToken], controller.allAssociatedClients);
 };
