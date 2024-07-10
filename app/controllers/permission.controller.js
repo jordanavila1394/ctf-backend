@@ -176,7 +176,7 @@ exports.permissionsByClient = async (req, res) => {
     const users = await User.findAll(queryOptions);
 
     // Transform the data into the desired format
-    const result = users.map(user => {
+    let result = users.map(user => {
       return {
         id: user.id,
         name: user.name,
@@ -189,6 +189,9 @@ exports.permissionsByClient = async (req, res) => {
       };
     });
 
+    // Filter out users with no absences
+    result = result.filter(user => user.absences.length > 0);
+
     // Sort users by the length of their absences
     result.sort((a, b) => b.absences.length - a.absences.length);
 
@@ -197,6 +200,7 @@ exports.permissionsByClient = async (req, res) => {
     res.status(500).send({ message: err.message });
   }
 };
+
 
 exports.approvePermission = (req, res) => {
   Permission.update(
