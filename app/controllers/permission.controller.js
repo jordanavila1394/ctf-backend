@@ -153,23 +153,25 @@ exports.allPermissions = (req, res) => {
 exports.permissionsByClient = async (req, res) => {
   const associatedClient = req.body.associatedClient;
 
-  if (!associatedClient) {
-    return res.status(400).send({ message: "associatedClient is required" });
-  }
-
   try {
-    // Find all users with the given associatedClient
-    const users = await User.findAll({
-      where: {
-        associatedClient: associatedClient
-
-      },
+    // Define query options
+    let queryOptions = {
       include: [{
         model: Permission,
         as: "permissions",
         order: [["createdAt", "DESC"]],
       }],
-    });
+    };
+
+    // Add where clause if associatedClient is provided
+    if (associatedClient) {
+      queryOptions.where = {
+        associatedClient: associatedClient
+      };
+    }
+
+    // Find all users with the given associatedClient or without where clause if associatedClient is null
+    const users = await User.findAll(queryOptions);
 
     // Transform the data into the desired format
     const result = users.map(user => {
