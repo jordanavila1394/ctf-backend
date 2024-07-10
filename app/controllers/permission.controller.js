@@ -180,6 +180,8 @@ exports.permissionsByClient = async (req, res) => {
       return {
         id: user.id,
         name: user.name,
+        surname: user.surname,
+        fiscalCode: user.fiscalCode,
         absences: user.permissions.map(permission => {
           return {
             date: permission.dates,
