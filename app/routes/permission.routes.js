@@ -45,6 +45,13 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.allPermissions
   );
+
+  app.post(
+    "/api/permission/permissionsByClient",
+    [authJwt.verifyToken],
+    controller.permissionsByClient
+  );
+
   app.post(
     "/api/permission/approvePermission",
     [authJwt.verifyToken],

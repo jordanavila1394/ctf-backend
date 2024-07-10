@@ -27,6 +27,8 @@ exports.createPermission = (req, res) => {
     });
 };
 
+
+
 exports.getMyPermissions = (req, res) => {
   const idUser = req.body.idUser;
 
@@ -145,6 +147,47 @@ exports.allPermissions = (req, res) => {
       .catch((err) => {
         res.status(500).send({ message: err.message });
       });
+  }
+};
+
+exports.permissionsByClient = async (req, res) => {
+  const associatedClient = req.body.associatedClient;
+
+  if (!associatedClient) {
+    return res.status(400).send({ message: "associatedClient is required" });
+  }
+
+  try {
+    // Find all users with the given associatedClient
+    const users = await User.findAll({
+      where: {
+        associatedClient: associatedClient
+
+      },
+      include: [{
+        model: Permission,
+        as: "permissions",
+        order: [["createdAt", "DESC"]],
+      }],
+    });
+
+    // Transform the data into the desired format
+    const result = users.map(user => {
+      return {
+        id: user.id,
+        name: user.name,
+        absences: user.permissions.map(permission => {
+          return {
+            date: permission.dates,
+            type: permission.typology
+          };
+        })
+      };
+    });
+
+    res.status(200).send(result);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
   }
 };
 
