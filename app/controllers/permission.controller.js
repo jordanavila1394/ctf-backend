@@ -151,6 +151,7 @@ exports.allPermissions = (req, res) => {
   }
 };
 
+
 exports.permissionsByClient = async (req, res) => {
   const associatedClient = req.body.associatedClient;
 
@@ -187,6 +188,9 @@ exports.permissionsByClient = async (req, res) => {
         })
       };
     });
+
+    // Sort users by the length of their absences
+    result.sort((a, b) => b.absences.length - a.absences.length);
 
     res.status(200).send(result);
   } catch (err) {
