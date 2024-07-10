@@ -1,6 +1,7 @@
 const db = require("../models");
 var moment = require("moment/moment");
 const Permission = db.permission;
+const User = db.user;
 const Op = db.Sequelize.Op;
 
 exports.createPermission = (req, res) => {
