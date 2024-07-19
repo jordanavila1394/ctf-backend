@@ -153,7 +153,7 @@ exports.allPermissions = (req, res) => {
 
 
 exports.permissionsByClient = async (req, res) => {
-  const associatedClient = req.body.associatedClient;
+  const { associatedClient, startDate, endDate } = req.body;
 
   try {
     // Define query options
@@ -162,13 +162,21 @@ exports.permissionsByClient = async (req, res) => {
         model: Permission,
         as: "permissions",
         order: [["createdAt", "DESC"]],
+        where: {}
       }],
     };
 
-    // Add where clause if associatedClient is provided
+    // Add where clause for associatedClient if provided
     if (associatedClient) {
       queryOptions.where = {
         associatedClient: associatedClient
+      };
+    }
+
+    // Add date range filter for permissions if provided
+    if (startDate && endDate) {
+      queryOptions.include[0].where.createdAt = {
+        [Op.between]: [new Date(startDate), new Date(endDate)]
       };
     }
 
