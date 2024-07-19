@@ -161,8 +161,7 @@ exports.permissionsByClient = async (req, res) => {
       include: [{
         model: Permission,
         as: "permissions",
-        order: [["createdAt", "DESC"]],
-        where: {}
+        order: [["createdAt", "DESC"]]
       }],
     };
 
@@ -170,13 +169,6 @@ exports.permissionsByClient = async (req, res) => {
     if (associatedClient) {
       queryOptions.where = {
         associatedClient: associatedClient
-      };
-    }
-
-    // Add date range filter for permissions if provided
-    if (startDate && endDate) {
-      queryOptions.include[0].where.createdAt = {
-        [Op.between]: [new Date(startDate), new Date(endDate)]
       };
     }
 
@@ -195,6 +187,13 @@ exports.permissionsByClient = async (req, res) => {
             date: permission.dates,
             type: permission.typology
           };
+        }).filter(absence => {
+          // Filter absences by date range
+          return absence.date.split(',').some(dateStr => {
+            const [day, month, year] = dateStr.split('-').map(Number);
+            const absenceDate = new Date(year, month - 1, day);
+            return absenceDate >= new Date(startDate) && absenceDate <= new Date(endDate);
+          });
         })
       };
     });
