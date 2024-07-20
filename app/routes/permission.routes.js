@@ -63,4 +63,10 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.rejectPermission
   );
+  app.post(
+    "/api/permission/cleanPermissions",
+    [authJwt.verifyToken],
+    controller.cleanPermissions
+  );
+
 };
