@@ -28,4 +28,9 @@ module.exports = function (app) {
     controller.deleteEntity
   );
   
+  app.put(
+    "/api/entity/updateEntity/:id",
+    [authJwt.verifyToken],
+    controller.updateEntity
+  );
 };

@@ -82,3 +82,25 @@ exports.deleteEntity = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.updateEntity = (req, res) => {
+  const entityId = req.params.id;
+  const updateData = req.body;
+
+  Entity.update(updateData, {
+    where: { id: entityId },
+    returning: true, // This option is used to return the updated entity data
+  })
+    .then(([rowsUpdated, [updatedEntity]]) => {
+      if (rowsUpdated === 0) {
+        return res.status(404).send({ message: "Entity not found!" });
+      }
+      res.status(200).send({
+        message: "Entity updated successfully!",
+        entity: updatedEntity,
+      });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
