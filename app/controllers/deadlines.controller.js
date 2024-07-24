@@ -91,6 +91,7 @@ exports.allDeadlines = (req, res) => {
             id: entity.id,
             name: entity.name,
             identifier: entity.identifier,
+            payer: entity.payer,
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
             companyId: entity.companyId,

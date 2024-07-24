@@ -47,7 +47,8 @@ exports.createEntity = (req, res) => {
   Entity.create({
     companyId: req.body.companyId,
     name: req.body.name,
-    identifier: req.body.identifier,
+    identifier: req.body.identifier ? req.body.identifier : "",
+    payer: req.body.payer,
   })
     .then((entity) => {
       res.status(201).send({ message: "Ente aggiunto con successo!" });
@@ -76,6 +77,24 @@ exports.deleteEntity = (req, res) => {
         .catch((err) => {
           res.status(500).send({ message: err.message });
         });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
+exports.updatePayerEntity = (req, res) => {
+  const entityId = req.params.id;
+
+  Entity.update({
+    payer: req.body.payer ? req.body.payer : ""
+  }, {
+    where: { id: entityId },
+  })
+    .then((entity) => {
+      res.status(200).send({
+        message: "Entity updated successfully!",
+      });
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });

@@ -381,3 +381,18 @@ exports.checkIfExistUser = (req, res) => {
       res.status(404).send({ userExist: false });
     });
 };
+
+exports.getAllAssociatedClients = (req, res) => {
+  User.findAll({
+    attributes: [
+      [db.Sequelize.fn('DISTINCT', db.Sequelize.col('associatedClient')), 'associatedClient']
+    ],
+    order: [['associatedClient', 'ASC']]
+  })
+    .then((clients) => {
+      const associatedClients = clients.map(client => client.associatedClient);
+      res.status(200).send(associatedClients);    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};

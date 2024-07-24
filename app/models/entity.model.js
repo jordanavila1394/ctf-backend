@@ -10,6 +10,9 @@ module.exports = (sequelize, Sequelize) => {
     identifier: {
       type: Sequelize.STRING,
     },
+    payer: {
+      type: Sequelize.STRING,
+    },
   });
   return Entity;
 };
