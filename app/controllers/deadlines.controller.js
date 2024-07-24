@@ -8,7 +8,7 @@ const Company = db.company;
 const Op = db.Sequelize.Op;
 var moment = require("moment/moment");
 const emailController = require("./email.controller");
-var recipient = ["avila@ctfitalia.com"]; // Sostituisci con l'indirizzo email appropriato
+var recipientDeadLines = ["ajaime@ctfitalia.com", "avila@ctfitalia.com"]; // Sostituisci con l'indirizzo email appropriato
 const fs = require("fs");
 
 exports.allDeadlines = (req, res) => {
@@ -378,8 +378,8 @@ exports.uploadDeadlinesExcel = async (req, res) => {
 
 exports.sendEmailsUnpaidDeadlines = async () => {
   try {
-    const dateTo = moment().add(30, "d").format("YYYY-MM-DD 23:59");
-    const dateFrom = moment().subtract(30, "d").format("YYYY-MM-DD 00:00");
+    const dateTo = moment().add(5, "d").format("YYYY-MM-DD 23:59");
+    const dateFrom = moment().subtract(5, "d").format("YYYY-MM-DD 00:00");
 
     const queryOptions = {
       include: [
@@ -425,7 +425,7 @@ exports.sendEmailsUnpaidDeadlines = async () => {
 
       const req = {
         body: {
-          recipient: recipient,
+          recipient: recipientDeadLines,
           subject: subject,
           message: message,
         },
