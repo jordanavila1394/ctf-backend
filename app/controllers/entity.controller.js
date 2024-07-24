@@ -85,19 +85,15 @@ exports.deleteEntity = (req, res) => {
 
 exports.updateEntity = (req, res) => {
   const entityId = req.params.id;
-  const updateData = req.body;
 
-  console.log(updateData);
-  Entity.update(updateData, {
+  Entity.update({
+    payer: req.body.payer ? req.body.payer:""
+  }, {
     where: { id: entityId },
   })
-    .then(([rowsUpdated, [updatedEntity]]) => {
-      if (rowsUpdated === 0) {
-        return res.status(404).send({ message: "Entity not found!" });
-      }
+    .then((entity) => {
       res.status(200).send({
         message: "Entity updated successfully!",
-        entity: updatedEntity,
       });
     })
     .catch((err) => {
