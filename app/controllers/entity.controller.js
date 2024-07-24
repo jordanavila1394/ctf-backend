@@ -47,7 +47,7 @@ exports.createEntity = (req, res) => {
   Entity.create({
     companyId: req.body.companyId,
     name: req.body.name,
-    identifier: req.body.identifier ? req.body.identifier: "",
+    identifier: req.body.identifier ? req.body.identifier : "",
     payer: req.body.payer,
   })
     .then((entity) => {
@@ -83,11 +83,11 @@ exports.deleteEntity = (req, res) => {
     });
 };
 
-exports.updateEntity = (req, res) => {
+exports.updatePayerEntity = (req, res) => {
   const entityId = req.params.id;
 
   Entity.update({
-    payer: req.body.payer ? req.body.payer:""
+    payer: req.body.payer ? req.body.payer : ""
   }, {
     where: { id: entityId },
   })

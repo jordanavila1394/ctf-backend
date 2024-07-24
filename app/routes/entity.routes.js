@@ -29,8 +29,8 @@ module.exports = function (app) {
   );
   
   app.put(
-    "/api/entity/updateEntity/:id",
+    "/api/entity/updatePayerEntity/:id",
     [authJwt.verifyToken],
-    controller.updateEntity
+    controller.updatePayerEntity
   );
 };
