@@ -47,7 +47,8 @@ exports.createEntity = (req, res) => {
   Entity.create({
     companyId: req.body.companyId,
     name: req.body.name,
-    identifier: req.body.identifier,
+    identifier: req.body.identifier ? req.body.identifier: "",
+    payer: req.body.payer,
   })
     .then((entity) => {
       res.status(201).send({ message: "Ente aggiunto con successo!" });
