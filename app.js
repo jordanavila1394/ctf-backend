@@ -55,20 +55,20 @@ require("./app/routes/email.routes")(app);
 //Cron jobs
 const deadlinesController = require("./app/controllers/deadlines.controller");
 
-// cron.schedule(
-//   "0 9 * * *",
-//   async () => {
-//     try {
-//       deadlinesController.sendEmailsUnpaidDeadlines();
-//     } catch (error) {
-//       console.error("Error sending emails for unpaid deadlines:", error);
-//     }
-//   },
-//   {
-//     timezone: "Europe/Rome", // Imposta il fuso orario italiano
-//   }
-// );
-// set port, listen for requests
+cron.schedule(
+  "0 8 * * *",
+  async () => {
+    try {
+      deadlinesController.sendEmailsUnpaidDeadlines();
+    } catch (error) {
+      console.error("Error sending emails for unpaid deadlines:", error);
+    }
+  },
+  {
+    timezone: "Europe/Rome", // Imposta il fuso orario italiano
+  }
+);
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
