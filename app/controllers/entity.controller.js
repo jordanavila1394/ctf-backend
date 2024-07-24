@@ -87,9 +87,9 @@ exports.updateEntity = (req, res) => {
   const entityId = req.params.id;
   const updateData = req.body;
 
+  console.log(updateData);
   Entity.update(updateData, {
     where: { id: entityId },
-    returning: true, // This option is used to return the updated entity data
   })
     .then(([rowsUpdated, [updatedEntity]]) => {
       if (rowsUpdated === 0) {
