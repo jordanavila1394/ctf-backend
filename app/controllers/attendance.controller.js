@@ -569,6 +569,31 @@ exports.synchronizeAttendances = async (req, res) => {
       });
     }
 
+    const permissions = await Permission.findAll({
+      where: {
+        userId: userId,
+        companyId: companyId,
+      },
+      include: [
+        {
+          model: db.user,
+          as: "user",
+        },
+      ],
+    });
+
+    // Filter the permissions by the specified month and year
+    const filteredPermissions = permissions.filter(permission => {
+      const permissionDates = permission.dates.split(',');
+      return permissionDates.some(date => {
+        const momentDate = moment(date, "YYYY-MM-DD");
+        return momentDate.year() === year && momentDate.month() === month;
+      });
+    });
+
+    console.log(filteredPermissions)
+
+
     res.status(200).send({ message: "Attendance data synchronized successfully for all users for the specified month!" });
   } catch (err) {
     handleError(res, err);
