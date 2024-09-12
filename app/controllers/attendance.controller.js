@@ -591,10 +591,9 @@ exports.synchronizeAttendances = async (req, res) => {
       });
     });
 
-    if (userId == 1) {
-      console.log("filteredPermissions ", filteredPermissions);
-      console.log("userId ", userId);
-    }
+    console.log("filteredPermissions ", filteredPermissions);
+    console.log("userId ", userId);
+
 
 
     res.status(200).send({ message: "Attendance data synchronized successfully for all users for the specified month!" });
