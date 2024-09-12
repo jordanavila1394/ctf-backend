@@ -575,23 +575,22 @@ exports.synchronizeAttendances = async (req, res) => {
         userId: userId,
         companyId: companyId,
       },
-      include: [
-        {
-          model: db.user,
-          as: "user",
-        },
-      ],
     });
 
     // Filter the permissions by the specified month and year
     const filteredPermissions = permissions.filter(permission => {
+      console.log("permission ", permission);
+
       const permissionDates = permission.dates.split(',');
+      console.log("permissionDates ", permissionDates);
+
       return permissionDates.some(date => {
         const momentDate = moment(date, "YYYY-MM-DD");
         return momentDate.year() === year && momentDate.month() === month;
       });
     });
 
+    console.log("permissions ", permissions);
     console.log("filteredPermissions ", filteredPermissions);
     console.log("userId ", userId);
 
