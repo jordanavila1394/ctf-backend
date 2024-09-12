@@ -573,7 +573,6 @@ exports.synchronizeAttendances = async (req, res) => {
     const permissions = await Permission.findAll({
       where: {
         userId: userId,
-        companyId: companyId,
       },
     });
 
