@@ -22,7 +22,14 @@ exports.getDocumentsExpiring = async (req, res) => {
             },
         };
 
-        const documents = await userDocuments.findAll({ where: condition });
+        const documents = await userDocuments.findAll({
+            include: [
+                {
+                    model: db.user,
+                    attributes: ["id", "name", "surname"],
+                    as: "user",
+                }
+            ], where: condition });
 
         res.status(200).json({
             success: true,
