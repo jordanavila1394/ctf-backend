@@ -595,7 +595,6 @@ exports.synchronizeAttendances = async (req, res) => {
   }
 }
 
-
 function formatDifferenceHours(date2, date1) {
   let tempHours = 0;
   if (date2) {
