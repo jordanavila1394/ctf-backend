@@ -26,7 +26,7 @@ exports.getDocumentsExpiring = async (req, res) => {
             include: [
                 {
                     model: db.user,
-                    attributes: ["id", "name", "surname"],
+                    attributes: ["id", "name", "surname","cellphone","email"],
                     as: "user",
                 }
             ], where: condition });
