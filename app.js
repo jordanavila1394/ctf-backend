@@ -51,6 +51,7 @@ require("./app/routes/upload.routes")(app);
 require("./app/routes/download.routes")(app);
 require("./app/routes/permission.routes")(app);
 require("./app/routes/email.routes")(app);
+require("./app/routes/document.routes")(app);
 
 //Cron jobs
 const deadlinesController = require("./app/controllers/deadlines.controller");

@@ -3,6 +3,7 @@ const db = require("../models");
 var moment = require("moment/moment");
 
 const Attendance = db.attendance;
+const Permission = db.permission;
 const User = db.user;
 const Vehicle = db.vehicle;
 const Op = db.Sequelize.Op;
@@ -572,14 +573,8 @@ exports.synchronizeAttendances = async (req, res) => {
     const permissions = await Permission.findAll({
       where: {
         userId: userId,
-        companyId: companyId,
+        status:'Approvato'
       },
-      include: [
-        {
-          model: db.user,
-          as: "user",
-        },
-      ],
     });
 
     // Filter the permissions by the specified month and year
@@ -591,15 +586,14 @@ exports.synchronizeAttendances = async (req, res) => {
       });
     });
 
-    console.log(filteredPermissions)
-
+    console.log("filteredPermissions ", filteredPermissions);
+    console.log("userId ", userId);
 
     res.status(200).send({ message: "Attendance data synchronized successfully for all users for the specified month!" });
   } catch (err) {
     handleError(res, err);
   }
 }
-
 
 function formatDifferenceHours(date2, date1) {
   let tempHours = 0;
