@@ -39,6 +39,11 @@ db.userCompanies = require("../models/userCompanies.model.js")(
   Sequelize
 );
 
+db.entityDocument = require("../models/entityDocument.model.js")(
+  sequelize,
+  Sequelize
+);
+
 UserRoles = sequelize.define("user_roles", {
   userId: Sequelize.STRING,
   roleId: Sequelize.STRING,
@@ -158,6 +163,16 @@ db.user.hasMany(db.userDocument, {
   foreignKey: "userId",
   as: "userDocuments",
 });
+
+//entityDocuments- Entity
+
+db.entityDocument.belongsTo(db.entity, { foreignKey: "entityId", as: "entity" });
+
+db.user.hasMany(db.entityDocument, {
+  foreignKey: "entityId",
+  as: "entityDocuments",
+});
+
 
 db.ROLES = ["worker", "admin", "moderator", "ceo"];
 
