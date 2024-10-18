@@ -45,7 +45,7 @@ exports.allDeadlines = (req, res) => {
           },
           {
             model: EntityDocument,
-            as: "entityDocument",
+            as: "entityDocuments",
           },
           {
             model: Company,
@@ -70,7 +70,7 @@ exports.allDeadlines = (req, res) => {
           },
           {
             model: EntityDocument,
-            as: "entityDocument",
+            as: "entityDocuments",
           },
           {
             model: Company,
@@ -220,15 +220,6 @@ exports.monthlySummary = async (req, res) => {
           include: [
             {
               model: Deadlines,
-              as: "deadlines",
-              where: {
-                expireDate: {
-                  [Op.between]: [startOfMonth, endOfMonth],
-                },
-              },
-            },
-            {
-              model: entityDocument,
               as: "deadlines",
               where: {
                 expireDate: {
