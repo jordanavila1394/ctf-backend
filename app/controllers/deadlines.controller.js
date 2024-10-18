@@ -105,6 +105,7 @@ exports.allDeadlines = (req, res) => {
             companyId: entity.companyId,
             deadlines: [],
             company: entity.company,
+            entityDocuments: entity.entityDocuments,
             totalImportToPay: 0, // Inizializza il totale a 0
             totalImportNotPayed: 0,
             totalImportSum: 0,
