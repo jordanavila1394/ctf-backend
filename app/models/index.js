@@ -168,7 +168,7 @@ db.user.hasMany(db.userDocument, {
 
 db.entityDocument.belongsTo(db.entity, { foreignKey: "entityId", as: "entity" });
 
-db.user.hasMany(db.entityDocument, {
+db.entity.hasMany(db.entityDocument, {
   foreignKey: "entityId",
   as: "entityDocuments",
 });
