@@ -4,7 +4,7 @@ const XLSX = require("xlsx");
 const Entity = db.entity;
 const Deadlines = db.deadlines;
 const Company = db.company;
-const EntityDocument = db.entityDocument;
+const entityDocuments = db.entityDocument;
 const Op = db.Sequelize.Op;
 var moment = require("moment/moment");
 const emailController = require("./email.controller");
@@ -44,7 +44,7 @@ exports.allDeadlines = (req, res) => {
             },
           },
           {
-            model: EntityDocument,
+            model: entityDocuments,
             as: "entityDocuments",
           },
           {
@@ -69,7 +69,7 @@ exports.allDeadlines = (req, res) => {
             },
           },
           {
-            model: EntityDocument,
+            model: entityDocuments,
             as: "entityDocuments",
           },
           {
