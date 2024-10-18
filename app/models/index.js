@@ -39,7 +39,7 @@ db.userCompanies = require("../models/userCompanies.model.js")(
   Sequelize
 );
 
-db.entityDocument = require("../models/entityDocument.model.js")(
+db.entityDocument = require("../models/entityDocuments.model.js")(
   sequelize,
   Sequelize
 );
