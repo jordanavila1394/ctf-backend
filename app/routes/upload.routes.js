@@ -4,6 +4,8 @@ const AWS = require("aws-sdk");
 const db = require("../models");
 const AttendanceImages = db.attendanceImage;
 const userDocuments = db.userDocument;
+
+const entityDocuments = db.entityDocument;
 module.exports = function (app) {
   const spacesEndpoint = new AWS.Endpoint("fra1.digitaloceanspaces.com");
   const s3Client = new AWS.S3({
@@ -158,6 +160,71 @@ module.exports = function (app) {
         });
     }
   );
+  app.post(
+    "/api/upload/uploadEntityDocuments",
+    upload.array("files"),
+    async (req, res) => {
+      const files = req.files;
+      const entityId = req.body.entityId;
+
+      if (!files) {
+        return res.status(400).send("No files were uploaded.");
+      }
+
+      // Upload each file to Digital Ocean Spaces
+      const uploadPromises = files.map((file, index) => {
+        const timestamp = Date.now();
+        const params = {
+          Bucket: "ctf.images",
+          Key:
+            "documents/entity/" +
+            entityId +
+            "/" +
+            timestamp +
+            "/" +
+            file.originalname,
+          Body: file.buffer,
+        };
+
+        return s3Client.upload(params).promise();
+      });
+
+      Promise.all(uploadPromises)
+        .then((results) => {
+          const response = {
+            success: true,
+            message: "Documents uploaded successfully",
+            files: results,
+          };
+
+          for (let result of results) {
+            // Save document info in entityDocuments instead of userDocuments
+            entityDocuments.create({
+              entityId: entityId,
+              etag: result?.ETag,
+              location: result?.Location,
+              keyFile: result?.Key,
+              bucket: result?.Bucket,
+            });
+            var parts = result?.Key.split("/");
+            var fileName = parts[parts.length - 1];
+
+            res
+              .status(201)
+              .send({ message: fileName + " aggiunto con successo!" });
+          }
+        })
+        .catch((error) => {
+          const response = {
+            success: false,
+            message: "Error uploading files",
+            error: error.message,
+          };
+          res.status(500).json(response);
+        });
+    }
+  );
+
 
   // Route to delete a file
   app.post("/api/upload/deleteDocument", async (req, res) => {

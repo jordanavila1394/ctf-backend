@@ -17,7 +17,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
     },
     googlePlaceId: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING,
     },
     url: {
       type: Sequelize.STRING,
