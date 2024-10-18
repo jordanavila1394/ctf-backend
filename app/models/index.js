@@ -39,7 +39,7 @@ db.userCompanies = require("../models/userCompanies.model.js")(
   Sequelize
 );
 
-db.entityDocument = require("../models/entityDocument.model.js")(
+db.entityDocument = require("../models/entityDocuments.model.js")(
   sequelize,
   Sequelize
 );
@@ -168,7 +168,7 @@ db.user.hasMany(db.userDocument, {
 
 db.entityDocument.belongsTo(db.entity, { foreignKey: "entityId", as: "entity" });
 
-db.user.hasMany(db.entityDocument, {
+db.entity.hasMany(db.entityDocument, {
   foreignKey: "entityId",
   as: "entityDocuments",
 });

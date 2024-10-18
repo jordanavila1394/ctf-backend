@@ -4,7 +4,7 @@ const XLSX = require("xlsx");
 const Entity = db.entity;
 const Deadlines = db.deadlines;
 const Company = db.company;
-
+const entityDocuments = db.entityDocument;
 const Op = db.Sequelize.Op;
 var moment = require("moment/moment");
 const emailController = require("./email.controller");
@@ -44,6 +44,10 @@ exports.allDeadlines = (req, res) => {
             },
           },
           {
+            model: entityDocuments,
+            as: "entityDocuments",
+          },
+          {
             model: Company,
             as: "company",
             where: {
@@ -63,6 +67,10 @@ exports.allDeadlines = (req, res) => {
                 [Op.between]: [startOfMonth, endOfMonth],
               },
             },
+          },
+          {
+            model: entityDocuments,
+            as: "entityDocuments",
           },
           {
             model: Company,
@@ -97,6 +105,7 @@ exports.allDeadlines = (req, res) => {
             companyId: entity.companyId,
             deadlines: [],
             company: entity.company,
+            entityDocuments: entity.entityDocuments,
             totalImportToPay: 0, // Inizializza il totale a 0
             totalImportNotPayed: 0,
             totalImportSum: 0,
