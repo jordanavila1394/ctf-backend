@@ -2,6 +2,7 @@ const db = require("../models");
 const Entity = db.entity;
 const Company = db.company;
 const Deadline = db.deadlines;
+const EntityDocument = db.entityDocument;
 exports.allEntities = (req, res) => {
   const idCompany = req.body.idCompany;
   if (idCompany > 0) {
@@ -60,19 +61,29 @@ exports.createEntity = (req, res) => {
 
 exports.deleteEntity = (req, res) => {
   const entityId = req.params.id;
-  // Delete company
-  Entity.destroy({
-    where: { id: entityId },
+
+  // First, delete the entity's documents
+  EntityDocument.destroy({
+    where: { entityId: entityId },
   })
-    .then((entity) => {
-      // Delete deadlines associated with the entity
-      Deadline.destroy({
-        where: { entityId: entityId },
+    .then(() => {
+      // Then, delete the entity and deadlines
+      Entity.destroy({
+        where: { id: entityId },
       })
-        .then((numDeleted) => {
-          res.status(201).send({
-            message: "Entity e relative scadenze eliminate con successo!",
-          });
+        .then(() => {
+          // Delete deadlines associated with the entity
+          Deadline.destroy({
+            where: { entityId: entityId },
+          })
+            .then(() => {
+              res.status(201).send({
+                message: "Entity, deadlines e documenti associati eliminati con successo!",
+              });
+            })
+            .catch((err) => {
+              res.status(500).send({ message: err.message });
+            });
         })
         .catch((err) => {
           res.status(500).send({ message: err.message });
@@ -82,6 +93,7 @@ exports.deleteEntity = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
 
 exports.updatePayerEntity = (req, res) => {
   const entityId = req.params.id;
