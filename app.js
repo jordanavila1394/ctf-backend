@@ -69,6 +69,23 @@ cron.schedule(
     timezone: "Europe/Rome", // Imposta il fuso orario italiano
   }
 );
+const emailController = require("./app/controllers/email.controller");
+
+cron.schedule(
+  "05 14 * * *",
+  async () => {
+    try {
+      emailController.sendBackupEmail();
+
+    } catch (error) {
+      console.error("Errore durante il cron job:", error.message);
+    }
+  },
+  {
+    timezone: "Europe/Rome", // Imposta il fuso orario italiano
+  }
+);
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

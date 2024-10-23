@@ -396,3 +396,22 @@ exports.getAllAssociatedClients = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.updateUserEmail = (req, res) => {
+  // Update User Email in Database
+  User.update(
+    {
+      email: req.body.email,  // New email from the request body
+    },
+    { where: { id: req.params.id } }  // Filter by user ID from the request parameters
+  )
+    .then((rowsUpdated) => {
+      if (rowsUpdated[0] === 0) {
+        return res.status(404).send({ message: "Utente non trovato" }); // User not found
+      }
+      res.send({ message: "Email aggiornata con successo!" }); // Success message
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message }); // Error handling
+    });
+};
