@@ -89,77 +89,77 @@ module.exports = function (app) {
     "/api/upload/uploadDocuments",
     upload.array("files"),
     async (req, res) => {
-      const files = req.files;
-      const userId = req.body.userId;
-      const category = req.body.category;
-      const fiscalCode = req.body.fiscalCode;
-      const expireDate = req.body.expireDate ? req.body.expireDate : null;
-      const releaseMonth = req.body.releaseMonth ? req.body.releaseMonth : null;
-      const releaseYear = req.body.releaseYear ? req.body.releaseYear : null;
+      try {
+        const files = req.files;
+        const userId = req.body.userId;
+        const category = req.body.category;
+        const fiscalCode = req.body.fiscalCode;
+        const expireDate = req.body.expireDate ? req.body.expireDate : null;
+        const releaseMonth = req.body.releaseMonth ? req.body.releaseMonth : null;
+        const releaseYear = req.body.releaseYear ? req.body.releaseYear : null;
 
-      if (!files) {
-        return res.status(400).send("No files were uploaded.");
-      }
+        if (!files) {
+          return res.status(400).send("No files were uploaded.");
+        }
 
-      // Upload each file to Digital Ocean Spaces
-      const uploadPromises = files.map((file, index) => {
-        const timestamp = Date.now();
-        const params = {
-          Bucket: "ctf.images",
-          Key:
-            "documents/" +
-            fiscalCode +
-            "/" +
-            category +
-            "/" +
-            timestamp +
-            "/" +
-            file.originalname,
-          Body: file.buffer,
-        };
-
-        return s3Client.upload(params).promise();
-      });
-
-      Promise.all(uploadPromises)
-        .then((results) => {
-          const response = {
-            success: true,
-            message: "Documents uploaded successfully",
-            files: results,
+        // Upload each file to Digital Ocean Spaces
+        const uploadPromises = files.map((file, index) => {
+          const timestamp = Date.now();
+          const params = {
+            Bucket: "ctf.images",
+            Key:
+              "documents/" +
+              fiscalCode +
+              "/" +
+              category +
+              "/" +
+              timestamp +
+              "/" +
+              file.originalname,
+            Body: file.buffer,
           };
 
-          for (let result of results) {
-            +userDocuments.create({
-              userId: userId,
-              fiscalCode: fiscalCode,
-              category: category,
-              etag: result?.ETag,
-              location: result?.Location,
-              keyFile: result?.Key,
-              bucket: result?.Bucket,
-              expireDate: expireDate,
-              releaseMonth: releaseMonth,
-              releaseYear: releaseYear,
-            });
-            var parts = result?.Key.split("/");
-            var fileName = parts[parts.length - 1];
-
-            res
-              .status(201)
-              .send({ message: fileName + " aggiunto con successo!" });
-          }
-        })
-        .catch((error) => {
-          const response = {
-            success: false,
-            message: "Error uploading files",
-            error: error.message,
-          };
-          res.status(500).json(response);
+          return s3Client.upload(params).promise();
         });
+
+        const results = await Promise.all(uploadPromises);
+
+        const uploadResults = [];
+
+        for (let result of results) {
+          await userDocuments.create({
+            userId: userId,
+            fiscalCode: fiscalCode,
+            category: category,
+            etag: result?.ETag,
+            location: result?.Location,
+            keyFile: result?.Key,
+            bucket: result?.Bucket,
+            expireDate: expireDate,
+            releaseMonth: releaseMonth,
+            releaseYear: releaseYear,
+          });
+
+          var parts = result?.Key.split("/");
+          var fileName = parts[parts.length - 1];
+          uploadResults.push(fileName + " aggiunto con successo!");
+        }
+
+        res.status(201).send({
+          success: true,
+          message: "Documents uploaded successfully",
+          files: uploadResults,
+        });
+      } catch (error) {
+        res.status(500).json({
+          success: false,
+          message: "Error uploading files",
+          error: error.message,
+        });
+      }
     }
   );
+
   app.post(
     "/api/upload/uploadEntityDocuments",
     upload.array("files"),
