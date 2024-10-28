@@ -101,12 +101,28 @@ exports.sendBackupEmail = async (req, res) => {
     // Estrai i dati da ogni tabella
     for (const table of tables) {
       const tableName = table[`Tables_in_${dbConfig.DB}`]; // Modifica secondo il tuo database
+
+      // Ottieni i nomi delle colonne della tabella
+      const [columns] = await sequelize.query(`SHOW COLUMNS FROM \`${tableName}\``);
+      const columnNames = columns.map(col => `\`${col.Field}\``).join(', '); // Estrai i nomi delle colonne
+
+      // Estrai i dati dalla tabella
       const [rows] = await sequelize.query(`SELECT * FROM \`${tableName}\``);
 
       // Crea la stringa SQL per l'inserimento
       if (rows.length > 0) {
-        const values = rows.map(row => `(${Object.values(row).map(value => `'${value}'`).join(', ')})`).join(', ');
-        sqlDump.push(`INSERT INTO \`${tableName}\` VALUES ${values};\n`);
+        const values = rows.map(row => {
+          return `(${Object.entries(row).map(([key, value]) => {
+            if ((key === 'createdAt' || key === 'updatedAt') && value) {
+              // Formatta la data in YYYY-MM-DD HH:MM:SS
+              const date = new Date(value);
+              return `'${date.toISOString().slice(0, 19).replace('T', ' ')}'`;
+            }
+            return `'${value}'`;
+          }).join(', ')})`;
+        }).join(', ');
+
+        sqlDump.push(`INSERT INTO \`${tableName}\` (${columnNames}) VALUES ${values};\n`); // Aggiungi i nomi delle colonne
       }
     }
 
