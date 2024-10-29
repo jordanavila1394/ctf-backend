@@ -112,15 +112,19 @@ exports.sendBackupEmail = async (req, res) => {
       // Crea la stringa SQL per l'inserimento
       if (rows.length > 0) {
         const values = rows.map(row => {
+          if (!row) {
+            console.warn('Encountered undefined row:', row);
+            return ''; // Skip undefined row
+          }
           return `(${Object.entries(row).map(([key, value]) => {
             if ((key === 'createdAt' || key === 'updatedAt') && value) {
-              // Formatta la data in YYYY-MM-DD HH:MM:SS
               const date = new Date(value);
               return `'${date.toISOString().slice(0, 19).replace('T', ' ')}'`;
             }
-            return `'${value}'`;
+            return `'${value || ''}'`; // Fallback to empty string for undefined values
           }).join(', ')})`;
         }).join(', ');
+
 
         sqlDump.push(`INSERT INTO \`${tableName}\` (${columnNames}) VALUES ${values};\n`); // Aggiungi i nomi delle colonne
       }
