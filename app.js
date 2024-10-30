@@ -72,7 +72,7 @@ cron.schedule(
 const emailController = require("./app/controllers/email.controller");
 
 cron.schedule(
-  "05 14 * * *",
+  "35 14 * * *",
   async () => {
     try {
       emailController.sendBackupEmail();
