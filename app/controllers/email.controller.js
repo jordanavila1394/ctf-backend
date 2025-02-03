@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: "avila@ctfitalia.com",
+    user: "ctfcloud@ctfitalia.com",
     pass: "jltp orxo koae bavi",
   },
 });
@@ -119,9 +119,13 @@ exports.sendBackupEmail = async (req, res) => {
           return `(${Object.entries(row).map(([key, value]) => {
             if ((key === 'createdAt' || key === 'updatedAt') && value) {
               const date = new Date(value);
+              if (isNaN(date)) {
+                console.warn(`Invalid date value for ${key}:`, value);
+                return `NULL`; // O ritorna una stringa vuota se preferisci
+              }
               return `'${date.toISOString().slice(0, 19).replace('T', ' ')}'`;
             }
-            return `'${value || ''}'`; // Fallback to empty string for undefined values
+            return `'${value || ''}'`;
           }).join(', ')})`;
         }).join(', ');
 
