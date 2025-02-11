@@ -152,6 +152,52 @@ exports.allPermissions = (req, res) => {
 };
 
 
+exports.allPermissionsByMonth = async (req, res) => {
+  try {
+    const idCompany = req.body.idCompany;
+    const whereCondition = idCompany > 0 ? { companyId: idCompany } : {};
+
+    const permissions = await Permission.findAll({
+      include: [
+        {
+          model: db.user,
+          as: "user",
+        },
+      ],
+      where: whereCondition,
+      order: [["createdAt", "DESC"]],
+    });
+
+    // Raggruppa per mese
+    const groupedByMonth = permissions.reduce((acc, permission) => {
+      const month = permission.createdAt.toISOString().slice(0, 7); // yyyy-MM
+      if (!acc[month]) {
+        acc[month] = [];
+      }
+      acc[month].push(permission);
+      return acc;
+    }, {});
+
+    // Ordina i mesi dal più recente al meno recente
+    const sortedMonths = Object.keys(groupedByMonth).sort((a, b) => new Date(b) - new Date(a));
+
+    // Ordina per ogni mese con "In Attesa" per primi
+    const sortedGroupedByMonth = {};
+    sortedMonths.forEach((month) => {
+      sortedGroupedByMonth[month] = groupedByMonth[month].sort((a, b) => {
+        if (a.status === "In Attesa" && b.status !== "In Attesa") return -1;
+        if (a.status !== "In Attesa" && b.status === "In Attesa") return 1;
+        return new Date(b.createdAt) - new Date(a.createdAt); // Mantiene l'ordine per data
+      });
+    });
+
+    res.status(200).send(sortedGroupedByMonth);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+
 exports.permissionsByClient = async (req, res) => {
   const { associatedClient, startDate, endDate } = req.body;
 
