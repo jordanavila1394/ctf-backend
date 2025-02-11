@@ -151,6 +151,7 @@ exports.allPermissions = (req, res) => {
   }
 };
 
+
 exports.allPermissionsByMonth = async (req, res) => {
   try {
     const idCompany = req.body.idCompany;
@@ -177,20 +178,25 @@ exports.allPermissionsByMonth = async (req, res) => {
       return acc;
     }, {});
 
+    // Ordina i mesi dal più recente al meno recente
+    const sortedMonths = Object.keys(groupedByMonth).sort((a, b) => new Date(b) - new Date(a));
+
     // Ordina per ogni mese con "In Attesa" per primi
-    Object.keys(groupedByMonth).forEach((month) => {
-      groupedByMonth[month].sort((a, b) => {
+    const sortedGroupedByMonth = {};
+    sortedMonths.forEach((month) => {
+      sortedGroupedByMonth[month] = groupedByMonth[month].sort((a, b) => {
         if (a.status === "In Attesa" && b.status !== "In Attesa") return -1;
         if (a.status !== "In Attesa" && b.status === "In Attesa") return 1;
         return new Date(b.createdAt) - new Date(a.createdAt); // Mantiene l'ordine per data
       });
     });
 
-    res.status(200).send(groupedByMonth);
+    res.status(200).send(sortedGroupedByMonth);
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
 };
+
 
 exports.permissionsByClient = async (req, res) => {
   const { associatedClient, startDate, endDate } = req.body;
