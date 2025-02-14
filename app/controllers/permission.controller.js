@@ -252,8 +252,12 @@ exports.permissionsByClient = async (req, res) => {
         attendances: user.attendances
           .map((attendance) => {
             return {
-              date: attendance.checkIn,
-              type: "Presenza",
+              date: new Date(attendance.checkIn).toLocaleDateString("it-IT", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              }),
+              type: attendance.status,
             };
           })
           .filter((attendance) => {
