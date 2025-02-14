@@ -1,6 +1,7 @@
 const db = require("../models");
 var moment = require("moment/moment");
 const Permission = db.permission;
+const Attendance = db.attendance;
 const User = db.user;
 const Op = db.Sequelize.Op;
 
@@ -202,53 +203,89 @@ exports.permissionsByClient = async (req, res) => {
   const { associatedClient, startDate, endDate } = req.body;
 
   try {
-    // Define query options
     let queryOptions = {
-      include: [{
-        model: Permission,
-        as: "permissions",
-        order: [["createdAt", "DESC"]]
-      }],
+      include: [
+        {
+          model: Permission,
+          as: "permissions",
+          order: [["createdAt", "DESC"]],
+        },
+        {
+          model: Attendance,
+          as: "attendances",
+          order: [["checkIn", "DESC"]],
+        },
+      ],
     };
 
-    // Add where clause for associatedClient if provided
     if (associatedClient) {
       queryOptions.where = {
-        associatedClient: associatedClient
+        associatedClient: associatedClient,
       };
     }
 
-    // Find all users with the given associatedClient or without where clause if associatedClient is null
     const users = await User.findAll(queryOptions);
 
-    // Transform the data into the desired format
-    let result = users.map(user => {
+    let result = users.map((user) => {
       return {
         id: user.id,
         name: user.name,
         surname: user.surname,
         fiscalCode: user.fiscalCode,
-        absences: user.permissions.map(permission => {
-          return {
-            date: permission.dates,
-            type: permission.typology
-          };
-        }).filter(absence => {
-          // Filter absences by date range
-          return absence.date.split(',').some(dateStr => {
-            const [day, month, year] = dateStr.split('-').map(Number);
-            const absenceDate = new Date(year, month - 1, day);
-            return absenceDate >= new Date(startDate) && absenceDate <= new Date(endDate);
-          });
-        })
+        absences: user.permissions
+          .map((permission) => {
+            return {
+              date: permission.dates,
+              type: permission.typology,
+            };
+          })
+          .filter((absence) => {
+            return absence.date.split(",").some((dateStr) => {
+              const [day, month, year] = dateStr.split("-").map(Number);
+              const absenceDate = new Date(year, month - 1, day);
+              return (
+                absenceDate >= new Date(startDate) &&
+                absenceDate <= new Date(endDate)
+              );
+            });
+          }),
+        attendances: user.attendances
+          .map((attendance) => {
+            return {
+              date: new Date(attendance.checkIn)
+                .toLocaleDateString("it-IT", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })
+                .replace(/\//g, "-"),
+              type: attendance.status,
+            };
+          })
+          .filter((attendance) => {
+            const attendanceDate = new Date(
+              attendance.date.split("-").reverse().join("-")
+            );
+            return (
+              attendanceDate >= new Date(startDate) &&
+              attendanceDate <= new Date(endDate)
+            );
+          }),
       };
     });
 
-    // Filter out users with no absences
-    result = result.filter(user => user.absences.length > 0);
+    result = result.filter(
+      (user) => user.absences.length > 0 || user.attendances.length > 0
+    );
 
-    // Sort users by the length of their absences
-    result.sort((a, b) => b.absences.length - a.absences.length);
+    // Ordinamento alfabetico per nome e cognome
+    result.sort((a, b) => {
+      if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+      if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+      if (a.surname.toLowerCase() < b.surname.toLowerCase()) return -1;
+      if (a.surname.toLowerCase() > b.surname.toLowerCase()) return 1;
+      return 0;
+    });
 
     res.status(200).send(result);
   } catch (err) {
