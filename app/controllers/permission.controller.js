@@ -252,18 +252,21 @@ exports.permissionsByClient = async (req, res) => {
         attendances: user.attendances
           .map((attendance) => {
             return {
-              date: new Date(attendance.checkIn).toLocaleDateString("it-IT", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              }).replace(/\//g, "-"),
+              date: new Date(attendance.checkIn)
+                .toLocaleDateString("it-IT", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })
+                .replace(/\//g, "-"),
               type: attendance.status,
             };
           })
           .filter((attendance) => {
             const attendanceDate = new Date(
               attendance.date.split("-").reverse().join("-")
-            );            return (
+            );
+            return (
               attendanceDate >= new Date(startDate) &&
               attendanceDate <= new Date(endDate)
             );
@@ -275,16 +278,21 @@ exports.permissionsByClient = async (req, res) => {
       (user) => user.absences.length > 0 || user.attendances.length > 0
     );
 
-    result.sort((a, b) =>
-      b.absences.length + b.attendances.length -
-      (a.absences.length + a.attendances.length)
-    );
+    // Ordinamento alfabetico per nome e cognome
+    result.sort((a, b) => {
+      if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+      if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+      if (a.surname.toLowerCase() < b.surname.toLowerCase()) return -1;
+      if (a.surname.toLowerCase() > b.surname.toLowerCase()) return 1;
+      return 0;
+    });
 
     res.status(200).send(result);
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
 };
+
 
 exports.approvePermission = (req, res) => {
   Permission.update(
