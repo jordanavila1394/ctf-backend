@@ -261,8 +261,9 @@ exports.permissionsByClient = async (req, res) => {
             };
           })
           .filter((attendance) => {
-            const attendanceDate = new Date(attendance.date);
-            return (
+            const attendanceDate = new Date(
+              attendance.date.split("-").reverse().join("-")
+            );            return (
               attendanceDate >= new Date(startDate) &&
               attendanceDate <= new Date(endDate)
             );
