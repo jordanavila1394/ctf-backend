@@ -1,6 +1,7 @@
 const db = require("../models");
 var moment = require("moment/moment");
 const Permission = db.permission;
+const Attendance = db.attendance;
 const User = db.user;
 const Op = db.Sequelize.Op;
 
@@ -202,60 +203,83 @@ exports.permissionsByClient = async (req, res) => {
   const { associatedClient, startDate, endDate } = req.body;
 
   try {
-    // Define query options
     let queryOptions = {
-      include: [{
-        model: Permission,
-        as: "permissions",
-        order: [["createdAt", "DESC"]]
-      }],
+      include: [
+        {
+          model: Permission,
+          as: "permissions",
+          order: [["createdAt", "DESC"]],
+        },
+        {
+          model: Attendance,
+          as: "attendances",
+          order: [["checkIn", "DESC"]],
+        },
+      ],
     };
 
-    // Add where clause for associatedClient if provided
     if (associatedClient) {
       queryOptions.where = {
-        associatedClient: associatedClient
+        associatedClient: associatedClient,
       };
     }
 
-    // Find all users with the given associatedClient or without where clause if associatedClient is null
     const users = await User.findAll(queryOptions);
 
-    // Transform the data into the desired format
-    let result = users.map(user => {
+    let result = users.map((user) => {
       return {
         id: user.id,
         name: user.name,
         surname: user.surname,
         fiscalCode: user.fiscalCode,
-        absences: user.permissions.map(permission => {
-          return {
-            date: permission.dates,
-            type: permission.typology
-          };
-        }).filter(absence => {
-          // Filter absences by date range
-          return absence.date.split(',').some(dateStr => {
-            const [day, month, year] = dateStr.split('-').map(Number);
-            const absenceDate = new Date(year, month - 1, day);
-            return absenceDate >= new Date(startDate) && absenceDate <= new Date(endDate);
-          });
-        })
+        absences: user.permissions
+          .map((permission) => {
+            return {
+              date: permission.dates,
+              type: permission.typology,
+            };
+          })
+          .filter((absence) => {
+            return absence.date.split(",").some((dateStr) => {
+              const [day, month, year] = dateStr.split("-").map(Number);
+              const absenceDate = new Date(year, month - 1, day);
+              return (
+                absenceDate >= new Date(startDate) &&
+                absenceDate <= new Date(endDate)
+              );
+            });
+          }),
+        attendances: user.attendances
+          .map((attendance) => {
+            return {
+              date: attendance.checkIn,
+              type: "Presenza",
+            };
+          })
+          .filter((attendance) => {
+            const attendanceDate = new Date(attendance.date);
+            return (
+              attendanceDate >= new Date(startDate) &&
+              attendanceDate <= new Date(endDate)
+            );
+          }),
       };
     });
 
-    // Filter out users with no absences
-    result = result.filter(user => user.absences.length > 0);
+    result = result.filter(
+      (user) => user.absences.length > 0 || user.attendances.length > 0
+    );
 
-    // Sort users by the length of their absences
-    result.sort((a, b) => b.absences.length - a.absences.length);
+    result.sort((a, b) =>
+      b.absences.length + b.attendances.length -
+      (a.absences.length + a.attendances.length)
+    );
 
     res.status(200).send(result);
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
 };
-
 
 exports.approvePermission = (req, res) => {
   Permission.update(
