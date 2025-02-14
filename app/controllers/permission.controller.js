@@ -256,7 +256,7 @@ exports.permissionsByClient = async (req, res) => {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric",
-              }),
+              }).replace(/\//g, "-"),
               type: attendance.status,
             };
           })
