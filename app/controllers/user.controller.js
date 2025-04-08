@@ -399,6 +399,23 @@ exports.getAllAssociatedClients = (req, res) => {
     });
 };
 
+exports.getAllAssociatedBrenchs= (req, res) => {
+  User.findAll({
+    attributes: [
+      [db.Sequelize.fn('DISTINCT', db.Sequelize.col('associatedBrench')), 'associatedBrench']
+    ],
+    order: [['associatedBrench', 'ASC']]
+  })
+    .then((clients) => {
+      const associatedBrenchs = clients.map(client => client.associatedBrench);
+      res.status(200).send(associatedBrenchs);
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
+
 exports.updateUserEmail = (req, res) => {
   // Update User Email in Database
   User.update(
