@@ -400,16 +400,16 @@ exports.getAllAssociatedClients = (req, res) => {
     });
 };
 
-exports.getAllAssociatedBrenchs= (req, res) => {
+exports.getAllAssociatedBranchs= (req, res) => {
   User.findAll({
     attributes: [
-      [db.Sequelize.fn('DISTINCT', db.Sequelize.col('associatedBrench')), 'associatedBrench']
+      [db.Sequelize.fn('DISTINCT', db.Sequelize.col('associatedBranch')), 'associatedBranch']
     ],
-    order: [['associatedBrench', 'ASC']]
+    order: [['associatedBranch', 'ASC']]
   })
     .then((clients) => {
-      const associatedBrenchs = clients.map(client => client.associatedBrench);
-      res.status(200).send(associatedBrenchs);
+      const associatedBranchs = clients.map(client => client.associatedBaench);
+      res.status(200).send(associatedBranchs);
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
