@@ -408,7 +408,7 @@ exports.getAllAssociatedBranchs= (req, res) => {
     order: [['associatedBranch', 'ASC']]
   })
     .then((clients) => {
-      const associatedBranchs = clients.map(client => client.associatedBaench);
+      const associatedBranchs = clients.map(client => client.associatedBranch);
       res.status(200).send(associatedBranchs);
     })
     .catch((err) => {
