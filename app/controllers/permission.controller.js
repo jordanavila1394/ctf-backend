@@ -216,6 +216,7 @@ exports.permissionsByClientAndBranch = async (req, res) => {
           order: [["checkIn", "DESC"]],
         },
       ],
+      where: {}, // Inizializza 'where' come oggetto vuoto
     };
 
     if (associatedClient) {
