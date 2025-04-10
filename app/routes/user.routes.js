@@ -70,4 +70,6 @@ module.exports = function (app) {
 
 
   app.get("/api/user/getAllAssociatedClients", [authJwt.verifyToken], controller.getAllAssociatedClients);
+  app.get("/api/user/getAllAssociatedBranchs", [authJwt.verifyToken], controller.getAllAssociatedBranchs);
+
 };

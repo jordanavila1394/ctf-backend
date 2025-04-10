@@ -199,8 +199,8 @@ exports.allPermissionsByMonth = async (req, res) => {
 };
 
 
-exports.permissionsByClient = async (req, res) => {
-  const { associatedClient, startDate, endDate } = req.body;
+exports.permissionsByClientAndBranch = async (req, res) => {
+  const { associatedClient, associatedBranch, startDate, endDate } = req.body;
 
   try {
     let queryOptions = {
@@ -216,12 +216,15 @@ exports.permissionsByClient = async (req, res) => {
           order: [["checkIn", "DESC"]],
         },
       ],
+      where: {}, // Inizializza 'where' come oggetto vuoto
     };
 
     if (associatedClient) {
-      queryOptions.where = {
-        associatedClient: associatedClient,
-      };
+      queryOptions.where.associatedClient = associatedClient;
+
+    }
+    if (associatedBranch) {
+      queryOptions.where.associatedBranch = associatedBranch;
     }
 
     const users = await User.findAll(queryOptions);

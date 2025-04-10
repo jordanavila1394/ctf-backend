@@ -225,6 +225,7 @@ exports.createUser = (req, res) => {
     fiscalCode: req.body.fiscalCode,
     workerNumber: parseInt(req.body.workerNumber, 10) || 0,
     associatedClient: req.body.associatedClient || '',
+    associatedBranch: req.body.associatedBranch || '',
     position: req.body.position,
     iban: req.body.iban,
     address: req.body.address,
@@ -305,6 +306,7 @@ exports.patchUser = (req, res) => {
       fiscalCode: req.body.fiscalCode,
       workerNumber: parseInt(req.body.workerNumber, 10) || 0,
       associatedClient: req.body.associatedClient || "",
+      associatedBranch: req.body.associatedBranch || "",
       position: req.body.position,
       iban: req.body.iban,
       address: req.body.address,
@@ -326,6 +328,7 @@ exports.patchUser = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
 
 exports.saveProfileUser = (req, res) => {
   // Save User to Database
@@ -396,6 +399,23 @@ exports.getAllAssociatedClients = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.getAllAssociatedBranchs= (req, res) => {
+  User.findAll({
+    attributes: [
+      [db.Sequelize.fn('DISTINCT', db.Sequelize.col('associatedBranch')), 'associatedBranch']
+    ],
+    order: [['associatedBranch', 'ASC']]
+  })
+    .then((clients) => {
+      const associatedBranchs = clients.map(client => client.associatedBranch);
+      res.status(200).send(associatedBranchs);
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
 
 exports.updateUserEmail = (req, res) => {
   // Update User Email in Database

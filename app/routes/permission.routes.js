@@ -52,9 +52,9 @@ module.exports = function (app) {
   );
 
   app.post(
-    "/api/permission/permissionsByClient",
+    "/api/permission/permissionsByClientAndBranch",
     [authJwt.verifyToken],
-    controller.permissionsByClient
+    controller.permissionsByClientAndBranch
   );
 
   app.post(
