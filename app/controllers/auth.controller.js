@@ -198,6 +198,28 @@ exports.generatePin = async (req, res) => {
   }
 };
 
+exports.getUserPin = async (req, res) => {
+  const userId = req.params.id;  // esempio: /api/user-pin/:id
+
+  if (!userId) {
+    return res.status(400).send({ message: 'ID utente mancante' });
+  }
+
+  try {
+    const user = await User.findByPk(userId, {
+      attributes: ['pin'],  // prendo solo il pin
+    });
+
+    if (!user) {
+      return res.status(404).send({ message: 'Utente non trovato' });
+    }
+
+    return res.status(200).send({ pin: user.pin });
+  } catch (error) {
+    console.error('Errore getUserPin:', error);
+    return res.status(500).send({ message: 'Errore server' });
+  }
+};
 
 exports.test = (req, res) => {
   res.json({ message: "workpath" });
