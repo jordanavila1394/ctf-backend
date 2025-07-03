@@ -102,7 +102,7 @@ exports.signin = (req, res) => {
     });
 };
 
-exports.signInPin = (req, res) => {
+exports.signinPin = (req, res) => {
   console.log(req.body);
   const { pin } = req.body;
 
