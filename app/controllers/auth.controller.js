@@ -148,6 +148,55 @@ exports.signinPin = (req, res) => {
     });
 };
 
+function generateRandomPin() {
+  return Math.floor(10000 + Math.random() * 90000).toString();
+}
+
+exports.generatePin = async (req, res) => {
+  const { id } = req.body;
+
+  if (!id) {
+    return res.status(400).send({ message: 'ID utente mancante' });
+  }
+
+  try {
+    // Controlla che l'utente esista
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).send({ message: 'Utente non trovato' });
+    }
+
+    let pin;
+    let attempts = 0;
+    const maxAttempts = 100;
+    let pinUsed = true;
+
+    // Loop per generare PIN unico
+    while (pinUsed && attempts < maxAttempts) {
+      pin = generateRandomPin();
+
+      const existingUserWithPin = await User.findOne({
+        where: { pin: pin },
+      });
+
+      pinUsed = existingUserWithPin !== null;
+      attempts++;
+    }
+
+    if (pinUsed) {
+      return res.status(500).send({ message: 'Impossibile generare PIN univoco' });
+    }
+
+    // Assegna PIN all'utente
+    user.pin = pin;
+    await user.save();
+
+    return res.status(200).send({ message: 'PIN generato con successo', pin: pin });
+  } catch (error) {
+    console.error('Errore generaPIN:', error);
+    return res.status(500).send({ message: error.message || 'Errore server' });
+  }
+};
 
 
 exports.test = (req, res) => {
