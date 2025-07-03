@@ -102,6 +102,53 @@ exports.signin = (req, res) => {
     });
 };
 
+exports.signInPin = (req, res) => {
+  console.log(req.body);
+  const { pin } = req.body;
+
+  if (!pin || pin.length !== 5) {
+    return res.status(400).send({ message: 'PIN non valido' });
+  }
+
+  User.findOne({
+    where: {
+      pin: pin,
+    },
+  })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: 'Utente non trovato o PIN errato' });
+      }
+
+      const token = jwt.sign({ id: user.id }, config.secret, {
+        algorithm: 'HS256',
+        allowInsecureKeySizes: true,
+        expiresIn: 86400, // 24 ore
+      });
+
+      var authorities = [];
+      user.getRoles().then((roles) => {
+        for (let i = 0; i < roles.length; i++) {
+          authorities.push('ROLE_' + roles[i].name.toUpperCase());
+        }
+        res.status(200).send({
+          id: user.id,
+          fiscalCode: user.fiscalCode,
+          name: user.name,
+          surname: user.surname,
+          email: user.email,
+          roles: authorities,
+          accessToken: token,
+        });
+      });
+    })
+    .catch((err) => {
+      console.log('err.message', err.message);
+      res.status(500).send({ message: err.message });
+    });
+};
+
+
 
 exports.test = (req, res) => {
   res.json({ message: "workpath" });

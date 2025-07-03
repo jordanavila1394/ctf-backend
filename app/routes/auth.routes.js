@@ -17,6 +17,7 @@ module.exports = function (app) {
   );
 
   app.post("/api/auth/signin", controller.signin);
+  app.post("/api/auth/signin-pin", controller.signinPin);
 
   app.get("/api/auth/test", controller.test);
 };
