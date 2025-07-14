@@ -21,6 +21,6 @@ module.exports = function (app) {
     controller.createVehicle
   );
 
-  app.get('/info/plate/:plate', [authJwt.verifyToken], controller.getVehicleInfoByPlate);
+  app.get('/api/vehicle/info/plate/:plate', [authJwt.verifyToken], controller.getVehicleInfoByPlate);
 
 };
