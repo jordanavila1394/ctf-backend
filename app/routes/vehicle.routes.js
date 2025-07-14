@@ -20,4 +20,7 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.createVehicle
   );
+
+  router.get('/info/plate/:plate', [authJwt.verifyToken], controller.getVehicleInfoByPlate);
+
 };
