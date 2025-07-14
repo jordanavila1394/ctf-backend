@@ -70,12 +70,16 @@ exports.createVehicle = (req, res) => {
 
 exports.getVehicleInfoByPlate = (req, res) => {
   const plate = req.params.plate;
+
   Vehicle.findOne({
     include: [
       { model: User, as: "user" },
       { model: Company, as: "company" },
     ],
-    where: { licensePlate: { [Op.iLike]: plate } }, // iLike per case-insensitive (Postgres)
+    where: db.Sequelize.where(
+      db.Sequelize.fn('LOWER', db.Sequelize.col('licensePlate')),
+      plate.toLowerCase()
+    ),
   })
     .then((vehicle) => {
       if (!vehicle) {
