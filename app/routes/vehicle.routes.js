@@ -21,6 +21,6 @@ module.exports = function (app) {
     controller.createVehicle
   );
 
-  router.get('/info/plate/:plate', [authJwt.verifyToken], controller.getVehicleInfoByPlate);
+  app.get('/info/plate/:plate', [authJwt.verifyToken], controller.getVehicleInfoByPlate);
 
 };
