@@ -263,6 +263,7 @@ exports.permissionsByClientAndBranch = async (req, res) => {
                 })
                 .replace(/\//g, "-"),
               type: attendance.status,
+              hours: formatDifferenceAccurateHours(attendance.checkIn, attendance.checkOut),
             };
           })
           .filter((attendance) => {
