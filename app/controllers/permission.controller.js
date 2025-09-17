@@ -413,13 +413,32 @@ exports.cleanPermissions = async (req, res) => {
 function formatDifferenceAccurateHours(date2, date1) {
   const checkIn = moment(date1);
   const checkOut = moment(date2);
+
+  // Verifica validità delle date
+  if (!checkIn.isValid() || !checkOut.isValid()) {
+    return "00:00";
+  }
+
   const duration = moment.duration(checkOut.diff(checkIn));
+  let totalMinutes = duration.asMinutes();
 
-  const preciseHours = duration.asHours(); // ore decimali
-  const roundedHours = preciseHours.toFixed(2); // es. "6.89"
+  // Limite massimo: 9 ore e 30 minuti = 570 minuti
+  const maxMinutes = 9 * 60 + 30;
+  if (totalMinutes > maxMinutes) {
+    return "09:30";
+  }
 
-  const hours = Math.floor(preciseHours); // parte intera
-  const minutes = Math.round((preciseHours - hours) * 60); // parte decimale convertita in minuti
+  if (totalMinutes < 0) {
+    return "00:00";
+  }
 
-  return `${roundedHours} ore (${hours} ore e ${minutes} minuti)`;
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = Math.round(totalMinutes % 60);
+
+  // Formatta con zeri iniziali
+  const formattedHours = hours.toString().padStart(2, '0');
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+
+  return `${formattedHours}:${formattedMinutes}`;
 }
+
