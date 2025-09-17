@@ -409,3 +409,17 @@ exports.cleanPermissions = async (req, res) => {
     res.status(500).send({ message: err.message });
   }
 };
+
+function formatDifferenceAccurateHours(date2, date1) {
+  const checkIn = moment(date1);
+  const checkOut = moment(date2);
+  const duration = moment.duration(checkOut.diff(checkIn));
+
+  const preciseHours = duration.asHours(); // ore decimali
+  const roundedHours = preciseHours.toFixed(2); // es. "6.89"
+
+  const hours = Math.floor(preciseHours); // parte intera
+  const minutes = Math.round((preciseHours - hours) * 60); // parte decimale convertita in minuti
+
+  return `${roundedHours} ore (${hours} ore e ${minutes} minuti)`;
+}
