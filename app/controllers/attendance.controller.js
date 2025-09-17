@@ -263,7 +263,7 @@ exports.checkInAttendance = (req, res) => {
             Attendance.update(
               {
                 checkOut: moment(attendance?.checkIn)
-                  .set({ hour: 17, minute: 0 })
+                  .set({ hour: 17, minute: 30 })
                   .utc()
                   .format(),
                 status: "CheckOut?",
@@ -291,7 +291,7 @@ exports.checkInAttendance = (req, res) => {
                 .utc()
                 .format(),
               checkOut: moment(checkInInMonth)
-                .set({ hour: 17, minute: 0 })
+                .set({ hour: 17, minute: 30 })
                 .utc()
                 .format(),
             });
@@ -445,7 +445,7 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
 
               userAttendanceSummary["GG-" + currentDate.format("DD")] =
                 attendanceOfDay
-                  ? formatDifferenceHours(
+                  ? formatDifferenceAccurateHours(
                     new Date(attendanceOfDay?.checkOut),
                     new Date(attendanceOfDay?.checkIn)
                   )
@@ -531,7 +531,7 @@ exports.synchronizeAttendances = async (req, res) => {
       if (moment(attendance.checkIn).format("DD") !== moment().format("DD") && !attendance.checkOut) {
         await Attendance.update(
           {
-            checkOut: formatDate(moment(attendance.checkIn).set({ hour: 17, minute: 0 }).utc(), ""),
+            checkOut: formatDate(moment(attendance.checkIn).set({ hour: 17, minute: 30 }).utc(), ""),
             status: "CheckOut?",
           },
           { where: { id: attendance.id } }
@@ -552,7 +552,7 @@ exports.synchronizeAttendances = async (req, res) => {
       if (!found) {
         missingDays.push({
           checkIn: formatDate(moment(checkInInMonth).set({ hour: 8, minute: 0 }).utc(), ""),
-          checkOut: formatDate(moment(checkInInMonth).set({ hour: 17, minute: 0 }).utc(), ""),
+          checkOut: formatDate(moment(checkInInMonth).set({ hour: 17, minute: 30 }).utc(), ""),
         });
       }
       checkInInMonth.add(1, "days");
@@ -573,7 +573,7 @@ exports.synchronizeAttendances = async (req, res) => {
     const permissions = await Permission.findAll({
       where: {
         userId: userId,
-        status:'Approvato'
+        status: 'Approvato'
       },
     });
 
@@ -615,6 +615,41 @@ function formatDifferenceHours(date2, date1) {
     return 0;
   }
 }
+function calculateMissingWorkingHours(date2, date1) {
+  const checkIn = moment(date1);
+  const checkOut = moment(date2);
+  const duration = moment.duration(checkOut.diff(checkIn));
+
+  const totalWorkedHours = duration.asHours(); // ore decimali
+  const standardWorkingHours = 9.5; // 9 ore e 30 minuti
+
+  const missingHours = standardWorkingHours - totalWorkedHours;
+
+  if (missingHours <= 0) {
+    return "Nessuna ora mancante";
+  }
+
+  const hours = Math.floor(missingHours);
+  const minutes = Math.round((missingHours - hours) * 60);
+  const rounded = missingHours.toFixed(2);
+
+  return `${hours}:${minutes}`;
+}
+
+function formatDifferenceAccurateHours(date2, date1) {
+  const checkIn = moment(date1);
+  const checkOut = moment(date2);
+  const duration = moment.duration(checkOut.diff(checkIn));
+
+  const preciseHours = duration.asHours(); // ore decimali
+  const roundedHours = preciseHours.toFixed(2); // es. "6.89"
+
+  const hours = Math.floor(preciseHours); // parte intera
+  const minutes = Math.round((preciseHours - hours) * 60); // parte decimale convertita in minuti
+
+  return `${roundedHours} ore (${hours} ore e ${minutes} minuti)`;
+}
+
 
 function formatIsWeekendOrFestivo(date) {
   if (date.getDay() == 6 || date.getDay() == 0) return true;
