@@ -318,11 +318,9 @@ exports.checkInAttendance = (req, res) => {
 };
 
 exports.checkInAttendanceWithTime = (req, res) => {
-  const ItalyZone = "Europe/Rome";
-
   const checkInTime = req.body.checkInTime
-    ? moment(req.body.checkInTime).tz(ItalyZone).format("YYYY-MM-DD HH:mm:ss")
-    : moment().tz(ItalyZone).set({ hour: 9, minute: 0 }).format("YYYY-MM-DD HH:mm:ss");
+    ? moment(req.body.checkInTime).format("YYYY-MM-DD HH:mm:ss")
+    : moment().set({ hour: 9, minute: 0 }).format("YYYY-MM-DD HH:mm:ss");
 
   Attendance.create({
     userId: req.body.userId,
@@ -334,8 +332,8 @@ exports.checkInAttendanceWithTime = (req, res) => {
   })
     .then((attendance) => {
       const idUser = req.body.userId;
-      const startOfMonth = moment().startOf("month").format("YYYY-MM-DD 00:00");
-      const endOfMonth = moment().endOf("month").format("YYYY-MM-DD 23:59");
+      const startOfMonth = moment().startOf("month").set({ hour: 0, minute: 0 }).format("YYYY-MM-DD HH:mm:ss");
+      const endOfMonth = moment().endOf("month").set({ hour: 23, minute: 59 }).format("YYYY-MM-DD HH:mm:ss");
 
       Attendance.findAll({
         where: {
@@ -348,16 +346,17 @@ exports.checkInAttendanceWithTime = (req, res) => {
       }).then((attendances) => {
         // Fix missing checkout
         for (let attendance of attendances) {
-          if (
-            moment(attendance?.checkIn).format("DD") !== moment().format("DD") &&
-            !attendance?.checkOut
-          ) {
+          const checkInDay = moment(attendance?.checkIn).format("DD");
+          const today = moment().format("DD");
+
+          if (checkInDay !== today && !attendance?.checkOut) {
+            const checkOutTime = moment(attendance?.checkIn)
+              .set({ hour: 17, minute: 40 })
+              .format("YYYY-MM-DD HH:mm:ss");
+
             Attendance.update(
               {
-                checkOut: moment(attendance?.checkIn)
-                  .set({ hour: 17, minute: 40 })
-                  .utc()
-                  .format(),
+                checkOut: checkOutTime,
                 status: "CheckOut?",
               },
               { where: { id: attendance?.id } }
@@ -377,14 +376,8 @@ exports.checkInAttendanceWithTime = (req, res) => {
 
           if (!found) {
             missingDay.push({
-              checkIn: moment(checkInInMonth)
-                .set({ hour: 8, minute: 0 })
-                .utc()
-                .format(),
-              checkOut: moment(checkInInMonth)
-                .set({ hour: 17, minute: 40 })
-                .utc()
-                .format(),
+              checkIn: checkInInMonth.clone().set({ hour: 8, minute: 0 }).format("YYYY-MM-DD HH:mm:ss"),
+              checkOut: checkInInMonth.clone().set({ hour: 17, minute: 40 }).format("YYYY-MM-DD HH:mm:ss"),
             });
           }
           checkInInMonth.add(1, "days");
@@ -409,6 +402,7 @@ exports.checkInAttendanceWithTime = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
 
 
 exports.checkOutAttendance = (req, res) => {
@@ -446,11 +440,9 @@ exports.checkOutAttendance = (req, res) => {
 };
 
 exports.checkOutAttendanceWithTime = (req, res) => {
-  const ItalyZone = "Europe/Rome";
-
   const checkOutTime = req.body.checkOutTime
-    ? moment(req.body.checkOutTime).tz(ItalyZone).format("YYYY-MM-DD HH:mm:ss")
-    : moment().tz(ItalyZone).format("YYYY-MM-DD HH:mm:ss");
+    ? moment(req.body.checkOutTime).format("YYYY-MM-DD HH:mm:ss")
+    : moment().format("YYYY-MM-DD HH:mm:ss");
 
   Attendance.update(
     {
