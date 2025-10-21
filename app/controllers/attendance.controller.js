@@ -317,6 +317,100 @@ exports.checkInAttendance = (req, res) => {
     });
 };
 
+exports.checkInAttendanceWithTime = (req, res) => {
+  const ItalyZone = "Europe/Rome";
+
+  const checkInTime = req.body.checkInTime
+    ? moment(req.body.checkInTime).tz(ItalyZone).format("YYYY-MM-DD HH:mm:ss")
+    : moment().tz(ItalyZone).set({ hour: 9, minute: 0 }).format("YYYY-MM-DD HH:mm:ss");
+
+  Attendance.create({
+    userId: req.body.userId,
+    companyId: req.body.companyId,
+    placeId: req.body.placeId,
+    vehicleId: req.body.vehicleId,
+    checkIn: checkInTime,
+    status: "Presente",
+  })
+    .then((attendance) => {
+      const idUser = req.body.userId;
+      const startOfMonth = moment().startOf("month").format("YYYY-MM-DD 00:00");
+      const endOfMonth = moment().endOf("month").format("YYYY-MM-DD 23:59");
+
+      Attendance.findAll({
+        where: {
+          userId: idUser,
+          checkIn: {
+            [Op.between]: [startOfMonth, endOfMonth],
+          },
+        },
+        order: [["checkIn", "DESC"]],
+      }).then((attendances) => {
+        // Fix missing checkout
+        for (let attendance of attendances) {
+          if (
+            moment(attendance?.checkIn).format("DD") !== moment().format("DD") &&
+            !attendance?.checkOut
+          ) {
+            Attendance.update(
+              {
+                checkOut: moment(attendance?.checkIn)
+                  .set({ hour: 17, minute: 40 })
+                  .utc()
+                  .format(),
+                status: "CheckOut?",
+              },
+              { where: { id: attendance?.id } }
+            );
+          }
+        }
+
+        // Fix missing days of month
+        let missingDay = [];
+        let checkInInMonth = moment().startOf("month").set({ hour: 9, minute: 0 });
+        const currentDate = moment().set({ hour: 23, minute: 59 });
+
+        while (checkInInMonth.isSameOrBefore(currentDate)) {
+          const found = attendances.find(
+            (day) => moment(day.checkIn).format("DD") === checkInInMonth.format("DD")
+          );
+
+          if (!found) {
+            missingDay.push({
+              checkIn: moment(checkInInMonth)
+                .set({ hour: 8, minute: 0 })
+                .utc()
+                .format(),
+              checkOut: moment(checkInInMonth)
+                .set({ hour: 17, minute: 40 })
+                .utc()
+                .format(),
+            });
+          }
+          checkInInMonth.add(1, "days");
+        }
+
+        for (let index = 0; index < missingDay.length; index++) {
+          Attendance.create({
+            userId: req.body.userId,
+            companyId: req.body.companyId,
+            placeId: req.body.placeId,
+            vehicleId: req.body.vehicleId,
+            checkIn: missingDay[index].checkIn,
+            checkOut: missingDay[index].checkOut,
+            status: "Verificare",
+          });
+        }
+      });
+
+      res.status(201).send({ message: "CheckIn aggiunto con successo!" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
+
 exports.checkOutAttendance = (req, res) => {
   var ItalyZone = "Europe/Rome";
   const CURRENT_MOMENT = moment()
@@ -350,6 +444,41 @@ exports.checkOutAttendance = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.checkOutAttendanceWithTime = (req, res) => {
+  const ItalyZone = "Europe/Rome";
+
+  const checkOutTime = req.body.checkOutTime
+    ? moment(req.body.checkOutTime).tz(ItalyZone).format("YYYY-MM-DD HH:mm:ss")
+    : moment().tz(ItalyZone).format("YYYY-MM-DD HH:mm:ss");
+
+  Attendance.update(
+    {
+      checkOut: checkOutTime,
+      includeFacchinaggio: req.body.includeFacchinaggio || false,
+      facchinaggioNameClient: req.body.facchinaggioNameClient,
+      facchinaggioAddressClient: req.body.facchinaggioAddressClient,
+      facchinaggioValue: req.body.facchinaggioValue,
+      includeViaggioExtra: req.body.includeViaggioExtra || false,
+      viaggioExtraNameClient: req.body.viaggioExtraNameClient,
+      viaggioExtraAddressClient: req.body.viaggioExtraAddressClient,
+      viaggioExtraValue: req.body.viaggioExtraValue,
+    },
+    {
+      where: {
+        id: req.body.id,
+        userId: req.body.userId,
+      },
+    }
+  )
+    .then(() => {
+      res.status(201).send({ message: "CheckOut aggiunto con successo!" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
 
 exports.validateAttendance = (req, res) => {
   Attendance.update(

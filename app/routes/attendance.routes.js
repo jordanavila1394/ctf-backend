@@ -42,9 +42,21 @@ module.exports = function (app) {
   );
 
   app.post(
+    "/api/attendance/checkInAttendanceWithTime",
+    [authJwt.verifyToken],
+    controller.checkInAttendanceWithTime
+  );
+
+  app.post(
     "/api/attendance/checkOutAttendance",
     [authJwt.verifyToken],
     controller.checkOutAttendance
+  );
+
+  app.post(
+    "/api/attendance/checkOutAttendanceWithTime",
+    [authJwt.verifyToken],
+    controller.checkOutAttendanceWithTime
   );
 
   app.post(
