@@ -4,14 +4,25 @@ const AWS = require("aws-sdk");
 const db = require("../models");
 const AttendanceImages = db.attendanceImage;
 const userDocuments = db.userDocument;
+const nodemailer = require("nodemailer");
 
 const fs = require("fs");
 const path = require("path");
 const { v4: uuidv4 } = require("uuid");
-const transporter = require("../config/mailer"); // Assicurati che sia configurato
+ // Assicurati che sia configurato
 const htmlTemplatePath = path.join(__dirname, "../templates/defaultEmail.html");
 const logoPath = path.join(__dirname, "../templates/logo.png");
 
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: "ctfcloud@ctfitalia.com",
+    pass: "jltp orxo koae bavi",
+  },
+});
 
 const entityDocuments = db.entityDocument;
 module.exports = function (app) {
