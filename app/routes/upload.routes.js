@@ -263,7 +263,10 @@ module.exports = function (app) {
             attachments,
           };
 
-          await transporter.sendMail(mailOptions);
+          await transporter.sendMail(mailOptions).catch((err) => {
+            console.error("❌ Errore invio email:", err);
+          });
+
           console.log(`📧 Email inviata a ${email}`);
         }
 
