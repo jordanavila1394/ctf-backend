@@ -192,57 +192,5 @@ exports.sendBackupEmail = async (req, res) => {
   }
 };
 
-exports.sendDocumentByEmail = async (req, res) => {
-  try {
-    const { fiscalCode, email, releaseMonth, releaseYear } = req.body;
-    const file = req.file;
 
-    if (!file || !email) {
-      return res.status(400).send("File o email mancanti.");
-    }
-
-    const htmlDefaultTemplate = fs.readFileSync(
-      path.join(__dirname, "../templates/defaultEmail.html"),
-      "utf-8"
-    );
-
-    let htmlContent = htmlDefaultTemplate
-      .replace("{{imageCid}}", "imagelogo@cid")
-      .replace(
-        "{{message}}",
-        `In allegato il cedolino per ${fiscalCode} (${releaseMonth} ${releaseYear})`
-      );
-
-    const mailOptions = {
-      from: "info@ctfitalia.com",
-      to: email,
-      subject: `Cedolino ${releaseMonth} ${releaseYear}`,
-      html: htmlContent,
-      attachments: [
-        {
-          filename: file.originalname,
-          path: file.path,
-        },
-        {
-          filename: "logo.png",
-          path: path.join(__dirname, "../templates/logo.png"),
-          cid: "imagelogo@cid",
-        },
-      ],
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Errore invio email:", error.message);
-        return res.status(500).send("Errore invio email.");
-      }
-
-      console.log("Email inviata:", info.response);
-      res.status(200).send("Email inviata con successo.");
-    });
-  } catch (error) {
-    console.error("Errore server:", error.message);
-    res.status(500).send("Errore server.");
-  }
-};
 
