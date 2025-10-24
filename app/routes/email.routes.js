@@ -16,4 +16,5 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.sendEmail
   );
+
 };

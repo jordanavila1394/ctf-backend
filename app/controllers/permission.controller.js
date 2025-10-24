@@ -198,7 +198,6 @@ exports.allPermissionsByMonth = async (req, res) => {
   }
 };
 
-
 exports.permissionsByClientAndBranch = async (req, res) => {
   const { associatedClient, associatedBranch, startDate, endDate } = req.body;
 
@@ -216,12 +215,11 @@ exports.permissionsByClientAndBranch = async (req, res) => {
           order: [["checkIn", "DESC"]],
         },
       ],
-      where: {}, // Inizializza 'where' come oggetto vuoto
+      where: {},
     };
 
     if (associatedClient) {
       queryOptions.where.associatedClient = associatedClient;
-
     }
     if (associatedBranch) {
       queryOptions.where.associatedBranch = associatedBranch;
@@ -230,11 +228,38 @@ exports.permissionsByClientAndBranch = async (req, res) => {
     const users = await User.findAll(queryOptions);
 
     let result = users.map((user) => {
+      const attendancesFiltered = user.attendances
+        .map((attendance) => {
+          return {
+            date: new Date(attendance.checkIn)
+              .toLocaleDateString("it-IT", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })
+              .replace(/\//g, "-"),
+            type: attendance.status,
+            hours: formatDifferenceAccurateHours(attendance.checkOut, attendance.checkIn),
+            checkIn: attendance.checkIn,
+            checkOut: attendance.checkOut,
+          };
+        })
+        .filter((attendance) => {
+          const attendanceDate = new Date(
+            attendance.date.split("-").reverse().join("-")
+          );
+          return (
+            attendanceDate >= new Date(startDate) &&
+            attendanceDate <= new Date(endDate)
+          );
+        });
+
       return {
         id: user.id,
         name: user.name,
         surname: user.surname,
         fiscalCode: user.fiscalCode,
+        missingWorkedHours: calculateMissingWorkedHours(attendancesFiltered),
         absences: user.permissions
           .map((permission) => {
             return {
@@ -252,28 +277,11 @@ exports.permissionsByClientAndBranch = async (req, res) => {
               );
             });
           }),
-        attendances: user.attendances
-          .map((attendance) => {
-            return {
-              date: new Date(attendance.checkIn)
-                .toLocaleDateString("it-IT", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                })
-                .replace(/\//g, "-"),
-              type: attendance.status,
-            };
-          })
-          .filter((attendance) => {
-            const attendanceDate = new Date(
-              attendance.date.split("-").reverse().join("-")
-            );
-            return (
-              attendanceDate >= new Date(startDate) &&
-              attendanceDate <= new Date(endDate)
-            );
-          }),
+        attendances: attendancesFiltered.map(({ date, type, hours }) => ({
+          date,
+          type,
+          hours,
+        })),
       };
     });
 
@@ -281,7 +289,6 @@ exports.permissionsByClientAndBranch = async (req, res) => {
       (user) => user.absences.length > 0 || user.attendances.length > 0
     );
 
-    // Ordinamento alfabetico per nome e cognome
     result.sort((a, b) => {
       if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
       if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
@@ -408,3 +415,49 @@ exports.cleanPermissions = async (req, res) => {
     res.status(500).send({ message: err.message });
   }
 };
+
+function formatDifferenceAccurateHours(date2, date1) {
+  const checkIn = moment(date1);
+  const checkOut = moment(date2);
+
+  // Verifica validità delle date
+  if (!checkIn.isValid() || !checkOut.isValid()) {
+    return "00:00";
+  }
+
+  const duration = moment.duration(checkOut.diff(checkIn));
+  let totalMinutes = duration.asMinutes();
+
+
+  if (totalMinutes < 0) {
+    return "00:00";
+  }
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = Math.round(totalMinutes % 60);
+
+  // Formatta con zeri iniziali
+  const formattedHours = hours.toString().padStart(2, '0');
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+
+  return `${formattedHours}:${formattedMinutes}`;
+}
+
+function calculateMissingWorkedHours(attendances) {
+  const expectedMinutesPerDay = 9 * 60 + 30;
+
+  const totalMissingMinutes = attendances
+    .filter(att => att.type === "Presente")
+    .map(att => {
+      const timeStr = formatDifferenceAccurateHours(att.checkOut, att.checkIn);
+      const [hh, mm] = timeStr.split(":").map(Number);
+      const workedMinutes = hh * 60 + mm;
+      const missing = expectedMinutesPerDay - workedMinutes;
+      return missing > 0 ? missing : 0;
+    })
+    .reduce((sum, val) => sum + val, 0);
+
+  const hours = Math.floor(totalMissingMinutes / 60);
+  const minutes = totalMissingMinutes % 60;
+  return `${hours} ore e ${minutes} minuti`;
+}

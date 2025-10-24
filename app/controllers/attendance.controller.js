@@ -263,7 +263,7 @@ exports.checkInAttendance = (req, res) => {
             Attendance.update(
               {
                 checkOut: moment(attendance?.checkIn)
-                  .set({ hour: 17, minute: 0 })
+                  .set({ hour: 17, minute: 40 })
                   .utc()
                   .format(),
                 status: "CheckOut?",
@@ -291,7 +291,7 @@ exports.checkInAttendance = (req, res) => {
                 .utc()
                 .format(),
               checkOut: moment(checkInInMonth)
-                .set({ hour: 17, minute: 0 })
+                .set({ hour: 17, minute: 40 })
                 .utc()
                 .format(),
             });
@@ -316,6 +316,94 @@ exports.checkInAttendance = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.checkInAttendanceWithTime = (req, res) => {
+  const checkInTime = req.body.checkInTime
+    ? moment(req.body.checkInTime).format("YYYY-MM-DD HH:mm:ss")
+    : moment().set({ hour: 9, minute: 0 }).format("YYYY-MM-DD HH:mm:ss");
+
+  Attendance.create({
+    userId: req.body.userId,
+    companyId: req.body.companyId,
+    placeId: req.body.placeId,
+    vehicleId: req.body.vehicleId,
+    checkIn: checkInTime,
+    status: "Presente",
+  })
+    .then((attendance) => {
+      const idUser = req.body.userId;
+      const startOfMonth = moment().startOf("month").set({ hour: 0, minute: 0 }).format("YYYY-MM-DD HH:mm:ss");
+      const endOfMonth = moment().endOf("month").set({ hour: 23, minute: 59 }).format("YYYY-MM-DD HH:mm:ss");
+
+      Attendance.findAll({
+        where: {
+          userId: idUser,
+          checkIn: {
+            [Op.between]: [startOfMonth, endOfMonth],
+          },
+        },
+        order: [["checkIn", "DESC"]],
+      }).then((attendances) => {
+        // Fix missing checkout
+        for (let attendance of attendances) {
+          const checkInDay = moment(attendance?.checkIn).format("DD");
+          const today = moment().format("DD");
+
+          if (checkInDay !== today && !attendance?.checkOut) {
+            const checkOutTime = moment(attendance?.checkIn)
+              .set({ hour: 17, minute: 40 })
+              .format("YYYY-MM-DD HH:mm:ss");
+
+            Attendance.update(
+              {
+                checkOut: checkOutTime,
+                status: "CheckOut?",
+              },
+              { where: { id: attendance?.id } }
+            );
+          }
+        }
+
+        // Fix missing days of month
+        let missingDay = [];
+        let checkInInMonth = moment().startOf("month").set({ hour: 9, minute: 0 });
+        const currentDate = moment().set({ hour: 23, minute: 59 });
+
+        while (checkInInMonth.isSameOrBefore(currentDate)) {
+          const found = attendances.find(
+            (day) => moment(day.checkIn).format("DD") === checkInInMonth.format("DD")
+          );
+
+          if (!found) {
+            missingDay.push({
+              checkIn: checkInInMonth.clone().set({ hour: 8, minute: 0 }).format("YYYY-MM-DD HH:mm:ss"),
+              checkOut: checkInInMonth.clone().set({ hour: 17, minute: 40 }).format("YYYY-MM-DD HH:mm:ss"),
+            });
+          }
+          checkInInMonth.add(1, "days");
+        }
+
+        for (let index = 0; index < missingDay.length; index++) {
+          Attendance.create({
+            userId: req.body.userId,
+            companyId: req.body.companyId,
+            placeId: req.body.placeId,
+            vehicleId: req.body.vehicleId,
+            checkIn: missingDay[index].checkIn,
+            checkOut: missingDay[index].checkOut,
+            status: "Verificare",
+          });
+        }
+      });
+
+      res.status(201).send({ message: "CheckIn aggiunto con successo!" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
+
 
 exports.checkOutAttendance = (req, res) => {
   var ItalyZone = "Europe/Rome";
@@ -350,6 +438,39 @@ exports.checkOutAttendance = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.checkOutAttendanceWithTime = (req, res) => {
+  const checkOutTime = req.body.checkOutTime
+    ? moment(req.body.checkOutTime).format("YYYY-MM-DD HH:mm:ss")
+    : moment().format("YYYY-MM-DD HH:mm:ss");
+
+  Attendance.update(
+    {
+      checkOut: checkOutTime,
+      includeFacchinaggio: req.body.includeFacchinaggio || false,
+      facchinaggioNameClient: req.body.facchinaggioNameClient,
+      facchinaggioAddressClient: req.body.facchinaggioAddressClient,
+      facchinaggioValue: req.body.facchinaggioValue,
+      includeViaggioExtra: req.body.includeViaggioExtra || false,
+      viaggioExtraNameClient: req.body.viaggioExtraNameClient,
+      viaggioExtraAddressClient: req.body.viaggioExtraAddressClient,
+      viaggioExtraValue: req.body.viaggioExtraValue,
+    },
+    {
+      where: {
+        id: req.body.id,
+        userId: req.body.userId,
+      },
+    }
+  )
+    .then(() => {
+      res.status(201).send({ message: "CheckOut aggiunto con successo!" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
 
 exports.validateAttendance = (req, res) => {
   Attendance.update(
@@ -445,7 +566,7 @@ exports.getUserAttendanceSummaryByMonth = (req, res) => {
 
               userAttendanceSummary["GG-" + currentDate.format("DD")] =
                 attendanceOfDay
-                  ? formatDifferenceHours(
+                  ? formatDifferenceAccurateHours(
                     new Date(attendanceOfDay?.checkOut),
                     new Date(attendanceOfDay?.checkIn)
                   )
@@ -531,7 +652,7 @@ exports.synchronizeAttendances = async (req, res) => {
       if (moment(attendance.checkIn).format("DD") !== moment().format("DD") && !attendance.checkOut) {
         await Attendance.update(
           {
-            checkOut: formatDate(moment(attendance.checkIn).set({ hour: 17, minute: 0 }).utc(), ""),
+            checkOut: formatDate(moment(attendance.checkIn).set({ hour: 17, minute: 40 }).utc(), ""),
             status: "CheckOut?",
           },
           { where: { id: attendance.id } }
@@ -552,7 +673,7 @@ exports.synchronizeAttendances = async (req, res) => {
       if (!found) {
         missingDays.push({
           checkIn: formatDate(moment(checkInInMonth).set({ hour: 8, minute: 0 }).utc(), ""),
-          checkOut: formatDate(moment(checkInInMonth).set({ hour: 17, minute: 0 }).utc(), ""),
+          checkOut: formatDate(moment(checkInInMonth).set({ hour: 17, minute: 40 }).utc(), ""),
         });
       }
       checkInInMonth.add(1, "days");
@@ -573,7 +694,7 @@ exports.synchronizeAttendances = async (req, res) => {
     const permissions = await Permission.findAll({
       where: {
         userId: userId,
-        status:'Approvato'
+        status: 'Approvato'
       },
     });
 
@@ -615,6 +736,54 @@ function formatDifferenceHours(date2, date1) {
     return 0;
   }
 }
+function calculateMissingWorkingHours(date2, date1) {
+  const checkIn = moment(date1);
+  const checkOut = moment(date2);
+  const duration = moment.duration(checkOut.diff(checkIn));
+
+  const totalWorkedHours = duration.asHours(); // ore decimali
+  const standardWorkingHours = 9.5; // 9 ore e 30 minuti
+
+  const missingHours = standardWorkingHours - totalWorkedHours;
+
+  if (missingHours <= 0) {
+    return "Nessuna ora mancante";
+  }
+
+  const hours = Math.floor(missingHours);
+  const minutes = Math.round((missingHours - hours) * 60);
+  const rounded = missingHours.toFixed(2);
+
+  return `${hours}:${minutes}`;
+}
+
+function formatDifferenceAccurateHours(date2, date1) {
+  const checkIn = moment(date1);
+  const checkOut = moment(date2);
+
+  // Verifica validità delle date
+  if (!checkIn.isValid() || !checkOut.isValid()) {
+    return "00:00";
+  }
+
+  const duration = moment.duration(checkOut.diff(checkIn));
+  let totalMinutes = duration.asMinutes();
+
+
+  if (totalMinutes < 0) {
+    return "00:00";
+  }
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = Math.round(totalMinutes % 60);
+
+  // Formatta con zeri iniziali
+  const formattedHours = hours.toString().padStart(2, '0');
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+
+  return `${formattedHours}:${formattedMinutes}`;
+}
+
 
 function formatIsWeekendOrFestivo(date) {
   if (date.getDay() == 6 || date.getDay() == 0) return true;

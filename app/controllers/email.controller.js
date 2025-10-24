@@ -191,3 +191,6 @@ exports.sendBackupEmail = async (req, res) => {
     await sequelize.close(); // Chiudi la connessione
   }
 };
+
+
+

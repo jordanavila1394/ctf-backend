@@ -4,6 +4,25 @@ const AWS = require("aws-sdk");
 const db = require("../models");
 const AttendanceImages = db.attendanceImage;
 const userDocuments = db.userDocument;
+const nodemailer = require("nodemailer");
+
+const fs = require("fs");
+const path = require("path");
+const { v4: uuidv4 } = require("uuid");
+ // Assicurati che sia configurato
+const htmlTemplatePath = path.join(__dirname, "../templates/defaultEmail.html");
+const logoPath = path.join(__dirname, "../templates/logo.png");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: "ctfcloud@ctfitalia.com",
+    pass: "jltp orxo koae bavi",
+  },
+});
 
 const entityDocuments = db.entityDocument;
 module.exports = function (app) {
@@ -160,6 +179,112 @@ module.exports = function (app) {
     }
   );
 
+  app.post(
+    "/api/upload/uploadDocumentsAndSendEmail",
+    upload.array("files"),
+    async (req, res) => {
+      try {
+        const files = req.files;
+        const {
+          userId,
+          category,
+          fiscalCode,
+          expireDate = null,
+          releaseMonth = null,
+          releaseYear = null,
+          email,
+          subject = `Cedolino ${releaseMonth} ${releaseYear}`,
+          message = `In allegato il cedolino per ${fiscalCode}`,
+        } = req.body;
+
+        if (!files || files.length === 0) {
+          return res.status(400).send("No files were uploaded.");
+        }
+
+        const uploadResults = [];
+
+        const uploadPromises = files.map((file) => {
+          const timestamp = Date.now();
+          const key = `documents/${fiscalCode}/${category}/${timestamp}/${file.originalname}`;
+          const params = {
+            Bucket: "ctf.images",
+            Key: key,
+            Body: file.buffer,
+          };
+          return s3Client.upload(params).promise().then((result) => {
+            uploadResults.push({
+              fileName: file.originalname,
+              s3Key: result.Key,
+              location: result.Location,
+              buffer: file.buffer,
+            });
+            return userDocuments.create({
+              userId,
+              fiscalCode,
+              category,
+              etag: result.ETag,
+              location: result.Location,
+              keyFile: result.Key,
+              bucket: result.Bucket,
+              expireDate,
+              releaseMonth,
+              releaseYear,
+            });
+          });
+        });
+
+        await Promise.all(uploadPromises);
+
+        // 📧 Invio email
+        if (email) {
+          const cid = uuidv4();
+          let htmlContent = fs.readFileSync(htmlTemplatePath, "utf-8");
+          htmlContent = htmlContent
+            .replace("{{imageCid}}", cid)
+            .replace("{{message}}", message);
+
+          const attachments = [
+            {
+              filename: "logo.png",
+              path: logoPath,
+              cid,
+            },
+            ...uploadResults.map((doc) => ({
+              filename: doc.fileName,
+              content: doc.buffer,
+            })),
+          ];
+
+          const mailOptions = {
+            from: "info@ctfitalia.com",
+            to: email,
+            subject,
+            html: htmlContent,
+            attachments,
+          };
+
+          await transporter.sendMail(mailOptions).catch((err) => {
+            console.error("❌ Errore invio email:", err);
+          });
+
+          console.log(`📧 Email inviata a ${email}`);
+        }
+
+        res.status(201).send({
+          success: true,
+          message: "Documenti caricati e email inviata",
+          files: uploadResults.map((r) => r.fileName),
+        });
+      } catch (error) {
+        console.error("❌ Errore uploadDocumentsAndSendEmail:", error);
+        res.status(500).json({
+          success: false,
+          message: "Errore durante l'upload o invio email",
+          error: error.message,
+        });
+      }
+    }
+  );
   app.post(
     "/api/upload/uploadEntityDocuments",
     upload.array("files"),

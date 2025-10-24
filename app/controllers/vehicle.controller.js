@@ -67,3 +67,25 @@ exports.createVehicle = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.getVehicleInfoByPlate = (req, res) => {
+  const plate = req.params.plate;
+
+  Vehicle.findOne({
+    include: [
+      { model: User, as: "user" },
+      { model: Company, as: "company" },
+    ],
+    where: db.Sequelize.where(
+      db.Sequelize.fn('LOWER', db.Sequelize.col('licensePlate')),
+      plate.toLowerCase()
+    ),
+  })
+    .then((vehicle) => {
+      if (!vehicle) {
+        return res.status(404).send({ message: "Veicolo non trovato." });
+      }
+      res.status(200).send(vehicle);
+    })
+    .catch((err) => res.status(500).send({ message: err.message }));
+};

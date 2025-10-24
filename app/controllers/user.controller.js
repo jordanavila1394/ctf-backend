@@ -56,6 +56,27 @@ exports.allCeosByCompany = (req, res) => {
     });
 };
 
+exports.getUserByFiscalCode = async (req, res) => {
+  const { fiscalCode } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { fiscalCode } });
+
+    if (!user) {
+      return res.status(404).send({ message: "Utente non trovato" });
+    }
+
+    // Rimuovi la password prima di inviare
+    const userWithoutPassword = { ...user.dataValues };
+    delete userWithoutPassword.password;
+
+    res.status(200).send(userWithoutPassword);
+  } catch (error) {
+    console.error("Errore getUserByFiscalCode:", error);
+    res.status(500).send({ message: "Errore server" });
+  }
+};
+
 exports.allUsers = (req, res) => {
   const idCompany = req.body.idCompany;
   if (idCompany > 0) {

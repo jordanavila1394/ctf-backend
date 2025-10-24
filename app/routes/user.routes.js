@@ -31,6 +31,13 @@ module.exports = function (app) {
   app.get("/api/user/getUser/:id", [authJwt.verifyToken], controller.getUser);
 
   app.post(
+    "/api/user/getUserByFiscalCode",
+    [authJwt.verifyToken],
+    controller.getUserByFiscalCode
+  );
+
+
+  app.post(
     "/api/user/createUser",
     [authJwt.verifyToken, verifySignUp.checkDuplicateUser],
     controller.createUser
@@ -65,7 +72,7 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.deleteUser
   );
-  
+
   app.put("/api/user/updateUserEmail/:id", [authJwt.verifyToken], controller.updateUserEmail);
 
 
