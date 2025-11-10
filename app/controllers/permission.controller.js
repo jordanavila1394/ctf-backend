@@ -68,6 +68,7 @@ exports.getPermissionById = (req, res) => {
       {
         model: db.user,
         as: "user",
+        where: { status: true }, 
       },
     ],
     where: {
@@ -120,6 +121,7 @@ exports.allPermissions = (req, res) => {
         {
           model: db.user,
           as: "user",
+          where: { status: true }, 
         },
       ],
       where: {
@@ -139,6 +141,7 @@ exports.allPermissions = (req, res) => {
         {
           model: db.user,
           as: "user",
+          where: { status: true }, 
         },
       ],
       order: [["createdAt", "DESC"]],
@@ -163,6 +166,7 @@ exports.allPermissionsByMonth = async (req, res) => {
         {
           model: db.user,
           as: "user",
+          where: { status: true }, 
         },
       ],
       where: whereCondition,

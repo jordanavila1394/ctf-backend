@@ -28,6 +28,7 @@ exports.getDocumentsExpiring = async (req, res) => {
                     model: db.user,
                     attributes: ["id", "name", "surname","cellphone","email"],
                     as: "user",
+                    where: { status: true }, 
                 }
             ], where: condition });
 
