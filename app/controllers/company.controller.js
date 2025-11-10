@@ -10,6 +10,7 @@ exports.allCompanies = (req, res) => {
         model: db.user,
         attributes: ["id", "name", "surname"],
         as: "users",
+        where: { status: true }, 
         include: [
           {
             model: db.role,

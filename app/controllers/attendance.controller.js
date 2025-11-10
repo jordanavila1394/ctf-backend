@@ -24,6 +24,7 @@ exports.allAttendances = (req, res) => {
         {
           model: db.user,
           as: "user",
+          where: { status: true }, 
           include: [
             {
               model: db.company,
@@ -49,6 +50,7 @@ exports.allAttendances = (req, res) => {
         {
           model: db.user,
           as: "user",
+          where: { status: true }, 
           include: [
             {
               model: db.company,
@@ -84,6 +86,7 @@ exports.getAttendance = (req, res) => {
       {
         model: db.user,
         as: "user",
+        where: { status: true }, 
         include: [
           {
             model: db.company,
