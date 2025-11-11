@@ -13,7 +13,6 @@ exports.allVehicles = (req, res) => {
         {
           model: db.user,
           as: "user",
-          where: { status: true }, 
         },
         {
           model: db.company,
@@ -36,7 +35,6 @@ exports.allVehicles = (req, res) => {
         {
           model: db.user,
           as: "user",
-          where: { status: true }, 
         },
         {
           model: db.company,
