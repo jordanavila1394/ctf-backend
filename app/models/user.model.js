@@ -42,6 +42,9 @@ module.exports = (sequelize, Sequelize) => {
     birthCountry: {
       type: Sequelize.STRING,
     },
+    hireDate: {
+      type: Sequelize.STRING,
+    },
     birthDate: {
       type: Sequelize.STRING,
     },
