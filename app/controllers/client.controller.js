@@ -4,6 +4,19 @@ const Client = db.client;
 // Get all clients
 exports.getAllClients = (req, res) => {
   Client.findAll({
+    include: [
+      {
+        model: db.user,
+        as: "users",
+        attributes: [],
+      }
+    ],
+    attributes: {
+      include: [
+        [db.sequelize.fn('COUNT', db.sequelize.col('users.id')), 'userCount']
+      ]
+    },
+    group: ['clients.id'],
     order: [['name', 'ASC']]
   })
     .then((clients) => {

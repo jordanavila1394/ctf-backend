@@ -4,6 +4,19 @@ const Branch = db.branch;
 // Get all branches
 exports.getAllBranches = (req, res) => {
   Branch.findAll({
+    include: [
+      {
+        model: db.user,
+        as: "users",
+        attributes: [],
+      }
+    ],
+    attributes: {
+      include: [
+        [db.sequelize.fn('COUNT', db.sequelize.col('users.id')), 'userCount']
+      ]
+    },
+    group: ['branches.id'],
     order: [['name', 'ASC']]
   })
     .then((branches) => {
