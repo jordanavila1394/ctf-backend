@@ -6,9 +6,13 @@ module.exports = (sequelize, Sequelize) => {
     },
     createdAt: {
       type: Sequelize.DATE,
+      allowNull: true,
+      defaultValue: null,
     },
     updatedAt: {
       type: Sequelize.DATE,
+      allowNull: true,
+      defaultValue: null,
     },
   });
 
