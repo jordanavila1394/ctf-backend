@@ -203,7 +203,7 @@ exports.allPermissionsByMonth = async (req, res) => {
 };
 
 exports.permissionsByClientAndBranch = async (req, res) => {
-  const { associatedClient, associatedBranch, startDate, endDate } = req.body;
+  const { associatedClient, associatedBranch, clientId, branchId, startDate, endDate } = req.body;
 
   try {
     let queryOptions = {
@@ -222,10 +222,16 @@ exports.permissionsByClientAndBranch = async (req, res) => {
       where: {},
     };
 
-    if (associatedClient) {
+    // Supporta sia i nuovi campi (clientId/branchId) che i vecchi (associatedClient/associatedBranch)
+    if (clientId) {
+      queryOptions.where.clientId = clientId;
+    } else if (associatedClient) {
       queryOptions.where.associatedClient = associatedClient;
     }
-    if (associatedBranch) {
+    
+    if (branchId) {
+      queryOptions.where.branchId = branchId;
+    } else if (associatedBranch) {
       queryOptions.where.associatedBranch = associatedBranch;
     }
 
