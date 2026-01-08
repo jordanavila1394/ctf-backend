@@ -23,4 +23,11 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.runMigration
   );
+
+  // Endpoint per aggiornamento massivo clientId/branchId
+  app.post(
+    "/api/migration/bulk-update",
+    [authJwt.verifyToken],
+    controller.bulkUpdateClientBranch
+  );
 };

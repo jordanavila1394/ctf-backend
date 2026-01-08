@@ -338,3 +338,112 @@ exports.runMigration = async (req, res) => {
     });
   }
 };
+
+// Endpoint per cambiare massivamente clientId o branchId
+exports.bulkUpdateClientBranch = async (req, res) => {
+  try {
+    const { type, fromId, toId } = req.body;
+
+    // Validazione input
+    if (!type || !['client', 'branch'].includes(type)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Il campo 'type' deve essere 'client' o 'branch'"
+      });
+    }
+
+    if (!fromId || !toId) {
+      return res.status(400).json({
+        status: "error",
+        message: "I campi 'fromId' e 'toId' sono obbligatori"
+      });
+    }
+
+    const results = {
+      timestamp: new Date().toISOString(),
+      type: type,
+      fromId: parseInt(fromId),
+      toId: parseInt(toId)
+    };
+
+    if (type === 'client') {
+      // Verifica che i client esistano
+      const fromClient = await Client.findByPk(fromId);
+      const toClient = await Client.findByPk(toId);
+
+      if (!fromClient) {
+        return res.status(404).json({
+          status: "error",
+          message: `Client con ID ${fromId} non trovato`
+        });
+      }
+
+      if (!toClient) {
+        return res.status(404).json({
+          status: "error",
+          message: `Client con ID ${toId} non trovato`
+        });
+      }
+
+      // Conta utenti prima dell'aggiornamento
+      const usersCount = await User.count({ where: { clientId: fromId } });
+
+      // Aggiorna tutti gli utenti
+      await User.update(
+        { clientId: toId },
+        { where: { clientId: fromId } }
+      );
+
+      results.status = "success";
+      results.message = `Aggiornati ${usersCount} utenti da clientId ${fromId} a ${toId}`;
+      results.fromName = fromClient.name;
+      results.toName = toClient.name;
+      results.updatedUsers = usersCount;
+
+    } else if (type === 'branch') {
+      // Verifica che i branch esistano
+      const fromBranch = await Branch.findByPk(fromId);
+      const toBranch = await Branch.findByPk(toId);
+
+      if (!fromBranch) {
+        return res.status(404).json({
+          status: "error",
+          message: `Branch con ID ${fromId} non trovato`
+        });
+      }
+
+      if (!toBranch) {
+        return res.status(404).json({
+          status: "error",
+          message: `Branch con ID ${toId} non trovato`
+        });
+      }
+
+      // Conta utenti prima dell'aggiornamento
+      const usersCount = await User.count({ where: { branchId: fromId } });
+
+      // Aggiorna tutti gli utenti
+      await User.update(
+        { branchId: toId },
+        { where: { branchId: fromId } }
+      );
+
+      results.status = "success";
+      results.message = `Aggiornati ${usersCount} utenti da branchId ${fromId} a ${toId}`;
+      results.fromName = fromBranch.name;
+      results.toName = toBranch.name;
+      results.updatedUsers = usersCount;
+    }
+
+    console.log(`✅ ${results.message}`);
+    res.status(200).json(results);
+
+  } catch (error) {
+    console.error("❌ Errore durante l'aggiornamento massivo:", error);
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+};
