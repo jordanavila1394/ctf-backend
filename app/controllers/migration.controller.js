@@ -153,11 +153,46 @@ exports.runMigration = async (req, res) => {
       steps: []
     };
 
-    // STEP 1: Sincronizza database
-    await db.sequelize.sync({ alter: true });
+    // STEP 1: Crea tabelle se non esistono (senza timestamp)
+    await db.sequelize.query(`
+      CREATE TABLE IF NOT EXISTS clients (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL
+      )
+    `);
+    
+    await db.sequelize.query(`
+      CREATE TABLE IF NOT EXISTS branches (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL
+      )
+    `);
+
+    // Rimuovi colonne timestamp se esistono (per sicurezza)
+    try {
+      await db.sequelize.query(`ALTER TABLE clients DROP COLUMN createdAt`);
+    } catch (e) {
+      // Colonna non esiste, ignora
+    }
+    try {
+      await db.sequelize.query(`ALTER TABLE clients DROP COLUMN updatedAt`);
+    } catch (e) {
+      // Colonna non esiste, ignora
+    }
+    try {
+      await db.sequelize.query(`ALTER TABLE branches DROP COLUMN createdAt`);
+    } catch (e) {
+      // Colonna non esiste, ignora
+    }
+    try {
+      await db.sequelize.query(`ALTER TABLE branches DROP COLUMN updatedAt`);
+    } catch (e) {
+      // Colonna non esiste, ignora
+    }
+
     results.steps.push({
       step: 1,
-      name: "Sincronizzazione database",
+      name: "Creazione tabelle",
       status: "completed"
     });
 
