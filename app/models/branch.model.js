@@ -4,16 +4,8 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false,
     },
-    createdAt: {
-      type: Sequelize.DATE,
-      allowNull: true,
-      defaultValue: null,
-    },
-    updatedAt: {
-      type: Sequelize.DATE,
-      allowNull: true,
-      defaultValue: null,
-    },
+  }, {
+    timestamps: false
   });
 
   return Branch;
