@@ -98,8 +98,20 @@ exports.allUsers = (req, res) => {
             id: idCompany,
           },
         },
+        {
+          model: db.client,
+          as: "client",
+          attributes: ["id", "name"],
+          required: false,
+        },
+        {
+          model: db.branch,
+          as: "branch",
+          attributes: ["id", "name"],
+          required: false,
+        },
       ],
-      attributes: { exclude: ["password"] },
+      attributes: { exclude: ["password", "associatedClient", "associatedBranch"] },
     })
       .then((users) => {
         res.status(200).send(users);
@@ -123,8 +135,20 @@ exports.allUsers = (req, res) => {
           as: "companies",
           order: [["name", "ASC"]],
         },
+        {
+          model: db.client,
+          as: "client",
+          attributes: ["id", "name"],
+          required: false,
+        },
+        {
+          model: db.branch,
+          as: "branch",
+          attributes: ["id", "name"],
+          required: false,
+        },
       ],
-      attributes: { exclude: ["password"] },
+      attributes: { exclude: ["password", "associatedClient", "associatedBranch"] },
     })
       .then((users) => {
         res.status(200).send(users);
