@@ -20,6 +20,8 @@ db.sequelize = sequelize;
 db.user = require("../models/user.model.js")(sequelize, Sequelize);
 db.role = require("../models/role.model.js")(sequelize, Sequelize);
 db.company = require("../models/company.model.js")(sequelize, Sequelize);
+db.client = require("../models/client.model.js")(sequelize, Sequelize);
+db.branch = require("../models/branch.model.js")(sequelize, Sequelize);
 db.place = require("../models/place.model.js")(sequelize, Sequelize);
 db.vehicle = require("../models/vehicle.model.js")(sequelize, Sequelize);
 db.attendance = require("../models/attendance.model.js")(sequelize, Sequelize);
@@ -171,6 +173,22 @@ db.entityDocument.belongsTo(db.entity, { foreignKey: "entityId", as: "entity" })
 db.entity.hasMany(db.entityDocument, {
   foreignKey: "entityId",
   as: "entityDocuments",
+});
+
+//Client - User
+db.user.belongsTo(db.client, { foreignKey: "clientId", as: "client" });
+
+db.client.hasMany(db.user, {
+  foreignKey: "clientId",
+  as: "users",
+});
+
+//Branch - User
+db.user.belongsTo(db.branch, { foreignKey: "branchId", as: "branch" });
+
+db.branch.hasMany(db.user, {
+  foreignKey: "branchId",
+  as: "users",
 });
 
 

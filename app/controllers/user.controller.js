@@ -98,8 +98,20 @@ exports.allUsers = (req, res) => {
             id: idCompany,
           },
         },
+        {
+          model: db.client,
+          as: "client",
+          attributes: ["id", "name"],
+          required: false,
+        },
+        {
+          model: db.branch,
+          as: "branch",
+          attributes: ["id", "name"],
+          required: false,
+        },
       ],
-      attributes: { exclude: ["password"] },
+      attributes: { exclude: ["password", "associatedClient", "associatedBranch"] },
     })
       .then((users) => {
         res.status(200).send(users);
@@ -123,8 +135,20 @@ exports.allUsers = (req, res) => {
           as: "companies",
           order: [["name", "ASC"]],
         },
+        {
+          model: db.client,
+          as: "client",
+          attributes: ["id", "name"],
+          required: false,
+        },
+        {
+          model: db.branch,
+          as: "branch",
+          attributes: ["id", "name"],
+          required: false,
+        },
       ],
-      attributes: { exclude: ["password"] },
+      attributes: { exclude: ["password", "associatedClient", "associatedBranch"] },
     })
       .then((users) => {
         res.status(200).send(users);
@@ -246,7 +270,9 @@ exports.createUser = (req, res) => {
     fiscalCode: req.body.fiscalCode,
     workerNumber: parseInt(req.body.workerNumber, 10) || 0,
     associatedClient: req.body.associatedClient || '',
+    clientId: req.body.clientId || null,
     associatedBranch: req.body.associatedBranch || '',
+    branchId: req.body.branchId || null,
     position: req.body.position,
     iban: req.body.iban,
     address: req.body.address,
@@ -302,6 +328,16 @@ exports.getUser = (req, res) => {
           },
         ],
       },
+      {
+        model: db.client,
+        as: "client",
+        attributes: ["id", "name"],
+      },
+      {
+        model: db.branch,
+        as: "branch",
+        attributes: ["id", "name"],
+      },
     ],
   })
     .then((user) => {
@@ -328,7 +364,9 @@ exports.patchUser = (req, res) => {
       fiscalCode: req.body.fiscalCode,
       workerNumber: parseInt(req.body.workerNumber, 10) || 0,
       associatedClient: req.body.associatedClient || "",
+      clientId: req.body.clientId || null,
       associatedBranch: req.body.associatedBranch || "",
+      branchId: req.body.branchId || null,
       position: req.body.position,
       iban: req.body.iban,
       address: req.body.address,
@@ -409,36 +447,9 @@ exports.checkIfExistUser = (req, res) => {
     });
 };
 
-exports.getAllAssociatedClients = (req, res) => {
-  User.findAll({
-    attributes: [
-      [db.Sequelize.fn('DISTINCT', db.Sequelize.col('associatedClient')), 'associatedClient']
-    ],
-    order: [['associatedClient', 'ASC']]
-  })
-    .then((clients) => {
-      const associatedClients = clients.map(client => client.associatedClient);
-      res.status(200).send(associatedClients);    })
-    .catch((err) => {
-      res.status(500).send({ message: err.message });
-    });
-};
-
-exports.getAllAssociatedBranchs= (req, res) => {
-  User.findAll({
-    attributes: [
-      [db.Sequelize.fn('DISTINCT', db.Sequelize.col('associatedBranch')), 'associatedBranch']
-    ],
-    order: [['associatedBranch', 'ASC']]
-  })
-    .then((clients) => {
-      const associatedBranchs = clients.map(client => client.associatedBranch);
-      res.status(200).send(associatedBranchs);
-    })
-    .catch((err) => {
-      res.status(500).send({ message: err.message });
-    });
-};
+// Queste funzioni sono state rimosse e sostituite da:
+// - /api/client/getAllClients
+// - /api/branch/getAllBranches
 
 
 exports.updateUserEmail = (req, res) => {

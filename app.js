@@ -42,6 +42,8 @@ require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
 require("./app/routes/role.routes")(app);
 require("./app/routes/company.routes")(app);
+require("./app/routes/client.routes")(app);
+require("./app/routes/branch.routes")(app);
 require("./app/routes/place.routes")(app);
 require("./app/routes/vehicle.routes")(app);
 require("./app/routes/attendance.routes")(app);
@@ -52,6 +54,7 @@ require("./app/routes/download.routes")(app);
 require("./app/routes/permission.routes")(app);
 require("./app/routes/email.routes")(app);
 require("./app/routes/document.routes")(app);
+require("./app/routes/migration.routes")(app);
 
 //Cron jobs
 const deadlinesController = require("./app/controllers/deadlines.controller");
