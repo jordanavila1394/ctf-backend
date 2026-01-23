@@ -793,3 +793,57 @@ function formatIsWeekendOrFestivo(date) {
   return false;
 }
 
+exports.updateAttendanceTimes = async (req, res) => {
+  try {
+    const { id, checkInTime, checkOutTime } = req.body;
+
+    if (!id) {
+      return res.status(400).send({ message: "ID presenza è obbligatorio" });
+    }
+
+    // Trova la presenza
+    const attendance = await Attendance.findByPk(id);
+
+    if (!attendance) {
+      return res.status(404).send({ message: "Presenza non trovata" });
+    }
+
+    // Prepara i dati da aggiornare
+    const updateData = {};
+    
+    if (checkInTime) {
+      updateData.checkIn = checkInTime;
+    }
+    
+    if (checkOutTime) {
+      updateData.checkOut = checkOutTime;
+    }
+
+    // Aggiorna la presenza
+    await attendance.update(updateData);
+
+    // Restituisci la presenza aggiornata
+    const updatedAttendance = await Attendance.findByPk(id, {
+      include: [
+        {
+          model: db.user,
+          as: "user",
+          include: [
+            {
+              model: db.company,
+              as: "companies",
+            },
+          ],
+        },
+      ],
+    });
+
+    res.status(200).send({
+      message: "Orari presenza aggiornati con successo",
+      attendance: updatedAttendance,
+    });
+  } catch (err) {
+    handleError(res, err);
+  }
+};
+

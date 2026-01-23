@@ -89,5 +89,11 @@ module.exports = function (app) {
     controller.synchronizeAttendances
   );
 
+  app.post(
+    "/api/attendance/updateAttendanceTimes",
+    [authJwt.verifyToken],
+    controller.updateAttendanceTimes
+  );
+
 
 };
