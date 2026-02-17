@@ -74,20 +74,21 @@ cron.schedule(
 );
 const emailController = require("./app/controllers/email.controller");
 
-cron.schedule(
-  "35 14 * * *",
-  async () => {
-    try {
-      emailController.sendBackupEmail();
+// Backup email disabilitato
+// cron.schedule(
+//   "35 14 * * *",
+//   async () => {
+//     try {
+//       emailController.sendBackupEmail();
 
-    } catch (error) {
-      console.error("Errore durante il cron job:", error.message);
-    }
-  },
-  {
-    timezone: "Europe/Rome", // Imposta il fuso orario italiano
-  }
-);
+//     } catch (error) {
+//       console.error("Errore durante il cron job:", error.message);
+//     }
+//   },
+//   {
+//     timezone: "Europe/Rome", // Imposta il fuso orario italiano
+//   }
+// );
 
 
 const PORT = process.env.PORT || 3000;

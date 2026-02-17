@@ -174,19 +174,30 @@ exports.sendBackupEmail = async (req, res) => {
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           console.error(`Errore durante l'invio della mail: ${error.message}`);
-          return res.status(500).send("Errore durante l'invio della mail.");
+          if (res) {
+            return res.status(500).send("Errore durante l'invio della mail.");
+          }
+          return;
         }
 
         console.log(`Email inviata con successo: ${info.response}`);
-        res.status(200).send("Email inviata con successo.");
+        if (res) {
+          res.status(200).send("Email inviata con successo.");
+        }
       });
     } else {
       console.error("File di backup non trovato.");
-      return res.status(500).send("File di backup non trovato.");
+      if (res) {
+        return res.status(500).send("File di backup non trovato.");
+      }
+      return;
     }
   } catch (error) {
     console.error("Errore durante la creazione del dump:", error.message);
-    return res.status(500).send("Errore durante la creazione del dump.");
+    if (res) {
+      return res.status(500).send("Errore durante la creazione del dump.");
+    }
+    return;
   } finally {
     await sequelize.close(); // Chiudi la connessione
   }
