@@ -4,6 +4,7 @@ const Permission = db.permission;
 const Attendance = db.attendance;
 const User = db.user;
 const Op = db.Sequelize.Op;
+const emailController = require("./email.controller");
 
 exports.createPermission = (req, res) => {
   var ItalyZone = "Europe/Rome";
@@ -310,19 +311,68 @@ exports.permissionsByClientAndBranch = async (req, res) => {
 };
 
 
-exports.approvePermission = (req, res) => {
-  Permission.update(
-    {
-      status: "Approvato",
-    },
-    { where: { id: req.body.id, userId: req.body.userId } }
-  )
-    .then((permission) => {
-      res.status(201).send({ message: "Permesso approvato con successo!" });
-    })
-    .catch((err) => {
-      res.status(500).send({ message: err.message });
+exports.approvePermission = async (req, res) => {
+  try {
+    // Recupera i dati del permesso prima di aggiornarlo
+    const permission = await Permission.findOne({
+      where: { id: req.body.id, userId: req.body.userId },
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "name", "surname", "email"],
+        },
+      ],
     });
+
+    if (!permission) {
+      return res.status(404).send({ message: "Permesso non trovato" });
+    }
+
+    // Aggiorna lo stato del permesso
+    await Permission.update(
+      {
+        status: "Approvato",
+      },
+      { where: { id: req.body.id, userId: req.body.userId } }
+    );
+
+    // Invia email di conferma
+    if (permission.user && permission.user.email) {
+      const dates = permission.dates.split(',').join(', ');
+      const subject = `Richiesta ${permission.typology} Approvata`;
+      const message = `
+        Buongiorno ${permission.user.name} ${permission.user.surname},<br><br>
+        La tua richiesta di <strong>${permission.typology}</strong> è stata <strong>approvata</strong>.<br><br>
+        <strong>Dettagli:</strong><br>
+        - Date: ${dates}<br>
+        - Ore: ${permission.hours || 0}<br>
+        ${permission.note ? `- Note: ${permission.note}<br>` : ''}
+        <br>
+        Cordiali saluti,<br>
+        CTF Italia
+      `;
+
+      const emailReq = {
+        body: {
+          recipient: permission.user.email,
+          subject: subject,
+          message: message,
+        },
+      };
+
+      try {
+        await emailController.sendEmail(emailReq);
+      } catch (emailError) {
+        console.error("❌ Errore invio email approvazione permesso:", emailError.message);
+        // Non bloccare la risposta anche se l'email fallisce
+      }
+    }
+
+    res.status(201).send({ message: "Permesso approvato con successo!" });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
 };
 
 exports.addProtocolNumberPermission = (req, res) => {
@@ -341,19 +391,69 @@ exports.addProtocolNumberPermission = (req, res) => {
     });
 };
 
-exports.rejectPermission = (req, res) => {
-  Permission.update(
-    {
-      status: "Negato",
-    },
-    { where: { id: req.body.id, userId: req.body.userId } }
-  )
-    .then((permission) => {
-      res.status(201).send({ message: "Permesso negato con successo!" });
-    })
-    .catch((err) => {
-      res.status(500).send({ message: err.message });
+exports.rejectPermission = async (req, res) => {
+  try {
+    // Recupera i dati del permesso prima di aggiornarlo
+    const permission = await Permission.findOne({
+      where: { id: req.body.id, userId: req.body.userId },
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "name", "surname", "email"],
+        },
+      ],
     });
+
+    if (!permission) {
+      return res.status(404).send({ message: "Permesso non trovato" });
+    }
+
+    // Aggiorna lo stato del permesso
+    await Permission.update(
+      {
+        status: "Negato",
+      },
+      { where: { id: req.body.id, userId: req.body.userId } }
+    );
+
+    // Invia email di notifica
+    if (permission.user && permission.user.email) {
+      const dates = permission.dates.split(',').join(', ');
+      const subject = `Richiesta ${permission.typology} Rifiutata`;
+      const message = `
+        Buongiorno ${permission.user.name} ${permission.user.surname},<br><br>
+        La tua richiesta di <strong>${permission.typology}</strong> è stata <strong>rifiutata</strong>.<br><br>
+        <strong>Dettagli:</strong><br>
+        - Date: ${dates}<br>
+        - Ore: ${permission.hours || 0}<br>
+        ${permission.note ? `- Note: ${permission.note}<br>` : ''}
+        <br>
+        Per maggiori informazioni, contatta l'amministrazione.<br><br>
+        Cordiali saluti,<br>
+        CTF Italia
+      `;
+
+      const emailReq = {
+        body: {
+          recipient: permission.user.email,
+          subject: subject,
+          message: message,
+        },
+      };
+
+      try {
+        await emailController.sendEmail(emailReq);
+      } catch (emailError) {
+        console.error("❌ Errore invio email rifiuto permesso:", emailError.message);
+        // Non bloccare la risposta anche se l'email fallisce
+      }
+    }
+
+    res.status(201).send({ message: "Permesso negato con successo!" });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
 };
 
 exports.cleanPermissions = async (req, res) => {

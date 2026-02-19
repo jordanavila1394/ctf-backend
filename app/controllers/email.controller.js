@@ -73,8 +73,25 @@ exports.sendEmail = (req, res) => {
     ],
   };
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (info?.response) res.status(200).send("Email inviata: ");
+  return new Promise((resolve, reject) => {
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("❌ Errore invio email:", error);
+        console.error("Destinatario:", recipient);
+        console.error("Oggetto:", subject);
+        if (res) {
+          res.status(500).send({ message: "Errore nell'invio dell'email", error: error.message });
+        }
+        reject(error);
+      } else {
+        console.log("✅ Email inviata con successo a:", recipient);
+        console.log("Info:", info.response);
+        if (res) {
+          res.status(200).send({ message: "Email inviata con successo", info: info.response });
+        }
+        resolve(info);
+      }
+    });
   });
 };
 
