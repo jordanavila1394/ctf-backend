@@ -309,7 +309,7 @@ exports.checkInAttendance = (req, res) => {
             vehicleId: req.body.vehicleId,
             checkIn: missingDay[index].checkIn,
             checkOut: missingDay[index].checkOut,
-            status: "Verificare",
+            status: "Assente",
           });
         }
       });
@@ -394,7 +394,7 @@ exports.checkInAttendanceWithTime = (req, res) => {
             vehicleId: req.body.vehicleId,
             checkIn: missingDay[index].checkIn,
             checkOut: missingDay[index].checkOut,
-            status: "Verificare",
+            status: "Assente",
           });
         }
       });
@@ -690,7 +690,7 @@ exports.synchronizeAttendances = async (req, res) => {
         vehicleId: req.body.vehicleId,
         checkIn: day.checkIn,
         checkOut: day.checkOut,
-        status: "Verificare",
+        status: "Assente",
       });
     }
 
