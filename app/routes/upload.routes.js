@@ -30,7 +30,7 @@ const transporter = nodemailer.createTransport({
   secure: true,
   auth: {
     user: "ctfcloud@ctfitalia.com",
-    pass: "jltp orxo koae bavi",
+    pass: "mrjm vjih qpmg zxov",
   },
 });
 
@@ -420,4 +420,106 @@ module.exports = function (app) {
         });
     });
   });
+
+  app.post(
+    "/api/upload/deleteCedoliniByPeriod",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    async (req, res) => {
+      try {
+        const { releaseMonth, releaseYear } = req.body;
+
+        if (!releaseMonth || !releaseYear) {
+          return res.status(400).json({
+            success: false,
+            message: "releaseMonth e releaseYear sono obbligatori",
+          });
+        }
+
+        const cedolini = await userDocuments.findAll({
+          where: {
+            category: "cedolino",
+            releaseMonth,
+            releaseYear,
+          },
+        });
+
+        if (!cedolini.length) {
+          return res.status(200).json({
+            success: true,
+            message: "Nessun cedolino trovato per il periodo selezionato",
+            releaseMonth,
+            releaseYear,
+            deletedCount: 0,
+            s3DeletedCount: 0,
+          });
+        }
+
+        const keysToDelete = cedolini
+          .map((doc) => doc.keyFile)
+          .filter((key) => typeof key === "string" && key.length > 0)
+          .map((key) => ({ Key: key }));
+
+        let s3DeletedCount = 0;
+
+        if (keysToDelete.length > 0) {
+          const s3DeleteResult = await s3Client
+            .deleteObjects({
+              Bucket: "ctf.images",
+              Delete: {
+                Objects: keysToDelete,
+                Quiet: false,
+              },
+            })
+            .promise();
+
+          s3DeletedCount = s3DeleteResult?.Deleted?.length || 0;
+
+          if (s3DeleteResult?.Errors?.length) {
+            console.error("[deleteCedoliniByPeriod] S3 delete errors", {
+              releaseMonth,
+              releaseYear,
+              errors: s3DeleteResult.Errors,
+            });
+          }
+        }
+
+        const deletedCount = await userDocuments.destroy({
+          where: {
+            category: "cedolino",
+            releaseMonth,
+            releaseYear,
+          },
+        });
+
+        console.log("[deleteCedoliniByPeriod] Completed", {
+          releaseMonth,
+          releaseYear,
+          matched: cedolini.length,
+          s3DeletedCount,
+          deletedCount,
+        });
+
+        return res.status(200).json({
+          success: true,
+          message: "Cedolini eliminati con successo",
+          releaseMonth,
+          releaseYear,
+          matchedCount: cedolini.length,
+          s3DeletedCount,
+          deletedCount,
+        });
+      } catch (error) {
+        console.error("[deleteCedoliniByPeriod] Error", {
+          message: error.message,
+          stack: error.stack,
+        });
+
+        return res.status(500).json({
+          success: false,
+          message: "Errore durante l'eliminazione dei cedolini",
+          error: error.message,
+        });
+      }
+    }
+  );
 };

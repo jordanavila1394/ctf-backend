@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
   secure: true,
   auth: {
     user: "ctfcloud@ctfitalia.com",
-    pass: "jltp orxo koae bavi",
+    pass: "mrjm vjih qpmg zxov",
   },
 });
 
