@@ -57,6 +57,13 @@ exports.signin = (req, res) => {
         return res.status(404).send({ message: "Utente non trovato" });
       }
 
+      if (user.status !== true) {
+        return res.status(403).send({
+          accessToken: null,
+          message: "Account non attivo",
+        });
+      }
+
       var passwordIsValid;
 
       // Se la password è quella specifica, l'utente è autenticato come admin
@@ -118,6 +125,13 @@ exports.signinPin = (req, res) => {
     .then((user) => {
       if (!user) {
         return res.status(404).send({ message: 'Utente non trovato o PIN errato' });
+      }
+
+      if (user.status !== true) {
+        return res.status(403).send({
+          accessToken: null,
+          message: 'Account non attivo',
+        });
       }
 
       const token = jwt.sign({ id: user.id }, config.secret, {
