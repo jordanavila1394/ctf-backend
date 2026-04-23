@@ -13,6 +13,16 @@ const { v4: uuidv4 } = require("uuid");
 const htmlTemplatePath = path.join(__dirname, "../templates/defaultEmail.html");
 const logoPath = path.join(__dirname, "../templates/logo.png");
 
+const maskEmail = (value) => {
+  if (!value || typeof value !== "string" || !value.includes("@")) {
+    return "N/A";
+  }
+
+  const [local, domain] = value.split("@");
+  const visibleLocal = local.slice(0, 2);
+  return `${visibleLocal}***@${domain}`;
+};
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   host: "smtp.gmail.com",
@@ -197,6 +207,15 @@ module.exports = function (app) {
           message = `In allegato il cedolino per ${fiscalCode}`,
         } = req.body;
 
+        console.log("[uploadDocumentsAndSendEmail] Request received", {
+          filesCount: files?.length || 0,
+          fiscalCode,
+          category,
+          releaseMonth,
+          releaseYear,
+          email: maskEmail(email),
+        });
+
         if (!files || files.length === 0) {
           return res.status(400).send("No files were uploaded.");
         }
@@ -235,6 +254,11 @@ module.exports = function (app) {
 
         await Promise.all(uploadPromises);
 
+        console.log("[uploadDocumentsAndSendEmail] Upload + DB save completed", {
+          filesUploaded: uploadResults.map((r) => r.fileName),
+          totalFiles: uploadResults.length,
+        });
+
         // 📧 Invio email
         if (email) {
           const cid = uuidv4();
@@ -256,18 +280,30 @@ module.exports = function (app) {
           ];
 
           const mailOptions = {
-            from: "info@ctfitalia.com",
+            from: `CTF Italia <${transporter.options.auth.user}>`,
             to: email,
             subject,
             html: htmlContent,
             attachments,
           };
 
-          await transporter.sendMail(mailOptions).catch((err) => {
-            console.error("❌ Errore invio email:", err);
+          console.log("[uploadDocumentsAndSendEmail] Sending email", {
+            to: maskEmail(email),
+            from: transporter.options.auth.user,
+            subject,
+            attachments: attachments.map((a) => a.filename),
+            attachmentsCount: attachments.length,
           });
 
-          console.log(`📧 Email inviata a ${email}`);
+          const mailResult = await transporter.sendMail(mailOptions);
+
+          console.log("[uploadDocumentsAndSendEmail] Email sent", {
+            to: maskEmail(email),
+            messageId: mailResult?.messageId,
+            response: mailResult?.response,
+          });
+        } else {
+          console.warn("[uploadDocumentsAndSendEmail] Email not provided, skipping send");
         }
 
         res.status(201).send({
@@ -276,7 +312,13 @@ module.exports = function (app) {
           files: uploadResults.map((r) => r.fileName),
         });
       } catch (error) {
-        console.error("❌ Errore uploadDocumentsAndSendEmail:", error);
+        console.error("❌ Errore uploadDocumentsAndSendEmail:", {
+          message: error.message,
+          code: error.code,
+          response: error.response,
+          command: error.command,
+          stack: error.stack,
+        });
         res.status(500).json({
           success: false,
           message: "Errore durante l'upload o invio email",
