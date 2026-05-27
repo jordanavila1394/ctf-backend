@@ -142,7 +142,14 @@ exports.allPermissions = (req, res) => {
         {
           model: db.user,
           as: "user",
-          where: { status: true }, 
+          where: { status: true },
+          include: [
+            {
+              model: db.branch,
+              as: "branch",
+              attributes: ["id", "name"],
+            },
+          ],
         },
       ],
       order: [["createdAt", "DESC"]],
@@ -167,7 +174,14 @@ exports.allPermissionsByMonth = async (req, res) => {
         {
           model: db.user,
           as: "user",
-          where: { status: true }, 
+          where: { status: true },
+          include: [
+            {
+              model: db.branch,
+              as: "branch",
+              attributes: ["id", "name"],
+            },
+          ],
         },
       ],
       where: whereCondition,
