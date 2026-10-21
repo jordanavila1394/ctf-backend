@@ -23,14 +23,17 @@ const maskEmail = (value) => {
   return `${visibleLocal}***@${domain}`;
 };
 
+const gmailUser = process.env.GMAIL_USER || "ctfcloud@ctfitalia.com";
+const gmailPass = process.env.GMAIL_APP_PASSWORD || "mrjm vjih qpmg zxov";
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   host: "smtp.gmail.com",
   port: 465,
   secure: true,
   auth: {
-    user: "ctfcloud@ctfitalia.com",
-    pass: "mrjm vjih qpmg zxov",
+    user: gmailUser,
+    pass: gmailPass,
   },
 });
 
