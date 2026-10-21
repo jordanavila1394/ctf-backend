@@ -432,14 +432,12 @@ exports.checkIfExistUser = (req, res) => {
     where: { fiscalCode: req.body.fiscalCode },
   })
     .then((user) => {
-      if (user) {
-        res.status(200).send({ userExist: true });
-      } else {
-        res.status(404).send({ userExist: false });
-      }
+      // Sempre 200: il check di esistenza non è un errore HTTP
+      res.status(200).send({ userExist: !!user });
     })
     .catch((err) => {
-      res.status(404).send({ userExist: false });
+      console.error("Errore checkIfExistUser:", err);
+      res.status(500).send({ userExist: false, message: err.message });
     });
 };
 
