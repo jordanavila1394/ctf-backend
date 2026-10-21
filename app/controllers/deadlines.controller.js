@@ -428,19 +428,50 @@ exports.sendEmailsUnpaidDeadlines = async () => {
       return acc;
     }, []);
 
-    for (const unpaidDeadline of unpaidDeadlines) {
-      const subject = `${unpaidDeadline.companyName} - Scadenza non pagata - ${unpaidDeadline.entityName}, N° rata ${unpaidDeadline.deadlineId} - ${unpaidDeadline.importToPay} EUR - Data scadenza ${unpaidDeadline.deadlineDate}`;
-      const message = `La scadenza (id ${unpaidDeadline.deadlineId}) per ${unpaidDeadline.entityName}, azienda  ${unpaidDeadline.companyName} non è stata ancora pagata. <br> Bisogna pagare entro il: ${unpaidDeadline.deadlineDate} <br> Importo da pagare: ${unpaidDeadline.importToPay} € <br> Note: ${unpaidDeadline.deadlineNote} <br>  `;
-
-      const req = {
-        body: {
-          recipient: recipientDeadLines,
-          subject: subject,
-          message: message,
-        },
-      };
-      await emailController.sendEmail(req);
+    // Una sola email di riepilogo al giorno (evita burst SMTP / sospensione Gmail)
+    if (!unpaidDeadlines.length) {
+      console.log("[deadlines] Nessuna scadenza non pagata da notificare.");
+      return;
     }
+
+    const rowsHtml = unpaidDeadlines
+      .map(
+        (d) =>
+          `<tr>
+            <td style="padding:4px 8px;border:1px solid #ddd;">${d.companyName || "-"}</td>
+            <td style="padding:4px 8px;border:1px solid #ddd;">${d.entityName || "-"}</td>
+            <td style="padding:4px 8px;border:1px solid #ddd;">${d.deadlineId}</td>
+            <td style="padding:4px 8px;border:1px solid #ddd;">${d.deadlineDate}</td>
+            <td style="padding:4px 8px;border:1px solid #ddd;">${d.importToPay} €</td>
+            <td style="padding:4px 8px;border:1px solid #ddd;">${d.deadlineNote || ""}</td>
+          </tr>`
+      )
+      .join("");
+
+    const message = `
+      <p>Riepilogo scadenze <strong>non pagate</strong> (finestra ±5 giorni): <strong>${unpaidDeadlines.length}</strong>.</p>
+      <table style="border-collapse:collapse;width:100%;font-size:14px;">
+        <thead>
+          <tr>
+            <th style="padding:4px 8px;border:1px solid #ddd;text-align:left;">Azienda</th>
+            <th style="padding:4px 8px;border:1px solid #ddd;text-align:left;">Entità</th>
+            <th style="padding:4px 8px;border:1px solid #ddd;text-align:left;">N° rata</th>
+            <th style="padding:4px 8px;border:1px solid #ddd;text-align:left;">Scadenza</th>
+            <th style="padding:4px 8px;border:1px solid #ddd;text-align:left;">Importo</th>
+            <th style="padding:4px 8px;border:1px solid #ddd;text-align:left;">Note</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    `;
+
+    await emailController.sendEmail({
+      body: {
+        recipient: recipientDeadLines,
+        subject: `CTF - Riepilogo scadenze non pagate (${unpaidDeadlines.length}) - ${moment().format("DD/MM/YYYY")}`,
+        message,
+      },
+    });
   } catch (error) {
     console.error({ message: error.message });
   }
