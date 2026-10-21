@@ -545,4 +545,150 @@ module.exports = function (app) {
       }
     }
   );
+
+  // Tiene 1 cedolino per CF (il più recente) e cancella i duplicati del periodo
+  app.post(
+    "/api/upload/deleteDuplicateCedoliniByPeriod",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    async (req, res) => {
+      try {
+        const { releaseMonth, releaseYear } = req.body;
+
+        if (!releaseMonth || !releaseYear) {
+          return res.status(400).json({
+            success: false,
+            message: "releaseMonth e releaseYear sono obbligatori",
+          });
+        }
+
+        const cedolini = await userDocuments.findAll({
+          where: {
+            category: "cedolino",
+            releaseMonth,
+            releaseYear: String(releaseYear),
+          },
+          order: [
+            ["createdAt", "DESC"],
+            ["id", "DESC"],
+          ],
+        });
+
+        if (!cedolini.length) {
+          return res.status(200).json({
+            success: true,
+            message: "Nessun cedolino trovato per il periodo selezionato",
+            releaseMonth,
+            releaseYear,
+            keptCount: 0,
+            deletedCount: 0,
+            s3DeletedCount: 0,
+            duplicatedFiscalCodes: 0,
+          });
+        }
+
+        const seenFiscalCodes = new Set();
+        const duplicates = [];
+
+        for (const doc of cedolini) {
+          const fiscalCode = String(doc.fiscalCode || "")
+            .trim()
+            .toUpperCase();
+          if (!fiscalCode) {
+            duplicates.push(doc);
+            continue;
+          }
+          if (seenFiscalCodes.has(fiscalCode)) {
+            duplicates.push(doc);
+          } else {
+            seenFiscalCodes.add(fiscalCode);
+          }
+        }
+
+        if (!duplicates.length) {
+          return res.status(200).json({
+            success: true,
+            message: "Nessun duplicato trovato",
+            releaseMonth,
+            releaseYear,
+            keptCount: seenFiscalCodes.size,
+            deletedCount: 0,
+            s3DeletedCount: 0,
+            duplicatedFiscalCodes: 0,
+          });
+        }
+
+        const keysToDelete = duplicates
+          .map((doc) => doc.keyFile)
+          .filter((key) => typeof key === "string" && key.length > 0)
+          .map((key) => ({ Key: key }));
+
+        let s3DeletedCount = 0;
+
+        if (keysToDelete.length > 0) {
+          // S3 deleteObjects max 1000 keys per request
+          for (let i = 0; i < keysToDelete.length; i += 1000) {
+            const batch = keysToDelete.slice(i, i + 1000);
+            const s3DeleteResult = await s3Client
+              .deleteObjects({
+                Bucket: "ctf.images",
+                Delete: {
+                  Objects: batch,
+                  Quiet: false,
+                },
+              })
+              .promise();
+
+            s3DeletedCount += s3DeleteResult?.Deleted?.length || 0;
+
+            if (s3DeleteResult?.Errors?.length) {
+              console.error("[deleteDuplicateCedoliniByPeriod] S3 errors", {
+                releaseMonth,
+                releaseYear,
+                errors: s3DeleteResult.Errors,
+              });
+            }
+          }
+        }
+
+        const duplicateIds = duplicates.map((doc) => doc.id);
+        const deletedCount = await userDocuments.destroy({
+          where: {
+            id: duplicateIds,
+          },
+        });
+
+        console.log("[deleteDuplicateCedoliniByPeriod] Completed", {
+          releaseMonth,
+          releaseYear,
+          total: cedolini.length,
+          keptCount: seenFiscalCodes.size,
+          deletedCount,
+          s3DeletedCount,
+        });
+
+        return res.status(200).json({
+          success: true,
+          message: "Duplicati eliminati con successo",
+          releaseMonth,
+          releaseYear,
+          totalMatched: cedolini.length,
+          keptCount: seenFiscalCodes.size,
+          deletedCount,
+          s3DeletedCount,
+          duplicatedFiscalCodes: cedolini.length - seenFiscalCodes.size,
+        });
+      } catch (error) {
+        console.error("[deleteDuplicateCedoliniByPeriod] Error", {
+          message: error.message,
+          stack: error.stack,
+        });
+
+        return res.status(500).json({
+          success: false,
+          message: "Errore durante l'eliminazione dei duplicati",
+          error: error.message,
+        });
+      }
+    }
+  );
 };
