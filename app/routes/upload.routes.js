@@ -4,11 +4,10 @@ const AWS = require("aws-sdk");
 const db = require("../models");
 const AttendanceImages = db.attendanceImage;
 const userDocuments = db.userDocument;
-const nodemailer = require("nodemailer");
-
 const fs = require("fs");
 const path = require("path");
 const { v4: uuidv4 } = require("uuid");
+const { sendMailQueued, getMailUser } = require("../services/mail");
  // Assicurati che sia configurato
 const htmlTemplatePath = path.join(__dirname, "../templates/defaultEmail.html");
 const logoPath = path.join(__dirname, "../templates/logo.png");
@@ -22,20 +21,6 @@ const maskEmail = (value) => {
   const visibleLocal = local.slice(0, 2);
   return `${visibleLocal}***@${domain}`;
 };
-
-const gmailUser = process.env.GMAIL_USER || "ctfcloud@ctfitalia.com";
-const gmailPass = process.env.GMAIL_APP_PASSWORD || "mrjm vjih qpmg zxov";
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: gmailUser,
-    pass: gmailPass,
-  },
-});
 
 const entityDocuments = db.entityDocument;
 module.exports = function (app) {
@@ -287,7 +272,7 @@ module.exports = function (app) {
             ];
 
             const mailOptions = {
-              from: `CTF Italia <${transporter.options.auth.user}>`,
+              from: `CTF Italia <${getMailUser()}>`,
               to: email,
               subject,
               html: htmlContent,
@@ -296,13 +281,13 @@ module.exports = function (app) {
 
             console.log("[uploadDocumentsAndSendEmail] Sending email", {
               to: maskEmail(email),
-              from: transporter.options.auth.user,
+              from: getMailUser(),
               subject,
               attachments: attachments.map((a) => a.filename),
               attachmentsCount: attachments.length,
             });
 
-            const mailResult = await transporter.sendMail(mailOptions);
+            const mailResult = await sendMailQueued(mailOptions);
             emailSent = true;
 
             console.log("[uploadDocumentsAndSendEmail] Email sent", {
@@ -549,18 +534,7 @@ module.exports = function (app) {
   // Tiene 1 cedolino per CF (il più recente) e cancella i duplicati del periodo
   app.post(
     "/api/upload/deleteDuplicateCedoliniByPeriod",
-    async (req, res, next) => {
-      // Bypass temporaneo one-shot per cleanup operativi (rimuovere dopo uso)
-      if (
-        req.headers["x-cleanup-secret"] ===
-        "ctf-dedupe-settembre-2026-jordan"
-      ) {
-        return next();
-      }
-      return authJwt.verifyToken(req, res, () =>
-        authJwt.isAdmin(req, res, next),
-      );
-    },
+    [authJwt.verifyToken, authJwt.isAdmin],
     async (req, res) => {
       try {
         const { releaseMonth, releaseYear } = req.body;
